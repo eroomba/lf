@@ -4,9 +4,11 @@ const ortOps = {
         type: "ort", 
         weight: 1.8,
         data: "a",
-        content: "&forall;", 
+        content: "&forall;", // upside down A
         formula: () => { 
-            return parseInt('00000011', 2); 
+            // 00000011
+            // 00000010
+            return parseInt('00000011', 2); // a1 + a2
         }, 
         range: 8, 
         decay: 150,
@@ -20,9 +22,11 @@ const ortOps = {
         type: "ort",
         weight: 1.8,
         data: "b", 
-        content: "&bowtie;",
-        formula: () => { 
-            return parseInt('00001100', 2); 
+        content: "&bowtie;", // bowtie
+        formula: () => {
+            // 00001100
+            // 00001000 
+            return parseInt('00001100', 2);  // b1 + b2
         }, 
         range: 8,
         decay: 150,
@@ -36,9 +40,11 @@ const ortOps = {
         type: "ort",
         weight: 1.8,
         data: "c", 
-        content: "&comp;",
-        formula: () => { 
-            return parseInt('00110000', 2); 
+        content: "&comp;", // long C
+        formula: () => {
+            // 00110000
+            // 00100000 
+            return parseInt('00110000', 2);  // c1 + c2
         }, 
         range: 8,
         decay: 150,
@@ -52,9 +58,11 @@ const ortOps = {
         type: "ort",
         weight: 1.8,
         data: "d", 
-        content: "&part;",
+        content: "&part;", // loopy d
         formula: () => { 
-            return parseInt('11000000', 2); 
+            // 11000000
+            // 10000100
+            return parseInt('11000100', 2); // d1 + d1
         }, 
         range: 10,
         decay: 160,
@@ -68,15 +76,17 @@ const ortOps = {
         type: "ort",
         weight: 1.9,
         data: "p", 
-        content: "&fork;",
+        content: "&fork;", // U with line
         formula: () => { 
-            return parseInt('00111100', 2); 
+            // 11000000
+            // 11000001
+            return parseInt('11000001', 2); // d1 + x1
         }, 
         range: 10,
         decay: 170,
         dformula: [
             {name: "spk-x1", type: "spek"},
-            {name: "spk-g1", type: "spek"}
+            {name: "spk-g2", type: "spek"}
         ] 
     },
     "ort-e": { 
@@ -84,15 +94,17 @@ const ortOps = {
         type: "ort",
         weight: 1.7,
         data: "e", 
-        content: "&sum;",
+        content: "&sum;", // summation
         formula: () => { 
-            return parseInt('11000011', 2); 
+            // 10000100
+            // 11000001
+            return parseInt('11000101', 2); // d2 + x1
         }, 
         range: 10,
         decay: 170,
         dformula: [
-            {name: "spk-x2", type: "spek"},
-            {name: "spk-g2", type: "spek"}
+            {name: "spk-g1", type: "spek"},
+            {name: "spk-g3", type: "spek"}
         ] 
     }
 };

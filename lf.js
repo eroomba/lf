@@ -13,7 +13,7 @@ function LF(ldObj = null) {
     me.ttLen = 3;
     me.step = ldObj != null ? ldObj.step : 0;
     me.obj = document.getElementById("main"); 
-    me.console = {
+    me.consoleset = {
         status: document.getElementById("statusDisp"),
         statusIcon: document.getElementById("statusIcon"),
         out: document.getElementById("outDisp")
@@ -86,8 +86,8 @@ function LF(ldObj = null) {
     me.stop = () => {
         clearTimeout(rt);
         running = false;
-        lf.console.statusIcon.style.color = "red";
-        lf.console.status.innerHTML = "stopped";
+        lf.consoleset.statusIcon.style.color = "red";
+        lf.consoleset.status.innerHTML = "stopped";
         console.log("stopped at step " + me.step);
     };
     me.roll = () => {
@@ -332,6 +332,9 @@ function LF(ldObj = null) {
             }, true)
         )
     };
+    me.runtests = () => {
+        // no current tests
+    };
     me.loadInit = () => {
         console.log("Load init");
         for (let tk1 in ortOps) {
@@ -341,6 +344,7 @@ function LF(ldObj = null) {
         me.refresh();
     };
     me.init = () => {
+        me.runtests();
 
         for (let tk1 in ortOps) {
             if (ortOps[tk1].formula() > 0) 
@@ -564,7 +568,7 @@ function LF(ldObj = null) {
                 }
             });
         }
-        me.console.out.innerHTML = cOut;
+        me.consoleset.out.innerHTML = cOut;
         me.step++;
     };
     me.output = () => {
@@ -639,8 +643,8 @@ let lastClick = new Date();
 
 function run() {
     clearTimeout(rt);
-    lf.console.statusIcon.style.color = "green";
-    lf.console.status.innerHTML = "running";
+    lf.consoleset.statusIcon.style.color = "green";
+    lf.consoleset.status.innerHTML = "running";
     lf.update();
     if (running) rt = setTimeout(run, 50);
 }
