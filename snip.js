@@ -64,43 +64,11 @@ function updateSnip(snip) {
         snip.life--;
     
     if (snip.life != null && snip.life <= 0 && snip.active) {
-        if (snip.ops.name == "snp-pre") {
-            let nDir = Math.floor(Math.random() * 360);
-            let nVel = Math.floor(Math.random() * 7) + 6;
-            let comps = [ snip.dynamic["code"][0], snip.dynamic["code"][1] ];
-            comps.forEach((orta) => {
-                let xDir = 12 * Math.cos(nDir * Math.PI / 180);
-                let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                let nOrt = new LItem(new LVector(snip.pos.x + xDir, snip.pos.y + yDir, nDir, nVel), ortOps["ort-" + orta], {gen:lf.step});
-                lf.queueItem(nOrt);
-                nDir += (360 / comps.length);
-                nDir = nDir % 360;
-            });
-        }
+        if ("proc" in snip.dynamic && "parts") snip.life = snip.ops.decay;
         else {
-            let comps = [ snip.dynamic["code"][0], snip.dynamic["code"][1] ];
-            let dComp = snip.dynamic["code"][2];
-            let nDir = Math.floor(Math.random() * 360);
-            let nVel = Math.floor(Math.random() * 7) + 6;
-            comps.forEach((orta) => {
-                let xDir = 12 * Math.cos(nDir * Math.PI / 180);
-                let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                let nOrt = new LItem(new LVector(snip.pos.x + xDir, snip.pos.y + yDir, nDir, nVel), ortOps["ort-" + orta], {gen:lf.step});
-                lf.queueItem(nOrt);
-                nDir += (360 / comps.length);
-                nDir = nDir % 360;
-            });
-            let dCmpX = ortOps["ort-" + dComp].ops.dformula;
-            dCmpX.forEach((spk) => {
-                let xDir = 1 - Math.floor(Math.random() * 3);
-                let yDir = 1 - Math.floor(Math.random() * 3);
-                let nDir = Math.floor(Math.random() * 360);
-                let nVel = Math.floor(Math.random() * 12) + 6;
-                let nSpk = new LItem(new LVector(snip.pos.x + xDir, snip.pos.y + yDir, nDir, nVel), spekOps[spk.name], {gen:lf.step});
-                lf.queueItem(nSpk);
-            });
+            snipDecay(snip.ops.name, snip.dynamic["code"], snip.pos);
+            snip.deactivate();
         }
-        snip.deactivate();
     }
     else {
 
@@ -187,7 +155,7 @@ function updateSnip(snip) {
                 let nDir = (snip.pos.dir + addTo.pos.dir) / 2;
                 let nVel = (snip.pos.vel + addTo.pos.vel) / 2;
                 let codes = [ snip.dynamic["code"], addTo.dynamic["code"] ]; 
-                let nStrand = new LItem(new LVector(mX, mY, nDir, nVel), strandOps, { gen: lf.step, codes: codes, genetic: {} });
+                let nStrand = new LItem(new LVector(mX, mY, nDir, nVel), strandOps, { gen: lf.step, codes: codes });
                 lf.queueItem(nStrand);
 
                 addTo.deactivate();
@@ -207,5 +175,48 @@ function updateSnip(snip) {
     }
     else {
         snip.obj.style.display = "none";
+    }
+}
+
+function snipDecay(snipName, snipCode, pos) {
+    if (snipOps[snipName].name == "snp-pre" || snipCode.length == 2) {
+        let nDir = Math.floor(Math.random() * 360);
+        let nVel = Math.floor(Math.random() * 7) + 6;
+        let comps = [ snipCode[0], snipCode[1] ];
+        comps.forEach((orta) => {
+            let xDir = 12 * Math.cos(nDir * Math.PI / 180);
+            let yDir = 12 * Math.sin(nDir * Math.PI / 180);
+            let nOrt = new LItem(new LVector(pos.x + xDir, pos.y + yDir, nDir, nVel), ortOps["ort-" + orta], {gen:lf.step});
+            lf.queueItem(nOrt);
+            nDir += (360 / comps.length);
+            nDir = nDir % 360;
+        });
+    }
+    else if (snipCode.length == 3) {
+        let comps = [ snipCode[0], snipCode[1] ];
+        let dComp = snipCode[2];
+        let nDir = Math.floor(Math.random() * 360);
+        let nVel = Math.floor(Math.random() * 7) + 6;
+        comps.forEach((orta) => {
+            let xDir = 12 * Math.cos(nDir * Math.PI / 180);
+            let yDir = 12 * Math.sin(nDir * Math.PI / 180);
+            let nOrt = new LItem(new LVector(pos.x + xDir, pos.y + yDir, nDir, nVel), ortOps["ort-" + orta], {gen:lf.step});
+            lf.queueItem(nOrt);
+            nDir += (360 / comps.length);
+            nDir = nDir % 360;
+        });
+        let dCmpX = ortOps["ort-" + dComp].dformula;
+        let oA = Math.floor(Math.random() * 360);
+        let oCount = dCmpX.length;
+        dCmpX.forEach((spk) => {
+            let nDir = oA;
+            let dX = 8 * Math.cos(nDir * Math.PI / 180);
+            let dY = 8 * Math.sin(nDir * Math.PI / 180);
+            let nVel = Math.floor(Math.random() * 9) + 4;
+            let nSpk = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), spekOps[spk.name], {gen:lf.step});
+            lf.queueItem(nSpk);
+            oA += 360 / oCount;
+            oA = oA % 360;
+        });
     }
 }

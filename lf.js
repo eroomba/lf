@@ -2,10 +2,13 @@ let lf;
 let mousePosX = 0;
 let mousePosY = 0;
 
+const defaultOps = { name: "empty", type: "none", weight: 10, data: null, content: "X", formula: () => { return null;}, range: 0, decay: 0, dformula: [] };
+
 let gVars = {
-    branecount: 8,
+    branecount: 3,
     spekColl: false,
-    minStrandLen: 24
+    minStrandLen: 24,
+    maxItems: 5000
 }
 
 function LF(ldObj = null) {
@@ -29,6 +32,7 @@ function LF(ldObj = null) {
     //me.initMode = "brane-test";
     //me.initMode = "cell-test";
     //me.initMode = "d-test";
+    //me.initMode = "sd-test";
     me.shash = null;
     me.items = {};
     me.additems = [];
@@ -38,9 +42,10 @@ function LF(ldObj = null) {
     me.events = [];
     me.behaviors = new codedBehaviors();
     me.shash = new SHash(me.w,me.h,50);
+    me.sfhash = new SfHash(me.w,me.h,50);
     me.qtree = { i: new QuadTree(0,0,me.w,me.h,null,true), u: new QuadTree(0,0,me.w,me.h,null,true) };
     //me.tmode = ldObj != null ? ldObj.tmode : "qtree";
-    me.tmode = ldObj != null ? ldObj.tmode : "shash";
+    me.tmode = ldObj != null ? ldObj.tmode : "sfhash";
     me.encode = (item, mode) => {
         if (me.tmode == "qtree") {
             if (mode == "u" || mode == "i") {
@@ -62,6 +67,12 @@ function LF(ldObj = null) {
                 me.shash.remove(itemID, me.items[itemID].pos.x, me.items[itemID].pos.y);
             }
         }
+        else if (me.tmode == "sfhash") {
+            if (itemID in me.items) {
+                me.sfhash.remove(itemID, me.items[itemID].pos.x, me.items[itemID].pos.y);
+                me.items[itemID].pos.hash = "";
+            }
+        }
     };
     me.query = (item, type, qops = {}) => {
         if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
@@ -76,9 +87,11 @@ function LF(ldObj = null) {
             if (me.tmode == "qtree") {
                 return me.qtree["i"].queryC(item.id,qX,qY,qR,type);
             }
-            else {
-                if (item.ops.type == "drip") console.log("drip q");
+            else if (me.tmode == "shash") {
                 return me.shash.query(item,type);
+            }
+            else {
+                return me.sfhash.query(item,type);
             }
         }
         return [];
@@ -95,9 +108,8 @@ function LF(ldObj = null) {
             me.qtree["i"] = me.qtree["u"];
             me.qtree["u"] = new QuadTree(0,0,me.w,me.h,null,true);
         }
-        else if (me.tmode == "shash") {
-            me.shash.roll();
-        }
+        else if (me.tmode == "shash") me.shash.roll();
+        else if (me.tmode == "sfhash") me.sfhash.roll(me.items);
     };
     me.refresh = () => {
         Object.keys(me.items).forEach((ky) => {
@@ -131,6 +143,19 @@ function LF(ldObj = null) {
         }
     };
     me.bomb = (mX=null,mY=null) => {
+
+        let validSpeks = [
+            "spk-a1",
+            "spk-a2",
+            "spk-b1",
+            "spk-b2",
+            "spk-c1",
+            "spk-c2",
+            "spk-d1",
+            "spk-d2",
+            "spk-x"
+        ];
+
         let r = Math.floor(Math.random() * 150) + 75;
 
         if (mX==null) {
@@ -146,14 +171,14 @@ function LF(ldObj = null) {
             let count = Math.floor(Math.random() * 3) + 1;
             for (let j = 0; j < count; j++) {
                 let r1 = Math.floor(Math.random() * r);
-                let ix1 = Math.floor(Math.random() * spekOpsSel.length);
-                let k1 = spekOpsSel[ix1];
+                let ix1 = Math.floor(Math.random() * validSpeks.length);
+                let k1 = validSpeks[ix1];
                 let nD = Math.floor(Math.random() * (r - 20)) + 20;
                 let nX = mX + (nD * Math.cos(a * Math.PI / 180));
                 let nY = mY + (nD * Math.sin(a * Math.PI / 180));
                 let nDir = a;
                 let nVel = Math.floor(Math.random() * 11) + 10;
-                let nItem = new LItem(new LVector(nX, nY, nDir, nVel), spekOps[k1],{gen:me.step});
+                let nItem = new LItem(new LVector(nX, nY, nDir, nVel), spekOps[k1], {gen:me.step});
                 if(me.addItem(nItem)) me.encode(nItem,'u');
             }
             addR += Math.floor(Math.random() * 15) + 5;
@@ -193,6 +218,18 @@ function LF(ldObj = null) {
         );
     };
     me.puff = (mX=null,mY=null) => {
+
+        let validSpeks = [
+            "spk-a1",
+            "spk-a2",
+            "spk-b1",
+            "spk-b2",
+            "spk-c1",
+            "spk-c2",
+            "spk-d1",
+            "spk-d2",
+            "spk-x"
+        ];
     
         let r = Math.floor(Math.random() * 25) + 15;
 
@@ -207,15 +244,15 @@ function LF(ldObj = null) {
         let addR = Math.floor(Math.random() * 30);
         for (let a = 0; a < 360; a+=addR) {
             let r1 = Math.floor(Math.random() * r);
-            let ix1 = Math.floor(Math.random() * spekOpsSel.length);
-            let k1 = spekOpsSel[ix1];
+            let ix1 = Math.floor(Math.random() * validSpeks.length);
+            let k1 = validSpeks[ix1];
             let nDir = a;
             let nVel = Math.floor(Math.random() * 5) + 5;
             let nD = Math.floor(Math.random() * (r - 15)) + 15;
             let nX = mX + (nD * Math.cos(a * Math.PI / 180));
             let nY = mY + (nD * Math.sin(a * Math.PI / 180));
             if (nX > 0 && nX < me.w && nY > 0 && nY < me.h) {
-                let nItem = new LItem(new LVector(nX, nY, nDir, nVel), spekOps[k1],{gen:me.step});
+                let nItem = new LItem(new LVector(nX, nY, nDir, nVel), spekOps[k1], {gen:me.step});
                 if(me.addItem(nItem)) me.encode(nItem,'u');
             }
             addR += Math.floor(Math.random() * 20) + 10;
@@ -295,6 +332,26 @@ function LF(ldObj = null) {
             }
         });
 
+        if (Math.random() > 0.5) {
+            let nDir = Math.floor(Math.random() * 360);
+            let nBlip = new LItem(new LVector(mX, mY, 0, nDir), struckOps["blip"], { gen: lf.step });
+            nBlip.obj.style.opacity = 0.4;
+            lf.queueItem(nBlip);
+        }
+
+        let gs = [ "spk-g1", "spk-g2" ];
+        let gCount = Math.floor(Math.random() * 4) + 3;
+        let gA = Math.floor(Math.random() * 360);
+        let addA = 360 / gCount;
+        for (let g = 0; g < gCount; g++) {
+            let nVel = Math.floor(Math.random() * 10) + 10;
+            let gName = gs[Math.floor(Math.random() * gs.length)];
+            let nGas = new LItem(new LVector(mX, mY, nVel,gA), spekOps[gName], { gen: lf.step });
+            lf.queueItem(nGas);
+            gA += addA;
+            gA = gA % 360;
+        }
+
         if (!("drips" in me.extras)) me.extras["drips"] = [];
         me.extras["drips"].push(
             new LXtra(new LVector(mX, mY, 0, 0), {
@@ -330,7 +387,7 @@ function LF(ldObj = null) {
                     }
                 }
             }, true)
-        )
+        );
     };
     me.runtests = () => {
         // no current tests
@@ -444,7 +501,73 @@ function LF(ldObj = null) {
                     if (me.addItem(nItem)) me.encode(nItem,'i');
                 }
                 break;
+            case "sd-test":
+                let cds = [];
+                let pts = ["a","b","c"];
+                for (let vv = 0; vv <= 26; vv++) {
+                    let nCode = pts[Math.floor(Math.random() * pts.length)];
+                    nCode += pts[Math.floor(Math.random() * pts.length)];
+                    nCode += pts[Math.floor(Math.random() * pts.length)];
+                    cds.push(nCode);
+                }
+                let nItem = new LItem(new LVector(me.w / 2, me.h / 2, 0, 15), strandOps, {gen: me.step, codes: cds }, {});
+                if (me.addItem(nItem)) me.encode(nItem,'i');
+
+                let nItem2 = new LItem(new LVector(nItem.pos.x + 40, nItem.pos.y, 0, 0), struckOps["blip"], { gen: me.step });
+                if (me.addItem(nItem2)) me.encode(nItem2,'i');
+                break;
             case "chaos":
+                let gCount = Math.floor(Math.random() * 200) + 200;
+                let gs = [ "spk-g1", "spk-g2" ];
+                let gIdx = 0;
+                for (let g = 0; g < gCount; g++) {
+                    let nX = Math.floor(Math.random() * me.w);
+                    let nY = Math.floor(Math.random() * me.h);
+                    let nVel = Math.floor(Math.random() * 5) + 5;
+                    let nDir = Math.floor(Math.random() * 360);
+                    let gName = gs[gIdx];
+                    gIdx = gIdx + 1 >= gs.length ? 0 : gIdx + 1;
+                    let nGas = new LItem(new LVector(nX, nY, nVel, nDir), spekOps[gName], { gen: lf.step });
+                    if (me.addItem(nGas)) me.encode(nGas,'i');
+                }
+
+
+                me.extras["vents"] = [];
+                let vCount = Math.floor(Math.random() * 3) + 1;
+                for (let v = 0; v < vCount; v++) {
+                    let vID = "vent-" + me.step + "-" + v;
+                    let vX = Math.floor(Math.random() * (me.w - 100)) + 50;
+                    let vY = Math.floor(Math.random() * (me.h - 100)) + 50;
+                    me.extras["vents"].push(
+                        new LXtra(new LVector(vX, vY, 0, 0), {
+                            angle: Math.floor(Math.random() * 360),
+                            init: function(vent) {
+                                let nObj = document.createElement("div");
+                                nObj.id = vID;
+                                nObj.classList.add("xtra");
+                                nObj.classList.add("vent");
+                                nObj.style.left = vent.pos.x + "px";
+                                nObj.style.top = vent.pos.y + "px";
+                                let vRot = Math.floor(Math.random() * 360);
+                                nObj.style.transform += "translateX(-50%) translateY(-50%) rotateZ(" + vRot + "deg)";
+                                
+                                nObj.innerHTML = "&divonx;"; 
+                                me.obj.append(nObj);
+                                vent.obj = nObj;
+                            },
+                            update: function(vent) {
+                                if (Math.random() > 0.8) {
+                                    let nDir = Math.floor(Math.random() * 360);
+                                    let nVel = Math.floor(Math.random() * 10) + 5;
+                                    let nGas = new LItem(new LVector(vent.pos.x, vent.pos.y, vent.ops.angle, nVel), spekOps["spk-g3"],{ gen: lf.step });
+                                    lf.queueItem(nGas);
+                                    vent.ops.angle += 20;
+                                }
+                            }
+                        }, true)
+                    );
+                }
+
 
                 break;
         }
@@ -482,7 +605,6 @@ function LF(ldObj = null) {
                     let mvCodes = ["aaa","bbb"];
                     let mvDynamic = {
                         struct: ["complex"],
-                        genetic: {},
                         codes: mvCodes
                     };
 
@@ -490,7 +612,7 @@ function LF(ldObj = null) {
                     let nDir = Math.floor(Math.random() * 360);
 
                     console.log("mv-test " + nDir + ",0");
-                    let mvPro = new LItem(new LVector(me.w / 2, me.h / 2, 30, nDir, 0), protoOps, mvDynamic);
+                    let mvPro = new LItem(new LVector(me.w / 2, me.h / 2, 30, nDir, 0), protoOps, mvDynamic, {});
                     me.queueItem(mvPro);
                 }
                 break;
@@ -519,7 +641,7 @@ function LF(ldObj = null) {
             case "chaos": 
                 if (!("drags" in me.extras)) me.extras["drags"] = [];
 
-                if (Object.keys(me.items).length < 5000) {
+                if (Object.keys(me.items).length < gVars.maxItems) {
                     if (Math.random() > 0.8) me.bomb();
                     if (Math.random() > 0.5) me.puff();
                 }
@@ -559,7 +681,7 @@ function LF(ldObj = null) {
         me.additems.length = 0;
         //console.log(me.snipStats);
         let iCount2 = Object.keys(me.items).length;
-        let cOut = "s:" + me.step + "<br/>i:" + iCount2
+        let cOut = "s:" + me.step + "<br/>i:" + iCount2 + " / " + gVars.maxItems;
         if (me.snipStats.show) {
             cOut += "<br/><u>ss</u>";
             Object.keys(me.snipStats).forEach((st) => {
@@ -702,6 +824,10 @@ addEventListener("keyup", (event) => {
     }
     else if (event.code.toLocaleLowerCase() == "arrowleft") {
         lf.snipStats.show = !lf.snipStats.show;
+    }
+    
+    if (event.key.toLocaleLowerCase() == "u") {
+        gVars.maxItems += 500;
     }
 });
 

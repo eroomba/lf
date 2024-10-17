@@ -3,7 +3,7 @@ const strandOps = {
     type: "strand", 
     weight: 2,
     data: "strand", 
-    content: "&infin;",
+    content: "<div class=\"st-cn\">&nbsp;</div><div class=\"st-ct\">&infin;</div><div class=\"st-cn\"><!--nm--></div>",
     formula: () => { 
         return "strand"; 
     }, 
@@ -18,7 +18,7 @@ function updateStrand(strand) {
         strand.life--;
     
     if (strand.life != null && strand.life <= 0 && strand.active) {
-        // TO DO
+        strandDecay(strand.dynamic["codes"], strand.pos);
         strand.deactivate();
     }
     else {
@@ -31,7 +31,7 @@ function updateStrand(strand) {
         let membrane = null;
         close.forEach((itm) => {
             let sums = groupObj(strand.dynamic["codes"],["eee"]);
-            if (itm.ops.name == "brane" && membrane == null) {
+            if ((itm.ops.name == "brane" || itm.ops.name == "blip") && membrane == null) {
                 membrane = itm;
             }
             if (itm.ops.type == "snip") {
@@ -40,7 +40,12 @@ function updateStrand(strand) {
                     itm.dynamic["code"].indexOf("d") != 0) ||
                     (itm.ops.name == "snp-ex" && (!("eee" in sums) || sums["eee"] <= 2)))
                 {
+                    let prevLen = strand.dynamic["codes"].length;
                     strand.dynamic["codes"].push(itm.dynamic["code"]);
+                    strand.obj.classList.remove("sz-" + prevLen);
+                    let newLen = strand.dynamic["codes"].length;
+                    if (newLen >= gVars.minStrandLen) strand.obj.classList.add("sz-full"); 
+                    else strand.obj.classList.add("sz-" + newLen);
                     strand.pos.vel += itm.pos.vel;
                     strand.pos.dir += itm.pos.dir;
                     itm.deactivate();
@@ -59,7 +64,12 @@ function updateStrand(strand) {
                 }
 
                 if (canComb) {
+                    let prevLen = strand.dynamic["codes"].length;
                     strand.dynamic["codes"].push(...nCodes);
+                    strand.obj.classList.remove("sz-" + prevLen);
+                    let newLen = strand.dynamic["codes"].length;
+                    if (newLen >= gVars.minStrandLen) strand.obj.classList.add("sz-full"); 
+                    else strand.obj.classList.add("sz-" + newLen);
                     strand.pos.vel += itm.pos.vel;
                     strand.pos.dir += itm.pos.dir;
                     itm.deactivate();
@@ -67,28 +77,25 @@ function updateStrand(strand) {
                     let dspCode = strand.dynamic["codes"].join(":");
                     let cLen = strand.dynamic["codes"].length;
                     console.log("s " + strand.id + " combined : " + dspCode + " [" + cLen + "]");
-                    for (let sz = 6; sz <= 18; sz+=4) {
-                        strand.obj.classList.remove("sz-" + sz);
-                        if (cLen >= sz) strand.obj.classList.add("sz-" + sz);
-                    }
                 }
             }
         });
 
         let cStrP = strand.dynamic["codes"].join(":");
         strand.obj.setAttribute("code",cStrP);
-        if (strand.dynamic["codes"].length >= lf.minStrandLen && membrane != null) {
-
+        if (strand.dynamic["codes"].length >= gVars.minStrandLen && membrane != null) {
             let ptDyn = {
                 gen: lf.step,
                 struct: [ "complex" ],
-                genetic: strand.dynamic["genetic"],
                 codes: strand.dynamic["codes"]
             };
 
+            let protoType = "proto-1a";
+            if (membrane.ops.name == "blip") protoType = "proto-1b";
+
             let nVel = Math.floor(Math.random() * 360);
             let nDir = Math.floor(Math.random() * 9);
-            let nPro= new LItem(new LVector(strand.pos.x, strand.pos.y,nDir,nVel),protoOps, ptDyn);
+            let nPro= new LItem(new LVector(strand.pos.x, strand.pos.y,nDir,nVel),protoOps[protoType], ptDyn, strand.genetic);
             lf.queueItem(nPro);
 
             membrane.deactivate();
@@ -101,6 +108,7 @@ function updateStrand(strand) {
             strand.dynamic["codes"].forEach((cd) => {
                 lf.behaviors.run(strand, cd);
             });
+            strand.obj.innerHTML = strandOps.content.replace("<!--nm-->",strand.dynamic["codes"].length);
         }
     }
 
@@ -114,5 +122,73 @@ function updateStrand(strand) {
     }
     else {
         strand.obj.style.display = "none";
+    }
+}
+
+function strandDecay(strandCodes, pos) {
+    let sCount = strandCodes.length;
+    let sCodes = strandCodes.slice();
+    let dCode = sCodes[sCodes.length - 1];
+    let rCodes = sCodes.slice(0,sCodes.length - 1);
+    let rCodes2 = [];
+    if (rCodes.length > 2) {
+        let sIdx = Math.floor(Math.random() * rCodes.length);
+        rCodes2 = rCodes.slice(sIdx);
+        rCodes = rCodes.slice(0,sIdx);
+    }
+
+    let oA = Math.floor(Math.random() * 360);
+    if (rCodes.length > 0) {
+        if (rCodes.length == 1) {
+            let nDir = oA;
+            let dX = 15 * Math.cos(nDir * Math.PI / 180);
+            let dY = 15 * Math.sin(nDir * Math.PI / 180);
+            let nVel = Math.floor(Math.random() * 5) + 10;
+            let sType = "snp-go";
+            if (rCodes[0] == "eee") sType = "snp-ex"
+            let nSnp = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), snipOps[sType], {gen:lf.step, code: rCodes[0]});
+            lf.queueItem(nSnp);
+            oA += 360 / sCount;
+            oA = oA % 360;
+        }
+        else {
+            let nDir = oA;
+            let dX = 40 * Math.cos(nDir * Math.PI / 180);
+            let dY = 40 * Math.sin(nDir * Math.PI / 180);
+            let nVel = Math.floor(Math.random() * 5) + 10;
+            let nStd = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), strandOps, {gen:lf.step, codes: rCodes, len: rCodes.length});
+            lf.queueItem(nStd);
+            oA += 360 / sCount;
+            oA = oA % 360;
+        }
+    }
+    if (rCodes2.length > 0) {
+        if (rCodes2.length == 1) {
+            let nDir = oA;
+            let dX = 40 * Math.cos(nDir * Math.PI / 180);
+            let dY = 40 * Math.sin(nDir * Math.PI / 180);
+            let nVel = Math.floor(Math.random() * 5) + 10;
+            let sType = "snp-go";
+            if (rCodes2[0] == "eee") sType = "snp-ex";
+            let nSnp = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), snipOps[sType], {gen:lf.step, code: rCodes2[0]});
+            lf.queueItem(nSnp);
+            oA += 360 / sCount;
+            oA = oA % 360;
+        }
+        else {
+            let nDir = oA;
+            let dX = 40 * Math.cos(nDir * Math.PI / 180);
+            let dY = 40 * Math.sin(nDir * Math.PI / 180);
+            let nVel = Math.floor(Math.random() * 5) + 10;
+            let nStd = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), strandOps, {gen:lf.step, codes: rCodes2, len: rCodes2.length});
+            lf.queueItem(nStd);
+            oA += 360 / sCount;
+            oA = oA % 360;
+        }
+    }
+    let dType = "snp-go";
+    if (dCode == "eee") dType = "snp-ex";
+    if (dCode != undefined && dCode != null) {
+        snipDecay(dType, dCode, pos);
     }
 }

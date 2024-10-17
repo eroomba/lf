@@ -1,4 +1,4 @@
-function LItem(pos, ops, dynamic = {}, init = true) {
+function LItem(pos, ops, dynamic = {}, genetic = {}, init = true) {
     let me = this;
     me.id = lf.generateID();
     me.gen = -1;
@@ -12,6 +12,7 @@ function LItem(pos, ops, dynamic = {}, init = true) {
     me.ops = defaultOps;
     me.dynamic = dynamic;
     me.style = {};
+    me.genetic = genetic;
     me.update = () => {
         if (me.active) {
             switch (me.ops.type) {
@@ -100,6 +101,9 @@ function LItem(pos, ops, dynamic = {}, init = true) {
                     let cStrS = me.dynamic["codes"].join(":");
                     nObj.setAttribute("code",cStrS);
                     nCont = me.ops.content;
+                    let cLen = me.dynamic["codes"].length;
+                    if (cLen >= gVars.minStrandLen) nObj.classList.add("sz-full");
+                    else nObj.classList.add("sz-" + me.dynamic["codes"].length);
                     break;
                 case 'struck':
                     nCont = me.ops.content;

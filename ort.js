@@ -11,7 +11,7 @@ const ortOps = {
             return parseInt('00000011', 2); // a1 + a2
         }, 
         range: 8, 
-        decay: 150,
+        decay: 300,
         dformula: [
             {name: "spk-b1", type: "spek"},
             {name: "spk-c2", type: "spek"}
@@ -29,7 +29,7 @@ const ortOps = {
             return parseInt('00001100', 2);  // b1 + b2
         }, 
         range: 8,
-        decay: 150,
+        decay: 300,
         dformula: [
             {name: "spk-c1", type: "spek"},
             {name: "spk-d2", type: "spek"},
@@ -47,7 +47,7 @@ const ortOps = {
             return parseInt('00110000', 2);  // c1 + c2
         }, 
         range: 8,
-        decay: 150,
+        decay: 310,
         dformula: [
             {name: "spk-d1", type: "spek"},
             {name: "spk-a2", type: "spek"},
@@ -65,7 +65,7 @@ const ortOps = {
             return parseInt('11000100', 2); // d1 + d1
         }, 
         range: 10,
-        decay: 160,
+        decay: 350,
         dformula: [
             {name: "spk-a1", type: "spek"},
             {name: "spk-b2", type: "spek"}
@@ -83,9 +83,9 @@ const ortOps = {
             return parseInt('11000001', 2); // d1 + x1
         }, 
         range: 10,
-        decay: 170,
+        decay: 450,
         dformula: [
-            {name: "spk-x1", type: "spek"},
+            {name: "spk-x", type: "spek"},
             {name: "spk-g2", type: "spek"}
         ] 
     },
@@ -101,7 +101,7 @@ const ortOps = {
             return parseInt('11000101', 2); // d2 + x1
         }, 
         range: 10,
-        decay: 170,
+        decay: 350,
         dformula: [
             {name: "spk-g1", type: "spek"},
             {name: "spk-g3", type: "spek"}
@@ -118,29 +118,7 @@ function updateOrt(ort) {
         ort.life--;
     
     if (ort.life != null && ort.life <= 0 && ort.active) {
-        let sA = Math.floor(Math.random() * 360);
-        ort.ops.dformula.forEach((di) => {
-            let nops = {};
-            switch (di.type) {
-                case "spek":
-                    nops = spekOps[di.name];
-                    break;
-                case "ort":
-                    nops = ortOps[di.name];
-                    break;
-                case "snip":
-                    nops = snipOps[di.name];
-                    break;
-            }
-            let nDir = sA;
-            sA += 120;
-            sA = sA % 360;
-            let aX = 5 * Math.cos(nDir * Math.PI / 180);
-            let aY = 5 * Math.sin(nDir * Math.PI / 180);
-            let nVel = Math.floor(Math.random() * 9) + 4;
-            let ndobj = new LItem(new LVector(ort.pos.x + aX, ort.pos.y + aY, nDir, nVel), nops, {gen:lf.step});
-            lf.queueItem(ndobj);
-        });
+        ortDecay(ort.ops.name, ort.pos);
         ort.deactivate();
     }
     else {
@@ -180,6 +158,10 @@ function updateOrt(ort) {
             let nDir = ndr / 3;
             let nVel = nv / 3;
             let nsnip = new LItem(new LVector(ort.pos.x, ort.pos.y, nDir, nVel), snipOps[snipType], { gen: lf.step, code: snipVal, len: snipVal.length });
+            if (snipVal[0] == "d") {
+                nsnip.life *= 4;
+                nsnip.dynamic["proc"] = 1;
+            }
             lf.queueItem(nsnip);
             
             ort.deactivate();
@@ -197,4 +179,18 @@ function updateOrt(ort) {
     else {
         ort.obj.style.display = "none";
     }
+}
+
+function ortDecay(ortName, pos) {
+    let sA = Math.floor(Math.random() * 360);
+    ortOps[ortName].dformula.forEach((di) => {
+        let nDir = sA;
+        sA += 120;
+        sA = sA % 360;
+        let aX = 8 * Math.cos(nDir * Math.PI / 180);
+        let aY = 8 * Math.sin(nDir * Math.PI / 180);
+        let nVel = Math.floor(Math.random() * 9) + 4;
+        let nDobj = new LItem(new LVector(pos.x + aX, pos.y + aY, nDir, nVel), spekOps[di.name], {gen:lf.step});
+        lf.queueItem(nDobj);
+    });
 }

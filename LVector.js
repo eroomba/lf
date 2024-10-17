@@ -1,5 +1,3 @@
-const defaultOps = { name: "empty", type: "none", weight: 10, data: null, content: "X", formula: () => { return null;}, range: 0, decay: 0, dformula: [] };
-
 function LVector(x,y,dir,vel,pType="",pID="") {
     let me = this;
     me.x = x;
@@ -14,17 +12,20 @@ function LVector(x,y,dir,vel,pType="",pID="") {
     me.yHist = [];
     me.dirHist = [];
     me.velHist = [];
+    me.track = false;
 
     me.move = (weight = 10) => {
-        //if (me.xHist.length > 10) me.xHist.splice(0,me.xHist.length - 10);
-        //if (me.yHist.length > 10) me.yHist.splice(0,me.yHist.length - 10);
-        //if (me.velHist.length > 10) me.velHist.splice(0,me.velHist.length - 10);
-        //if (me.dirHist.length > 10) me.dirHist.splice(0,me.dirHist.length - 10);
+        if (me.track) {
+            if (me.xHist.length > 10) me.xHist.splice(0,me.xHist.length - 10);
+            if (me.yHist.length > 10) me.yHist.splice(0,me.yHist.length - 10);
+            if (me.velHist.length > 10) me.velHist.splice(0,me.velHist.length - 10);
+            if (me.dirHist.length > 10) me.dirHist.splice(0,me.dirHist.length - 10);
 
-        //me.velHist.push(me.vel);
-        //me.dirHist.push(me.dir);
-        //me.xHist.push(me.x);
-        //me.yHist.push(me.y);
+            me.velHist.push(me.vel);
+            me.dirHist.push(me.dir);
+            me.xHist.push(me.x);
+            me.yHist.push(me.y);
+        }
 
 
         me.vel *= 1 / weight > 0.1 && 1 / weight < 1 ? 1 / weight : 0.9;
@@ -67,33 +68,33 @@ function LVector(x,y,dir,vel,pType="",pID="") {
 
         me.dir = me.dir % 360;
 
-        /*
-        if (me.vel == NaN || me.dir == NaN || me.x == NaN || me.y == NaN || Math.abs(me.vel) > 300 || Math.abs(me.dir) > 360) {
-            lf.stop();
-            let lStr = "[" + me.pID + ", " + me.pType + "]";
-            console.log(lStr);
-            lStr = "x: ";
-            for (let j = 0; j < me.xHist.length; j++) {
-                lStr += me.xHist[j] + ";";
+        if (me.track) {
+            if (me.vel == NaN || me.dir == NaN || me.x == NaN || me.y == NaN || Math.abs(me.vel) > 300 || Math.abs(me.dir) > 360) {
+                lf.stop();
+                let lStr = "[" + me.pID + ", " + me.pType + "]";
+                console.log(lStr);
+                lStr = "x: ";
+                for (let j = 0; j < me.xHist.length; j++) {
+                    lStr += me.xHist[j] + ";";
+                }
+                console.log(lStr);
+                lStr = "y: ";
+                for (let j = 0; j < me.yHist.length; j++) {
+                    lStr += me.yHist[j] + ";";
+                }
+                console.log(lStr);
+                lStr = "dir: ";
+                for (let j = 0; j < me.dirHist.length; j++) {
+                    lStr += me.dirHist[j] + ";";
+                }
+                console.log(lStr);
+                lStr = "vel: ";
+                for (let j = 0; j < me.velHist.length; j++) {
+                    lStr += me.velHist[j] + ";";
+                }
+                console.log(lStr);
             }
-            console.log(lStr);
-            lStr = "y: ";
-            for (let j = 0; j < me.yHist.length; j++) {
-                lStr += me.yHist[j] + ";";
-            }
-            console.log(lStr);
-            lStr = "dir: ";
-            for (let j = 0; j < me.dirHist.length; j++) {
-                lStr += me.dirHist[j] + ";";
-            }
-            console.log(lStr);
-            lStr = "vel: ";
-            for (let j = 0; j < me.velHist.length; j++) {
-                lStr += me.velHist[j] + ";";
-            }
-            console.log(lStr);
         }
-        */
 
     };
 

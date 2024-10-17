@@ -84,7 +84,7 @@ const spekOps = {
         dformula: [] 
     },
     "spk-d1": { 
-        // d1 can combine w/d2 to form d OR w/x1 to form p
+        // d1 can combine w/d2 to form d OR w/x to form p
         name: "spk-d1", 
         type: "spek",
         weight: 1.1, 
@@ -98,7 +98,7 @@ const spekOps = {
         dformula: [] 
     },
     "spk-d2": { 
-        // d2 can combine w/d1 to form d OR w/x1 to form e
+        // d2 can combine w/d1 to form d OR w/x to form e
         name: "spk-d2", 
         type: "spek",
         weight: 1.1, 
@@ -111,9 +111,9 @@ const spekOps = {
         decay: null,
         dformula: [] 
     },
-    "spk-x1": { 
-        // x1 is very ractive: x1 + d1 = p, x1 + g2 = e
-        name: "spk-x1", 
+    "spk-x": { 
+        // x is very ractive: x + d1 = p, x + d2 = e
+        name: "spk-x", 
         type: "spek",
         weight: 1.2, 
         data: parseInt('11000001', 2),
@@ -224,4 +224,8 @@ function updateSpek(spek) {
     else {
         spek.obj.style.display = "none";
     }
+}
+
+function spekDecay(spek) {
+    return true;
 }

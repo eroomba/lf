@@ -49,7 +49,7 @@ body {
 }
 
 .spek.spk-a2 {
-    color: #FF6666;
+    color: #330000;
 }
 
 .spek.spk-b1 {
@@ -76,25 +76,25 @@ body {
     color: #FF66FF;
 }
 
-.spek.spk-x1 {
+.spek.spk-x {
     color: #CC9900;
 }
 
-.spek.spk-x2 {
-    color: #0099CC;
-}
-
 .spek.spk-g1 {
-    color: #66FF66;
+    color: #99DDFF;
 }
 
 .spek.spk-g2 {
-    color: #FFFF66;
+    color: #99FF99;
+}
+
+.spek.spk-g3 {
+    color: #FFFF99;
 }
 
 .ort {
     font-size: 0.6rem;
-    opacity: 0.4;
+    opacity: 0.35;
     font-weight: bold;
 }
 
@@ -118,7 +118,7 @@ body {
 }
 
 .ort.ort-p {
-    color: #FF6600;
+    color: #FFAA00;
     opacity: 0.3;
 }
 
@@ -128,14 +128,14 @@ body {
 }
 
 .snip {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     opacity: 0.6;
     color: #666666;
 }
 
 .snip.snp-pre {
     color: #3399CC;
-    font-size: 0.8em;
+    font-size: 0.8rem;
 }
 
 .snip.snp-go {
@@ -143,18 +143,18 @@ body {
 }
 
 .snip.snp-blk {
-    color: #FFAA00;
-    font-size: 1.35em;
+    color: #FF9900;
+    font-size: 0.75rem;
 }
 
 .snip.snp-ex {
     color: #669900;
-    font-size: 1.5em;
+    font-size: 1.4em;
 }
 
 .snip.snp-ddd {
     color: #FF0000;
-    font-size: 0.4em;
+    font-size: 0.9rem;
 }
 
 .snip.snp-daa,
@@ -170,11 +170,12 @@ body {
 .snip.snp-dcb,
 .snip.snp-dcd {
     color: #FFAA00;
+    font-size: 0.9rem;
 }
 
 .snip i.loaded {
     font-style: normal;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
 }
 
 .snip.snp-dxx
@@ -188,32 +189,69 @@ body {
     color: #CC99CC;
 }
 
-.strand.sz-6 {
-    font-size: 1.1em;
+.strand.sz-6,
+.strand.sz-7,
+.strand.sz-8,
+.strand.sz-9 {
+    font-size: 1.8rem;
 }
 
-.strand.sz-10 {
-    font-size: 1.2em;
+.strand.sz-10,
+.strand.sz-11,
+.strand.sz-12,
+.strand.sz-13 {
+    font-size: 1.9rem;
 }
 
-.strand.sz-14 {
-    font-size: 1.3em;
+.strand.sz-14,
+.strand.sz-15,
+.strand.sz-16,
+.strand.sz-17 {
+    font-size: 2rem;
 }
 
-.strand.sz-18 {
-    font-size: 1.4em;
-    color: #FF66FF;
+.strand.sz-18,
+.strand.sz-19,
+.strand.sz-20,
+.strand.sz-21,
+.strand.sz-22,
+.strand.sz-23 {
+    font-size: 2.1em;
+    color: #9966FF;
+}
+
+.strand.sz-full {
+    font-size: 2.1em;
+    color: #3333FF;
+}
+
+.strand .st-ct {
+    text-align: center;
+    line-height: 0.5rem;
+}
+
+.strand .st-cn {
+    text-align: right;
+    font-size: 0.5rem;
+    line-height: 0.5rem;
 }
 
 .struck {
     font-size: 1rem;
     opacity: 0.4;
     color: #666666;
+    transform-origin: center;
 }
 
 .struck.brane {
     font-size: 2rem;
     color: #FFAA00;
+}
+
+.struck.blip {
+    font-size: 1.5rem;
+    color: #33CCFF;
+    opacity: 0.2;
 }
 
 .proto {
@@ -245,6 +283,7 @@ body {
 
 .xtra {
     position: absolute;
+    transform-origin: center;
 }
 
 .xtra.drip {
@@ -281,4 +320,13 @@ body {
     border-radius: 100%;
     transform: translateX(-50%) translateY(-50%);
     z-index: 88888;
+}
+
+.xtra.vent {
+    transform-origin: center;
+    transform: translateX(-50%) translateY(-50%);
+    font-size: 1.5rem;
+    color: #42d8c4;
+    opacity: 0.3;
+    z-index: 90;
 }

@@ -1,14 +1,28 @@
 const protoOps = { 
-    name: "proto", 
-    type: "proto", 
-    data: "proto",
-    content: "<html>", 
-    formula: () => { 
-        return "proto"; 
-    }, 
-    range: 20, 
-    decay: 20,
-    dformula: [] 
+    "proto-1a": {
+        name: "proto-1a", 
+        type: "proto", 
+        data: "proto",
+        content: "<html>", 
+        formula: () => { 
+            return "proto-1a"; 
+        }, 
+        range: 20, 
+        decay: 60,
+        dformula: []
+    },
+    "proto-1b": {
+        name: "proto-1b", 
+        type: "proto", 
+        data: "proto",
+        content: "<html>", 
+        formula: () => { 
+            return "proto-1b"; 
+        }, 
+        range: 20, 
+        decay: 30,
+        dformula: []
+    }
 };
 
 function updateProto(proto) {
@@ -30,10 +44,10 @@ function updateProto(proto) {
             proto.obj.style.opacity = 0.9;
         }
 
-        if (proto.life >= 30) {
+        if (proto.life >= 50) {
             let nDir = proto.pos.dir * -1;
             let nVel = 0;
-            let nProto = new LItem(new LVector(proto.pos.x, proto.pos.y, nDir, nVel), protoOps, {gen: lf.step, codes: proto.dynamic["codes"].splice(), genetic: JSON.parse(JSON.stringify(proto.dynamic["genetic"]))});
+            let nProto = new LItem(new LVector(proto.pos.x, proto.pos.y, nDir, nVel), protoOps[proto.ops.name], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)));
             nProto.life = 15;
             proto.life -= 15;
             lf.queueItem(nProto);
