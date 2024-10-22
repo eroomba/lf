@@ -2,7 +2,7 @@ const ortOps = {
     "ort-a": { 
         name: "ort-a", 
         type: "ort", 
-        weight: 1.8,
+        weight: 1.5,
         data: "a",
         content: "&forall;", // upside down A
         formula: () => { 
@@ -20,7 +20,7 @@ const ortOps = {
     "ort-b": { 
         name: "ort-b", 
         type: "ort",
-        weight: 1.8,
+        weight: 1.5,
         data: "b", 
         content: "&bowtie;", // bowtie
         formula: () => {
@@ -38,7 +38,7 @@ const ortOps = {
     "ort-c": { 
         name: "ort-c", 
         type: "ort",
-        weight: 1.8,
+        weight: 1.5,
         data: "c", 
         content: "&comp;", // long C
         formula: () => {
@@ -56,7 +56,7 @@ const ortOps = {
     "ort-d": { 
         name: "ort-d", 
         type: "ort",
-        weight: 1.8,
+        weight: 1.5,
         data: "d", 
         content: "&part;", // loopy d
         formula: () => { 
@@ -74,13 +74,13 @@ const ortOps = {
     "ort-p": { 
         name: "ort-p", 
         type: "ort",
-        weight: 1.9,
+        weight: 1.1,
         data: "p", 
         content: "&fork;", // U with line
         formula: () => { 
             // 11000000
             // 11000001
-            return parseInt('11000001', 2); // d1 + x1
+            return parseInt('11000001', 2); // d1 + x
         }, 
         range: 10,
         decay: 450,
@@ -92,13 +92,13 @@ const ortOps = {
     "ort-e": { 
         name: "ort-e", 
         type: "ort",
-        weight: 1.7,
+        weight: 1.3,
         data: "e", 
         content: "&sum;", // summation
         formula: () => { 
             // 10000100
             // 11000001
-            return parseInt('11000101', 2); // d2 + x1
+            return parseInt('11000101', 2); // d2 + x
         }, 
         range: 10,
         decay: 350,
@@ -122,49 +122,72 @@ function updateOrt(ort) {
         ort.deactivate();
     }
     else {
-        let closeOrts = lf.query(ort, "ort");
-        let chVal = "";
-        let nv = ort.pos.vel;
-        let ndr = ort.pos.dir;
-        let tv = 1;
+        if (ort.ops.name == "ort-e") {
+            let closeSpeks = lf.query(ort, "spek");
+            let g1 = null;
+            let g2 = null;
 
-        let snipC = [];
-        let snipVal = ort.ops.data;
-        for (let sc = 0; sc < closeOrts.length; sc++) {
-            snipC.push(closeOrts[sc]);
-            snipVal += closeOrts[sc].ops.data;
-            nv += closeOrts[sc].pos.vel;
-            ndr += closeOrts[sc].pos.dir;
-            if (snipC.length == 2) break;
-        }
-
-        let validSnip = false;
-        let snipType = null;
-        Object.keys(snipOps).forEach((sn) => {
-            if (!validSnip) {
-                snipType = snipOps[sn].formula(snipVal); 
-                if (snipType != null && snipType.length > 0) {
-                    validSnip = true;
-                }
-                else {
-                    snipType = null;
-                }
-            }
-        });
-
-        if (validSnip) {
-            for (let sc = snipC.length - 1; sc >= 0; sc--) snipC[sc].deactivate();
-
-            let nDir = ndr / 3;
-            let nVel = nv / 3;
-            let nsnip = new LItem(new LVector(ort.pos.x, ort.pos.y, nDir, nVel), snipOps[snipType], { gen: lf.step, code: snipVal, len: snipVal.length });
-            if (snipVal[0] == "d") {
-                nsnip.life *= 4;
-                nsnip.dynamic["proc"] = 1;
-            }
-            lf.queueItem(nsnip);
+            closeSpeks.forEach((spk) => {
+                if (spk.ops.name == "spk-g1" && g1 == null) g1 = spk;
+                if (spk.ops.name == "spk-g2" && g2 == null) g2 = spk;
+            });
             
-            ort.deactivate();
+            if (g1 != null && g2 != null) {
+                let nDir = Math.floor(Math.random() * 360);
+                let nVel = ort.pos.vel * 1.5;
+                let nSnip = new LItem(new LVector(ort.pos.x, ort.pos.y, nDir, nVel), snipOps["snp-ex"], { gen: lf.step, code: "e--", len: 3 });
+                lf.queueItem(nSnip);
+
+                g1.deactivate();
+                g2.deactivate();
+                ort.deactivate();
+            }
+        }
+        else {
+            let closeOrts = lf.query(ort, "ort");
+            let chVal = "";
+            let nv = ort.pos.vel;
+            let ndr = ort.pos.dir;
+            let tv = 1;
+
+            let snipC = [];
+            let snipVal = ort.ops.data;
+            for (let sc = 0; sc < closeOrts.length; sc++) {
+                snipC.push(closeOrts[sc]);
+                snipVal += closeOrts[sc].ops.data;
+                nv += closeOrts[sc].pos.vel;
+                ndr += closeOrts[sc].pos.dir;
+                if (snipC.length == 2) break;
+            }
+
+            let validSnip = false;
+            let snipType = null;
+            Object.keys(snipOps).forEach((sn) => {
+                if (!validSnip) {
+                    snipType = snipOps[sn].formula(snipVal); 
+                    if (snipType != null && snipType.length > 0) {
+                        validSnip = true;
+                    }
+                    else {
+                        snipType = null;
+                    }
+                }
+            });
+
+            if (validSnip) {
+                for (let sc = snipC.length - 1; sc >= 0; sc--) snipC[sc].deactivate();
+
+                let nDir = ndr / 3;
+                let nVel = nv / 3;
+                let nsnip = new LItem(new LVector(ort.pos.x, ort.pos.y, nDir, nVel), snipOps[snipType], { gen: lf.step, code: snipVal, len: snipVal.length });
+                if (snipVal[0] == "d") {
+                    nsnip.life *= 4;
+                    nsnip.dynamic["proc"] = 1;
+                }
+                lf.queueItem(nsnip);
+                
+                ort.deactivate();
+            }
         }
     }
 
@@ -172,7 +195,7 @@ function updateOrt(ort) {
         ort.pos.move(ort.ops.weight);
         ort.obj.style.left = ort.pos.x + "px";
         ort.obj.style.top = ort.pos.y + "px";
-        ort.obj.style.rotate = "z " + ort.pos.dir + "deg";
+        ort.obj.style.transform = ort.transformFill.replace("***",ort.pos.dir);
 
         lf.encode(ort,'u');
     }

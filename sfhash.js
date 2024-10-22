@@ -24,13 +24,16 @@ function SfHash(w,h,sub) {
     me.remove = (id,x,y) => {
         me.table.forEach((h) => { h = h.replace(id + ";","")});
     };
-    me.query = (item, type=null) => {
+    me.query = (item, type=null, options = {}) => {
         let res = [];
+        let qRange = item.ops.range;
+
+        if ("range" in options) qRange = options["range"];
 
         if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
             let x = item.pos.x;
             let y = item.pos.y;
-            let r = item.ops.range;
+            let r = qRange;
             let id = item.id;
             let qX = Math.floor(x / me.sub);
             let qY = Math.floor(y / me.sub);

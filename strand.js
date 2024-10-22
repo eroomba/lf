@@ -1,7 +1,7 @@
 const strandOps = { 
     name: "strand", 
     type: "strand", 
-    weight: 2,
+    weight: 2.2,
     data: "strand", 
     content: "<div class=\"st-cn\">&nbsp;</div><div class=\"st-ct\">&infin;</div><div class=\"st-cn\"><!--nm--></div>",
     formula: () => { 
@@ -30,7 +30,7 @@ function updateStrand(strand) {
 
         let membrane = null;
         close.forEach((itm) => {
-            let sums = groupObj(strand.dynamic["codes"],["eee"]);
+            let sums = groupObj(strand.dynamic["codes"],[snipOps["snp-ex"].data]);
             if ((itm.ops.name == "brane" || itm.ops.name == "blip") && membrane == null) {
                 membrane = itm;
             }
@@ -38,7 +38,7 @@ function updateStrand(strand) {
                 if ((itm.ops.name == "snp-go" &&
                     !strand.dynamic["codes"].includes(itm.dynamic["code"]) && 
                     itm.dynamic["code"].indexOf("d") != 0) ||
-                    (itm.ops.name == "snp-ex" && (!("eee" in sums) || sums["eee"] <= 2)))
+                    (itm.ops.name == "snp-ex" && (!(snipOps["snp-ex"].data in sums) || sums[snipOps["snp-ex"].data] <= 2)))
                 {
                     let prevLen = strand.dynamic["codes"].length;
                     strand.dynamic["codes"].push(itm.dynamic["code"]);
@@ -56,8 +56,8 @@ function updateStrand(strand) {
 
                 let codeLen = strand.dynamic["codes"].length + itm.dynamic["codes"].length;
                 let canComb = false;
-                let sumB = groupObj(itm.dynamic["codes"],["eee"]);
-                let sumE = sums["eee"] + sumB["eee"];
+                let sumB = groupObj(itm.dynamic["codes"],[snipOps["snp-ex"].data]);
+                let sumE = sums[snipOps["snp-ex"].data] + sumB[snipOps["snp-ex"].data];
                 if (sumE / codeLen <= 0.25 && codeLen <= 48) { 
                     canComb = true;
                     nCodes = itm.dynamic["codes"];
@@ -105,6 +105,7 @@ function updateStrand(strand) {
         }
 
         if (!spawned) {
+            lf.behaviors.run(strand, "reset");
             strand.dynamic["codes"].forEach((cd) => {
                 lf.behaviors.run(strand, cd);
             });
@@ -116,7 +117,7 @@ function updateStrand(strand) {
         strand.pos.move(strand.ops.weight);
         strand.obj.style.left = strand.pos.x + "px";
         strand.obj.style.top = strand.pos.y + "px";
-        strand.obj.style.rotate = "z " + strand.pos.dir + "deg";
+        strand.obj.style.transform = strand.transformFill.replace("***",strand.pos.dir); //"z " + strand.pos.dir + "deg";
 
         lf.encode(strand,'u');
     }
@@ -145,7 +146,7 @@ function strandDecay(strandCodes, pos) {
             let dY = 15 * Math.sin(nDir * Math.PI / 180);
             let nVel = Math.floor(Math.random() * 5) + 10;
             let sType = "snp-go";
-            if (rCodes[0] == "eee") sType = "snp-ex"
+            if (rCodes[0] == snipOps["snp-ex"].data) sType = "snp-ex"
             let nSnp = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), snipOps[sType], {gen:lf.step, code: rCodes[0]});
             lf.queueItem(nSnp);
             oA += 360 / sCount;
@@ -169,7 +170,7 @@ function strandDecay(strandCodes, pos) {
             let dY = 40 * Math.sin(nDir * Math.PI / 180);
             let nVel = Math.floor(Math.random() * 5) + 10;
             let sType = "snp-go";
-            if (rCodes2[0] == "eee") sType = "snp-ex";
+            if (rCodes2[0] == snipOps["snp-ex"].data) sType = "snp-ex";
             let nSnp = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), snipOps[sType], {gen:lf.step, code: rCodes2[0]});
             lf.queueItem(nSnp);
             oA += 360 / sCount;
@@ -187,7 +188,7 @@ function strandDecay(strandCodes, pos) {
         }
     }
     let dType = "snp-go";
-    if (dCode == "eee") dType = "snp-ex";
+    if (dCode == snipOps["snp-ex"].data) dType = "snp-ex";
     if (dCode != undefined && dCode != null) {
         snipDecay(dType, dCode, pos);
     }

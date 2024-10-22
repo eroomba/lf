@@ -5,7 +5,8 @@ let mousePosY = 0;
 const defaultOps = { name: "empty", type: "none", weight: 10, data: null, content: "X", formula: () => { return null;}, range: 0, decay: 0, dformula: [] };
 
 let gVars = {
-    branecount: 3,
+    braneCount: 3,
+    seedCount: 3,
     spekColl: false,
     minStrandLen: 24,
     maxItems: 5000
@@ -30,9 +31,20 @@ function LF(ldObj = null) {
     //me.initMode = "mv-test";
     //me.initMode = "sta-puff";
     //me.initMode = "brane-test";
+    //me.initMode = "seed-test2";
+    //me.initMode = "feed-test";
     //me.initMode = "cell-test";
     //me.initMode = "d-test";
     //me.initMode = "sd-test";
+    me.marker = {
+        obj: document.getElementById("marker"),
+        track: null
+    };
+    me.chaosOps = {
+        dripRate: 0.4,
+        puffRate: 0.5,
+        bombRate: 0.8
+    };
     me.shash = null;
     me.items = {};
     me.additems = [];
@@ -91,7 +103,7 @@ function LF(ldObj = null) {
                 return me.shash.query(item,type);
             }
             else {
-                return me.sfhash.query(item,type);
+                return me.sfhash.query(item,type,{ range: qR });
             }
         }
         return [];
@@ -153,6 +165,7 @@ function LF(ldObj = null) {
             "spk-c2",
             "spk-d1",
             "spk-d2",
+            "spk-x",
             "spk-x"
         ];
 
@@ -228,6 +241,7 @@ function LF(ldObj = null) {
             "spk-c2",
             "spk-d1",
             "spk-d2",
+            "spk-x",
             "spk-x"
         ];
     
@@ -313,12 +327,11 @@ function LF(ldObj = null) {
         let close = me.query(drip);
         close.forEach((elem) => {
             if (elem.active) {
-                let dA = Math.atan2(mY - elem.pos.y, mX - elem.pos.x) * 180 / Math.PI;
-                let dD = Math.hypot(mX - elem.pos.x, mY - elem.pos.y);
+                let dRes = elem.pos.subtract(drip.pos);
 
-                dA = (dA + 180) % 360;
+                let dA = dRes.dir % 360;
                 let force = 20;
-                let nVel = ((r - dD) + 1) * 2;
+                let nVel = ((r - dRes.magnitude()) + 1) * 3;
                 if (elem.pos.vel < 0.5) {
                     elem.obj.classList.add("hit-by-" + dID + "-1");
                     elem.pos.dir = dA;
@@ -456,10 +469,52 @@ function LF(ldObj = null) {
                 for (let i = 0; i < 2000; i++) {
                     let x1 = Math.floor(Math.random() * me.w);
                     let y1 = Math.floor(Math.random() * me.h);
-                    let nItem = new LItem(new LVector(x1, y1, 0, 0), snipOps["snp-blk"], {gen: me.step, code: "ppp" });
+                    let nItem = new LItem(new LVector(x1, y1, 0, 0), snipOps["snp-blk"], {gen: me.step, code: snipOps["snp-blk"].data });
                     if (me.addItem(nItem)) me.encode(nItem,'i');
                 }
                 break;
+            case "seed-test":
+                    for (let i = 0; i < 2000; i++) {
+                        let x1 = Math.floor(Math.random() * me.w);
+                        let y1 = Math.floor(Math.random() * me.h);
+                        let nItem = new LItem(new LVector(x1, y1, 0, 0), snipOps["snp-ex"], {gen: me.step, code: snipOps["snp-ex"].data });
+                        if (me.addItem(nItem)) me.encode(nItem,'i');
+                    }
+                    break;
+            case "seed-test2":
+                    for (let i = 0; i < 500; i++) {
+                        let x1 = Math.floor(Math.random() * me.w);
+                        let y1 = Math.floor(Math.random() * me.h);
+                        let nItem = new LItem(new LVector(x1, y1, 0, 0), ortOps["ort-e"], {gen: me.step });
+                        if (me.addItem(nItem)) me.encode(nItem,'i');
+                    }
+                    for (let i = 0; i < 500; i++) {
+                        let x1 = Math.floor(Math.random() * me.w);
+                        let y1 = Math.floor(Math.random() * me.h);
+                        let nItem = new LItem(new LVector(x1, y1, 0, 0), spekOps["spk-g1"], {gen: me.step });
+                        if (me.addItem(nItem)) me.encode(nItem,'i');
+                    }
+                    for (let i = 0; i < 2000; i++) {
+                        let x1 = Math.floor(Math.random() * me.w);
+                        let y1 = Math.floor(Math.random() * me.h);
+                        let nItem = new LItem(new LVector(x1, y1, 0, 0), spekOps["spk-g2"], {gen: me.step });
+                        if (me.addItem(nItem)) me.encode(nItem,'i');
+                    }
+                    //for (let i = 0; i < 10; i++) {
+                    //    let x1 = (me.w / 2) + ((i+1) * 40);
+                    //    let y1 = me.h / 2;
+                    //    let nItem = new LItem(new LVector(x1, y1, 0, 0), snipOps["snp-ex"], {gen: me.step, code: "e--" });
+                    //    if (me.addItem(nItem)) me.encode(nItem,'i');
+                    //}
+                    break;
+            case "feed-test":
+                    let sX = me.w / 2;
+                    let sY = me.h / 2;
+                    for (let i = 0; i < 5; i++) {
+                        let nSd = new LItem(new LVector(sX + ((i + 1) * 60), sY - ((i + 1) * 60), 0, 0), snipOps["snp-ex"], {gen: me.step, code: "e--" });
+                        if (me.addItem(nSd)) me.encode(nSd,'i');
+                    }
+                    break;
             case "cell-test":
                 for (let i = 0; i < 1000; i++) {
                     let x1 = Math.floor(Math.random() * me.w);
@@ -470,7 +525,7 @@ function LF(ldObj = null) {
                 for (let i = 0; i < 500; i++) {
                     let x1 = Math.floor(Math.random() * me.w);
                     let y1 = Math.floor(Math.random() * me.h);
-                    let nCodes = ["aaa","aab","aac","aad","bbb","bba","bbc","ccc","cab","cad","eee","eee","eee","","aba","abc","abd","baa","bab","bac","bad","cbb","cbc","cbd"];
+                    let nCodes = ["aaa","aab","aac","aad","bbb","bba","bbc","ccc","cab","cad","e--","e--","e--","","aba","abc","abd","baa","bab","bac","bad","cbb","cbc","cbd"];
                     let nItem = new LItem(new LVector(x1, y1, 0, 0), strandOps, {gen: me.step, codes: nCodes, genetic: {} });
                     if (me.addItem(nItem)) me.encode(nItem,'i');
                 }
@@ -600,9 +655,31 @@ function LF(ldObj = null) {
                     }
                 }
                 break;
+            case "seed-test2":
+            case "feed-test":
+                if (document.querySelectorAll(".proto").length == 0) {
+                    let mvCodes = ["aaa","bbb","bba","bbc","cba","cbb","cbc","cbd"]; 
+                    let mvDynamic = {
+                        struct: ["complex"],
+                        codes: mvCodes
+                    };
+
+                    let nVel = 0;
+                    let nDir = Math.floor(Math.random() * 360);
+                    if (me.initMode == "feed-test") nDir = -45;
+
+                    let mvPro = new LItem(new LVector(me.w / 2, me.h / 2, nDir, nVel), protoOps["proto-1a"], mvDynamic, {});
+                    me.queueItem(mvPro);
+                }
+                break;
             case "mv-test":
                 if (document.querySelectorAll(".proto").length == 0) {
-                    let mvCodes = ["aaa","bbb"];
+
+                    let mvCodes = []; //["aaa","bbb","aab","aad","bab","bac","bba","bbc"];
+                    if (Math.random() > 0.5) { mvCodes.push("aab"); mvCodes.push("aad"); }
+                    if (Math.random() > 0.5) { mvCodes.push("bab"); mvCodes.push("bac"); }
+                    if (Math.random() > 0.5) { mvCodes.push("bba"); mvCodes.push("bbc"); }
+                    if (Math.random() > 0.5 || mvCodes.length == 0) { mvCodes.push("aaa"); mvCodes.push("bbb"); }
                     let mvDynamic = {
                         struct: ["complex"],
                         codes: mvCodes
@@ -612,7 +689,7 @@ function LF(ldObj = null) {
                     let nDir = Math.floor(Math.random() * 360);
 
                     console.log("mv-test " + nDir + ",0");
-                    let mvPro = new LItem(new LVector(me.w / 2, me.h / 2, 30, nDir, 0), protoOps, mvDynamic, {});
+                    let mvPro = new LItem(new LVector(me.w / 2, me.h / 2, 30, nDir, 0), protoOps["proto-1a"], mvDynamic, {});
                     me.queueItem(mvPro);
                 }
                 break;
@@ -632,7 +709,8 @@ function LF(ldObj = null) {
                 }
                 break;
             case "brane-test":
-                if (Math.random() > 0.5) {s
+            case "seed-test":
+                if (Math.random() > 0.5) {
                     let bX = Math.floor((Math.random() * (me.w / 2)) + (me.w / 4));
                     let bY = Math.floor((Math.random() * (me.h / 2)) + (me.h / 4));
                     me.puff(bX, bY);
@@ -642,10 +720,15 @@ function LF(ldObj = null) {
                 if (!("drags" in me.extras)) me.extras["drags"] = [];
 
                 if (Object.keys(me.items).length < gVars.maxItems) {
-                    if (Math.random() > 0.8) me.bomb();
-                    if (Math.random() > 0.5) me.puff();
+                    if (Math.random() > me.chaosOps.bombRate) me.bomb();
+                    if (Math.random() > me.chaosOps.puffRate) me.puff();
                 }
-                if (Math.random() > 0.8) me.drip();
+                if (Math.random() >= me.chaosOps.dripRate) me.drip();
+
+                if (Math.random() > 0.5) me.chaosOps.dripRate += Math.random() > 0.5 ? -0.1 : 0.1;
+                if (me.chaosOps.dripRate >= 0.6) me.chaosOps.dripRate = 0.6;
+                else if (me.chaosOps.dripRate <= 0.1) me.chaosOps.dripRate = 0.1;
+
                 break;
         }
 

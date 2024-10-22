@@ -4,10 +4,14 @@ function LVector(x,y,dir,vel,pType="",pID="") {
     me.y = y;
     me.dir = 0;
     me.vel = 0;
+    me.prevX = x;
+    me.prevY = y;
+    me.prevVel = 0;
+    me.prevDir = 0;
     me.pType = "";
     me.pID = "";
-    if (dir) me.dir = dir;
-    if (vel) me.vel = vel;
+    if (dir) { me.dir = dir; me.prevDir = dir; }
+    if (vel) { me.vel = vel; me.prevVel = vel; }
     me.xHist = [];
     me.yHist = [];
     me.dirHist = [];
@@ -27,6 +31,10 @@ function LVector(x,y,dir,vel,pType="",pID="") {
             me.yHist.push(me.y);
         }
 
+        me.prevX = me.x;
+        me.prevY = me.y;
+        me.prevDir = me.dir;
+        me.prevVel = me.vel;
 
         me.vel *= 1 / weight > 0.1 && 1 / weight < 1 ? 1 / weight : 0.9;
         if (me.vel > 100) me.vel = 100;
@@ -72,30 +80,37 @@ function LVector(x,y,dir,vel,pType="",pID="") {
             if (me.vel == NaN || me.dir == NaN || me.x == NaN || me.y == NaN || Math.abs(me.vel) > 300 || Math.abs(me.dir) > 360) {
                 lf.stop();
                 let lStr = "[" + me.pID + ", " + me.pType + "]";
-                console.log(lStr);
                 lStr = "x: ";
                 for (let j = 0; j < me.xHist.length; j++) {
                     lStr += me.xHist[j] + ";";
                 }
-                console.log(lStr);
                 lStr = "y: ";
                 for (let j = 0; j < me.yHist.length; j++) {
                     lStr += me.yHist[j] + ";";
                 }
-                console.log(lStr);
                 lStr = "dir: ";
                 for (let j = 0; j < me.dirHist.length; j++) {
                     lStr += me.dirHist[j] + ";";
                 }
-                console.log(lStr);
                 lStr = "vel: ";
                 for (let j = 0; j < me.velHist.length; j++) {
                     lStr += me.velHist[j] + ";";
                 }
-                console.log(lStr);
             }
         }
 
+    };
+
+    me.magnitude = () => {
+        return Math.hypot(me.x, me.y);
+    };
+
+    me.subtract = (oth) => {
+        let subX = me.x - oth.x;
+        let subY = me.y - oth.y;
+        let subDir = (Math.atan2(subY, subX) * 180 / Math.PI) % 360;
+        let subVel = me.vel - oth.vel;
+        return new LVector(me.x - oth.x, me.y - oth.y, subDir, subVel);
     };
 
     me.accelerate = (acc) => {

@@ -128,7 +128,7 @@ const spekOps = {
     "spk-g1": { 
         name: "spk-g1", 
         type: "spek",
-        weight: 1.3, 
+        weight: 1.05, 
         data: -1,
         content: "&trie;", // equal with triangle
         formula: (val) => { 
@@ -141,7 +141,7 @@ const spekOps = {
     "spk-g2": { 
         name: "spk-g2", 
         type: "spek",
-        weight: 1.4, 
+        weight: 1.08, 
         data: -1,
         content: "&eDot;", // equal with dots 
         formula: (val) => { 
@@ -154,7 +154,7 @@ const spekOps = {
     "spk-g3": { 
         name: "spk-g3", 
         type: "spek",
-        weight: 1.3,  
+        weight: 1.1,  
         data: -1,
         content: "&epar;", // equal with 2 crosses (hash) 
         formula: (val) => { 
@@ -217,7 +217,7 @@ function updateSpek(spek) {
         spek.pos.move(spek.ops.weight);
         spek.obj.style.left = spek.pos.x + "px";
         spek.obj.style.top = spek.pos.y + "px";
-        spek.obj.style.rotate = "z " + spek.pos.dir + "deg";
+        spek.obj.style.transform = spek.transformFill.replace("***",spek.pos.dir);
 
         lf.encode(spek,'u');
     }

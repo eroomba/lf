@@ -24,6 +24,19 @@ const struckOps = {
         range: 20, 
         decay: 300,
         dformula: []
+    },
+    "seed": {
+        name: "seed", 
+        type: "struck", 
+        weight: 1.8,
+        data: "seed", 
+        content: "&sect;",
+        formula: () => { 
+            return "seed"; 
+        }, 
+        range: 20, 
+        decay: 800,
+        dformula: []
     }
 };
 
@@ -59,9 +72,9 @@ function struckDecay(struckName, pos) {
     switch (struckName) {
         case "brane":
             let degradeCount = 2;
-            let snipCount = lf.branecount - degradeCount;
+            let snipCount = lf.braneCount - degradeCount;
             let oA = Math.floor(Math.random() * 360);
-            for (let b = 0; b < lf.branecount - degradeCount; b++) {
+            for (let b = 0; b < lf.braneCount - degradeCount; b++) {
                 let nDir = oA;
                 let dX = 15 * Math.cos(nDir * Math.PI / 180);
                 let dY = 15 * Math.sin(nDir * Math.PI / 180);
@@ -89,6 +102,26 @@ function struckDecay(struckName, pos) {
             break;
         case "blip":
             // dissolves into nothing since it came from nothing
+            break;
+        case "seed":
+            let degradeCount2 = 2;
+            let snipCount2 = lf.seedCount - degradeCount2;
+            let oA2 = Math.floor(Math.random() * 360);
+            for (let b = 0; b < lf.seedCount - degradeCount2; b++) {
+                let nDir = oA2;
+                let dX = 15 * Math.cos(nDir * Math.PI / 180);
+                let dY = 15 * Math.sin(nDir * Math.PI / 180);
+                let nVel = Math.floor(Math.random() * 10) + 5;
+                let nDobj = new LItem(new LVector(pos.x + dX, pos.y + dY, nDir, nVel), snipOps["snp-ex"], {gen: lf.step,code:"e--",len: 3});
+                lf.queueItem(nDobj);
+                oA2 += 360 / snipCount2;
+                oA2 = oA2 % 360;
+            }
+            oA2 = Math.floor(Math.random() * 360);
+            let oCount2 = degradeCount2;
+            for (let ss = 0; ss < oCount2; ss++) {
+                snipDecay("snp-ex","e--", pos);
+            }
             break;
     }
 }
