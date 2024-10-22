@@ -99,7 +99,7 @@ body {
 }
 
 .spek.spk-g3 {
-    color: #FFFF99;
+    color: #339966;
 }
 
 .ort {
@@ -280,45 +280,12 @@ body {
     align-items: center;
 }
 
-.proto .back,
-.proto .front {
-    min-width: 1rem;
-    color: #3bb;
-}
-
-.proto .back .tail {
-    min-width: 1rem;
-    text-align: right;
-    font-size: 1.2rem;
-    position: relative;
-    right: -0.2rem;
-}
-
-.proto .front .mouth {
-    min-width: 1rem;
-    text-align: left;
-    font-size: 0.7rem;
-    position: relative;
-    left: -0.2rem;
-}
-
-.proto .front .mouth .open {
-    display: inline-block;
-}
-
-.proto .front .mouth .closed {
+.proto.complex-1 .back,
+.proto.complex-1 .front {
     display: none;
 }
 
-.proto.eating .front .mouth .open {
-    display: none;
-}
-
-.proto.eating .front .mouth .closed {
-    display: inline-block;
-}
-
-.proto .mid {
+.proto.complex-1 .mid {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -326,7 +293,79 @@ body {
     align-content: center;
 }
 
-.proto .mid .main {
+.proto.complex-1 .mid .main {
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.65rem;
+    line-height: 0.65rem;
+    vertical-align: middle;
+    border-width: 0.15rem;
+    border-style: solid;
+    border-radius: 100%;
+    background-color: #aff;
+    border-color: #3cc;
+    color: #2bb;
+    font-weight: bold;
+    text-align: center;
+}
+
+.proto.complex-1.mover .mid .main {
+    border-style: dashed;
+}
+
+.proto.complex-1.chem .mid .main {
+    background-color: #cfc;
+    border-color: #6c6;
+    color: #5b5;
+}
+
+.proto.complex-2 .back,
+.proto.complex-2 .front {
+    min-width: 1rem;
+    color: #3bb;
+}
+
+.proto.complex-2 .back .tail {
+    min-width: 1rem;
+    text-align: right;
+    font-size: 1.2rem;
+    position: relative;
+    right: -0.2rem;
+}
+
+.proto.complex-2 .front .mouth {
+    min-width: 1rem;
+    text-align: left;
+    font-size: 0.7rem;
+    position: relative;
+    left: -0.2rem;
+}
+
+.proto.complex-2 .front .mouth .open {
+    display: inline-block;
+}
+
+.proto.complex-2 .front .mouth .closed {
+    display: none;
+}
+
+.proto.complex-2.eating .front .mouth .open {
+    display: none;
+}
+
+.proto.complex-2.eating .front .mouth .closed {
+    display: inline-block;
+}
+
+.proto.complex-2 .mid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+.proto.complex-2 .mid .main {
     width: 1.5rem;
     height: 1rem;
     font-size: 0.75rem;
@@ -410,9 +449,8 @@ body {
 
 .xtra.vent {
     transform-origin: center;
-    transform: translateX(-50%) translateY(-50%);
-    font-size: 1.5rem;
-    color: #42d8c4;
-    opacity: 0.3;
+    font-size: 2rem;
+    color: #20d6b2;
+    opacity: 0.4;
     z-index: 90;
 }

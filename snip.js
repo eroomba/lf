@@ -50,7 +50,7 @@ const snipOps = {
     "snp-ex": {
         name: "snp-ex", 
         type: "snip",
-        weight: 1.5, 
+        weight: 1.2, 
         data: "e--",
         content: "&sim;", 
         formula: (check) => { 
@@ -187,7 +187,7 @@ function updateSnip(snip) {
                 
                 for (let sn = closeSnips.length - 1; sn >= 0; sn--) {
                     if (closeSnips[sn].ops.name == "snp-go" && 
-                        closeSnips[sn].dynamic["code"].indexOf("d") != 0 && 
+                        !(lf.behaviors.singles.includes(closeSnips[sn].dynamic["code"])) &&
                         closeSnips[sn].dynamic["code"] != snip.dynamic["code"]) {
                         addTo = closeSnips[sn];
                         break;

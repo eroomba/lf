@@ -8,7 +8,7 @@ let gVars = {
     braneCount: 3,
     seedCount: 3,
     spekColl: false,
-    minStrandLen: 24,
+    minStrandLen: 14,
     maxItems: 5000
 }
 
@@ -36,6 +36,7 @@ function LF(ldObj = null) {
     //me.initMode = "cell-test";
     //me.initMode = "d-test";
     //me.initMode = "sd-test";
+    //me.initMode = "complex-test";
     me.marker = {
         obj: document.getElementById("marker"),
         track: null
@@ -525,7 +526,7 @@ function LF(ldObj = null) {
                 for (let i = 0; i < 500; i++) {
                     let x1 = Math.floor(Math.random() * me.w);
                     let y1 = Math.floor(Math.random() * me.h);
-                    let nCodes = ["aaa","aab","aac","aad","bbb","bba","bbc","ccc","cab","cad","e--","e--","e--","","aba","abc","abd","baa","bab","bac","bad","cbb","cbc","cbd"];
+                    let nCodes = ["aaa","aab","aac","aad","bbb","bba","bbc","ccc","cab","cad","aba","abc","abd","baa","bab","bac","bad","cbb","cbc","cbd"];
                     let nItem = new LItem(new LVector(x1, y1, 0, 0), strandOps, {gen: me.step, codes: nCodes, genetic: {} });
                     if (me.addItem(nItem)) me.encode(nItem,'i');
                 }
@@ -604,16 +605,16 @@ function LF(ldObj = null) {
                                 nObj.style.left = vent.pos.x + "px";
                                 nObj.style.top = vent.pos.y + "px";
                                 let vRot = Math.floor(Math.random() * 360);
-                                nObj.style.transform += "translateX(-50%) translateY(-50%) rotateZ(" + vRot + "deg)";
+                                nObj.style.transform += "translateX(-50%) translateY(-50%) rotate(" + vRot + "deg)";
                                 
-                                nObj.innerHTML = "&divonx;"; 
+                                nObj.innerHTML = "&#x3DF;"; //"&divonx;"; 
                                 me.obj.append(nObj);
                                 vent.obj = nObj;
                             },
                             update: function(vent) {
-                                if (Math.random() > 0.8) {
+                                if (Math.random() > 0.8 && Object.keys(me.items).length < gVars.maxItems) {
                                     let nDir = Math.floor(Math.random() * 360);
-                                    let nVel = Math.floor(Math.random() * 10) + 5;
+                                    let nVel = Math.floor(Math.random() * 3) + 1;
                                     let nGas = new LItem(new LVector(vent.pos.x, vent.pos.y, vent.ops.angle, nVel), spekOps["spk-g3"],{ gen: lf.step });
                                     lf.queueItem(nGas);
                                     vent.ops.angle += 20;
@@ -660,7 +661,6 @@ function LF(ldObj = null) {
                 if (document.querySelectorAll(".proto").length == 0) {
                     let mvCodes = ["aaa","bbb","bba","bbc","cba","cbb","cbc","cbd"]; 
                     let mvDynamic = {
-                        struct: ["complex"],
                         codes: mvCodes
                     };
 
@@ -681,7 +681,6 @@ function LF(ldObj = null) {
                     if (Math.random() > 0.5) { mvCodes.push("bba"); mvCodes.push("bbc"); }
                     if (Math.random() > 0.5 || mvCodes.length == 0) { mvCodes.push("aaa"); mvCodes.push("bbb"); }
                     let mvDynamic = {
-                        struct: ["complex"],
                         codes: mvCodes
                     };
 
@@ -715,6 +714,36 @@ function LF(ldObj = null) {
                     let bY = Math.floor((Math.random() * (me.h / 2)) + (me.h / 4));
                     me.puff(bX, bY);
                 }
+                break;
+            case "complex-test":
+
+                if (document.querySelectorAll(".proto").length == 0) {
+                    let mvCodes = []; //["aaa","bbb","aab","aad","bab","bac","bba","bbc"];
+                    if (Math.random() > 0.5) { mvCodes.push("aab"); mvCodes.push("aad"); }
+                    if (Math.random() > 0.5) { mvCodes.push("bab"); mvCodes.push("bac"); }
+                    if (Math.random() > 0.5) { mvCodes.push("bba"); mvCodes.push("bbc"); }
+                    if (Math.random() > 0.5 || mvCodes.length == 0) { mvCodes.push("aaa"); mvCodes.push("bbb"); }
+                    let mvDynamic = {
+                        codes: mvCodes
+                    };
+
+                    let nVel = 0;
+                    let nDir = Math.floor(Math.random() * 360);
+
+                    let iOps = {
+                        init: true,
+                        complex: 1
+                    };
+                    let iType = "proto-1b";
+                    if (Math.random() > 0.5) {
+                        iOps.complex = 2;
+                        iType = "proto-1a";
+                    }
+
+                    let mvPro = new LItem(new LVector(me.w / 2, me.h / 2, nDir, 0), protoOps[iType], mvDynamic, {}, iOps);
+                    me.queueItem(mvPro);
+                }
+
                 break;
             case "chaos": 
                 if (!("drags" in me.extras)) me.extras["drags"] = [];
@@ -799,7 +828,7 @@ function loadLF(lfObj) {
     let ldObj = JSON.parse(lfObj.value);
     lf = new LF(ldObj.lf);
     Object.keys(ldObj.items).forEach((itid) => {
-        let ni = new LItem(new LVector(ldObj.items[itid].pos.x,ldObj.items[itid].pos.y,ldObj.items[itid].pos.dir,ldObj.items[itid].pos.vel),ldObj.items[itid].ops,JSON.parse(JSON.stringify(ldObj.items[itid].dynamic)),false);
+        let ni = new LItem(new LVector(ldObj.items[itid].pos.x,ldObj.items[itid].pos.y,ldObj.items[itid].pos.dir,ldObj.items[itid].pos.vel),ldObj.items[itid].ops,JSON.parse(JSON.stringify(ldObj.items[itid].dynamic)),{init:false});
         ni.init();
         lf.obj.append(ni.obj);
         lf.items[itid] = ni;

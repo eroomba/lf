@@ -1,4 +1,4 @@
-function LItem(pos, ops, dynamic = {}, genetic = {}, init = true) {
+function LItem(pos, ops, dynamic = {}, genetic = {}, initOps = {init: true}) {
     let me = this;
     me.id = lf.generateID();
     me.gen = -1;
@@ -13,6 +13,8 @@ function LItem(pos, ops, dynamic = {}, genetic = {}, init = true) {
     me.dynamic = dynamic;
     me.style = {};
     me.genetic = genetic;
+    me.complex = 0;
+    if ("complex" in initOps) me.complex = initOps["complex"];
     me.transformFill = "translateX(-50%) translateY(-50%) rotate(***deg)";
     me.update = () => {
         if (me.active) {
@@ -134,7 +136,8 @@ function LItem(pos, ops, dynamic = {}, genetic = {}, init = true) {
                         }
                         if (me.dynamic["codes"].includes("bab") && me.dynamic["codes"].includes("bac")) {
                             nObj.classList.add("chem");
-                            midCont += "&divonx;";
+                            if (me.complex >= 2)
+                                midCont += "&divonx;";
                         }
                     }
                     if (midCont.length == 0) midCont = "&horbar;"; //"&minus;";
@@ -160,6 +163,7 @@ function LItem(pos, ops, dynamic = {}, genetic = {}, init = true) {
             nObj.setAttribute("gen", me.gen);
             if (me.active) nObj.setAttribute("istat", "active");
             else nObj.setAttribute("istat", "inactive");
+            nObj.classList.add("complex-" + me.complex);
 
             me.obj = nObj;
 
@@ -178,5 +182,5 @@ function LItem(pos, ops, dynamic = {}, genetic = {}, init = true) {
         me.ops = ops;
     }
 
-    if (init) me.init();
+    if ("init" in initOps && initOps.init) me.init();
 }

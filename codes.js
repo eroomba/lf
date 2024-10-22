@@ -25,7 +25,7 @@ function codedBehaviors() {
         },
         "aad": function(item) {
             // respirate - enable see "aab"
-            if ("struct" in item.dynamic && item.dynamic["struct"].includes("complex")) {
+            if (item.complex >= 1) {
                 if ("respiration" in item.genetic && Array.isArray(item.genetic["respiration"])) {
                     let resp = item.genetic["respiration"];
 
@@ -56,10 +56,11 @@ function codedBehaviors() {
         },
         "bbb": function(item) {
             // movement - enable see "aaa"
-            if ("struct" in item.dynamic && item.dynamic["struct"].includes("complex")) {
+            if (item.complex >= 1) {
                 if ("speed" in item.genetic) {
 
                     let iSpeed = item.genetic["speed"];
+                    if (item.complex == 1) iSpeed *= 0.5;
 
                     let mvSet = false;
                     if ("seek" in item.genetic) { 
@@ -68,15 +69,19 @@ function codedBehaviors() {
                             let target = item.genetic["seek"]["target"];
                             let des = target.pos.subtract(item.pos);
                             item.pos.dir = des.dir;
-                            item.pos.vel = iSpeed;
-                            if (des.magnitude() < iSpeed) item.pos.vel = des.magnitude();
+                            if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
+                                item.pos.vel = iSpeed;
+                                if (des.magnitude() < iSpeed) item.pos.vel = des.magnitude();
+                            }
                             mvSet = true;
                         }
                     }
                     
                     if (!mvSet) {
-                        item.pos.dir += 10 - Math.floor(Math.random() * 21);
-                        item.pos.vel = iSpeed; 
+                        if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
+                            item.pos.dir += 10 - Math.floor(Math.random() * 21);
+                            item.pos.vel = iSpeed; 
+                        }
                     } 
 
                     item.obj.setAttribute("dir", item.pos.dir);
@@ -103,7 +108,7 @@ function codedBehaviors() {
         },
         "bbc": function(item) {
             // digestion - enable see "bba"
-            if ("struct" in item.dynamic && item.dynamic["struct"].includes("complex")) {           
+            if (item.complex >= 2) {           
                 if ("digestion" in item.genetic) {
                     let gCount = item.genetic["digestion"]["count"];
                     let digGut = item.genetic["digestion"]["gut"];
@@ -158,7 +163,7 @@ function codedBehaviors() {
         },
         "bac": function(item) {
             // chem - enable see "bab"
-            if ("struct" in item.dynamic && item.dynamic["struct"].includes("complex")) {
+            if (item.complex >= 2) {
                 if ("chem" in item.genetic) {
                     
                     let g2s = lf.query(item,"spek");
@@ -184,14 +189,16 @@ function codedBehaviors() {
         },
         "cba": function(item) {
             // enable perception - see "cbb"
-            if (!("perception" in item.genetic)) {
-                item.genetic["perception"] = { ran: false, range: (Math.floor(Math.random() * 4) + 2) * item.ops.range, found: new Array() };
-                console.log("perception: " + item.genetic["perception"]["range"]);
+            if (item.complex >= 2) {
+                if (!("perception" in item.genetic)) {
+                    item.genetic["perception"] = { ran: false, range: (Math.floor(Math.random() * 4) + 2) * item.ops.range, found: new Array() };
+                    //console.log("perception: " + item.genetic["perception"]["range"]);
+                }
             }
         },
         "cbb": function(item) {
             // perception - enable see "cba"
-            if ("struct" in item.dynamic && item.dynamic["struct"].includes("complex")) {
+            if (item.complex >= 2) {
                 if ("perception" in item.genetic && !item.genetic["perception"].ran) {
                     let pRange = item.genetic["perception"]["range"];
 
@@ -207,7 +214,7 @@ function codedBehaviors() {
         },
         "cbd": function(item) {
             // seek - enable see "cbc"
-            if ("struct" in item.dynamic && item.dynamic["struct"].includes("complex")) {
+            if (item.complex >= 2) {
                 if ("seek" in item.genetic && "perception" in item.genetic) {
                     if (!item.genetic["perception"]["ran"]) { this["cbb"](item); }
                     let minD = null;
@@ -249,7 +256,7 @@ function codedBehaviors() {
         },
         "cab": function(item) {
             // enable storage - see "cad"
-            if ("struct" in item.dynamic && item.dynamic["struct"].includes("complex")) {
+            if (item.complex >= 1) {
                 if (!("storage" in item.genetic)) {
                     item.genetic["storage"] = { "max": Math.floor(Math.random() * 20) + 10 };
                     item.dynamic["storage"] = { "snp-blk": 0, "snp-ex": 0 };
@@ -319,11 +326,11 @@ function codedBehaviors() {
                 let nsnip = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), snipOps["snp-blk"], { gen: lf.step, code: snipVal, len: snipVal.length });
                 lf.queueItem(nsnip);
                 item.dynamic["parts"]["p"] = 0;
-                item.obj.innerHTML = "&int;";
+                if (item.complex == 0) item.obj.innerHTML = "&int;";
             }
-            else if (item.dynamic["parts"]["p"] == 2) item.obj.innerHTML = "<i class=\"loaded\">&cwconint;</i>"; // int with circle
-            else if (item.dynamic["parts"]["p"] == 1) item.obj.innerHTML = "<i class=\"loaded\">&cwint;</i>"; // int with slash
-            else item.obj.innerHTML = "&int;";
+            else if (item.complex == 0 && item.dynamic["parts"]["p"] == 2) item.obj.innerHTML = "<i class=\"loaded\">&cwconint;</i>"; // int with circle
+            else if (item.complex == 0 && item.dynamic["parts"]["p"] == 1) item.obj.innerHTML = "<i class=\"loaded\">&cwint;</i>"; // int with slash
+            else if (item.complex == 0) item.obj.innerHTML = "&int;";
         }
     };
     me.run = (item,code) => {
@@ -331,7 +338,23 @@ function codedBehaviors() {
             return me.gens[code](item);
         else
             return null;
-    }
+    };
+    me.singles = [
+        "e--",
+        "ppp",
+        "ddd",
+        "daa",
+        "dab",
+        "dac",
+        "dad",
+        "dba",
+        "dbb",
+        "dbc",
+        "dbd",
+        "dca",
+        "dcc",
+        "dcd"
+    ];
 
     me.gens["dab"] = me.gens["daa"];
     me.gens["dac"] = me.gens["daa"];

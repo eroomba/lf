@@ -1,7 +1,7 @@
 const strandOps = { 
     name: "strand", 
     type: "strand", 
-    weight: 2.2,
+    weight: 2,
     data: "strand", 
     content: "<div class=\"st-cn\">&nbsp;</div><div class=\"st-ct\">&infin;</div><div class=\"st-cn\"><!--nm--></div>",
     formula: () => { 
@@ -35,10 +35,10 @@ function updateStrand(strand) {
                 membrane = itm;
             }
             if (itm.ops.type == "snip") {
-                if ((itm.ops.name == "snp-go" &&
+                if (itm.ops.name == "snp-go" &&
                     !strand.dynamic["codes"].includes(itm.dynamic["code"]) && 
-                    itm.dynamic["code"].indexOf("d") != 0) ||
-                    (itm.ops.name == "snp-ex" && (!(snipOps["snp-ex"].data in sums) || sums[snipOps["snp-ex"].data] <= 2)))
+                    !(lf.behaviors.singles.includes(itm.dynamic["code"])))
+                    //|| (itm.ops.name == "snp-ex" && (!(snipOps["snp-ex"].data in sums) || sums[snipOps["snp-ex"].data] <= 2)))
                 {
                     let prevLen = strand.dynamic["codes"].length;
                     strand.dynamic["codes"].push(itm.dynamic["code"]);
@@ -86,16 +86,19 @@ function updateStrand(strand) {
         if (strand.dynamic["codes"].length >= gVars.minStrandLen && membrane != null) {
             let ptDyn = {
                 gen: lf.step,
-                struct: [ "complex" ],
                 codes: strand.dynamic["codes"]
             };
 
+            let iOps = { init: true, complex: 2 };
             let protoType = "proto-1a";
-            if (membrane.ops.name == "blip") protoType = "proto-1b";
+            if (membrane.ops.name == "blip") {
+                protoType = "proto-1b";
+                iOps.complex = 1;
+            }
 
             let nVel = Math.floor(Math.random() * 360);
             let nDir = Math.floor(Math.random() * 9);
-            let nPro= new LItem(new LVector(strand.pos.x, strand.pos.y,nDir,nVel),protoOps[protoType], ptDyn, strand.genetic);
+            let nPro= new LItem(new LVector(strand.pos.x, strand.pos.y,nDir,nVel),protoOps[protoType], ptDyn, strand.genetic, iOps);
             lf.queueItem(nPro);
 
             membrane.deactivate();

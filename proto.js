@@ -20,7 +20,7 @@ const protoOps = {
             return "proto-1b"; 
         }, 
         range: 20, 
-        decay: 30,
+        decay: 50,
         dformula: []
     }
 };
@@ -43,11 +43,15 @@ function updateProto(proto) {
         }
 
         if (proto.life >= 80) {
-            let nDir = proto.pos.dir * -1;
-            let nVel = 0;
-            let nProto = new LItem(new LVector(proto.pos.x, proto.pos.y, nDir, nVel), protoOps[proto.ops.name], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)));
-            nProto.life = 15;
-            proto.life -= 15;
+            let nDir = (proto.pos.dir + 180) % 360;
+            let nVel = proto.pos.vel;
+            let iOps = {
+                init: true,
+                complex: proto.complex
+            }
+            let nProto = new LItem(new LVector(proto.pos.x, proto.pos.y, nDir, nVel), protoOps[proto.ops.name], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)), iOps);
+            nProto.life = 40;
+            proto.life -= 40;
             lf.queueItem(nProto);
             console.log("divided!!!");
         }

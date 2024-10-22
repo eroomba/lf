@@ -3,7 +3,7 @@ const spekOps = {
         // a1 combines w/a2 to form a
         name: "spk-a1", 
         type: "spek", 
-        weight: 1.1,
+        weight: 1.05,
         data: parseInt('00000011', 2), 
         content: "&ominus;", // circle with -
         formula: (val) => { 
@@ -17,7 +17,7 @@ const spekOps = {
         // a1 combines w/a2 to form a
         name: "spk-a2", 
         type: "spek",
-        weight: 1.1, 
+        weight: 1.05, 
         data: parseInt('00000010', 2),
         content: "&oast;", // circle with asterisk
         formula: (val) => { 
@@ -31,7 +31,7 @@ const spekOps = {
         // b1 combines w/b2 to form b
         name: "spk-b1", 
         type: "spek",
-        weight: 1.1, 
+        weight: 1.05, 
         data: parseInt('00001100', 2),
         content: "&minusb;", // square with dash
         formula: (val) => { 
@@ -73,7 +73,7 @@ const spekOps = {
         // c1 combines w/c2 to form c
         name: "spk-c2", 
         type: "spek",
-        weight: 1.1, 
+        weight: 1.05, 
         data: parseInt('00100000', 2),
         content: "&ocir;", // circle with ring
         formula: (val) => { 
@@ -101,7 +101,7 @@ const spekOps = {
         // d2 can combine w/d1 to form d OR w/x to form e
         name: "spk-d2", 
         type: "spek",
-        weight: 1.1, 
+        weight: 1.05, 
         data: parseInt('10000100', 2),
         content: "&plusb;", // square with +
         formula: (val) => { 
@@ -115,7 +115,7 @@ const spekOps = {
         // x is very ractive: x + d1 = p, x + d2 = e
         name: "spk-x", 
         type: "spek",
-        weight: 1.2, 
+        weight: 1.1, 
         data: parseInt('11000001', 2),
         content: "&otimes;", // circle with X
         formula: (val) => { 
@@ -128,7 +128,7 @@ const spekOps = {
     "spk-g1": { 
         name: "spk-g1", 
         type: "spek",
-        weight: 1.05, 
+        weight: 1.02, 
         data: -1,
         content: "&trie;", // equal with triangle
         formula: (val) => { 
@@ -141,7 +141,7 @@ const spekOps = {
     "spk-g2": { 
         name: "spk-g2", 
         type: "spek",
-        weight: 1.08, 
+        weight: 1.03, 
         data: -1,
         content: "&eDot;", // equal with dots 
         formula: (val) => { 
@@ -154,7 +154,7 @@ const spekOps = {
     "spk-g3": { 
         name: "spk-g3", 
         type: "spek",
-        weight: 1.1,  
+        weight: 1.08,  
         data: -1,
         content: "&epar;", // equal with 2 crosses (hash) 
         formula: (val) => { 

@@ -2,7 +2,7 @@ const ortOps = {
     "ort-a": { 
         name: "ort-a", 
         type: "ort", 
-        weight: 1.5,
+        weight: 1.3,
         data: "a",
         content: "&forall;", // upside down A
         formula: () => { 
@@ -20,7 +20,7 @@ const ortOps = {
     "ort-b": { 
         name: "ort-b", 
         type: "ort",
-        weight: 1.5,
+        weight: 1.3,
         data: "b", 
         content: "&bowtie;", // bowtie
         formula: () => {
@@ -38,7 +38,7 @@ const ortOps = {
     "ort-c": { 
         name: "ort-c", 
         type: "ort",
-        weight: 1.5,
+        weight: 1.3,
         data: "c", 
         content: "&comp;", // long C
         formula: () => {
@@ -92,7 +92,7 @@ const ortOps = {
     "ort-e": { 
         name: "ort-e", 
         type: "ort",
-        weight: 1.3,
+        weight: 1.2,
         data: "e", 
         content: "&sum;", // summation
         formula: () => { 
