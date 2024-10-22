@@ -1,4 +1,4 @@
-function LVector(x,y,dir,vel,pType="",pID="") {
+function LFVector(x,y,dir,vel,pType="",pID="") {
     let me = this;
     me.x = x;
     me.y = y;

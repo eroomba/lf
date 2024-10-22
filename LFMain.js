@@ -1,0 +1,258 @@
+let lf;
+let mousePosX = 0;
+let mousePosY = 0;
+
+const gVars = {
+    braneCount: 3,
+    seedCount: 3,
+    spekColl: false,
+    minStrandLen: 14,
+    maxItems: 5000
+}
+
+function LF() {
+    let me = this;
+    me.step = 0;
+    me.obj = document.getElementById("main"); 
+    me.consoleset = {
+        status: document.getElementById("statusDisp"),
+        statusIcon: document.getElementById("statusIcon"),
+        out: document.getElementById("outDisp")
+    };
+    me.w = window.innerWidth;
+    me.h = window.innerHeight;
+    me.idc = 0;
+    me.initMode = "chaos";
+    me.marker = {
+        obj: document.getElementById("marker"),
+        track: null
+    };
+    me.chaosOps = {
+        dripRate: 0.4,
+        puffRate: 0.5,
+        bombRate: 0.8
+    };
+    me.items = [];
+    me.iHash = {};
+    me.additems = [];
+    me.extras = {};
+    me.debugDisplay = false;
+    me.events = [];
+    me.behaviors = new LFCodedBehaviors();
+    me.hash = new LFHash(me.w,me.h,50);
+    me.remEncode = (itemID) => {
+        if (itemID in me.items) {
+            me.hash.remove(itemID, me.items[itemID].pos.x, me.items[itemID].pos.y);
+            me.items[itemID].pos.hash = "";
+        }
+    };
+    me.query = (item, type, qops = {}) => {
+        if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
+            let qX = item.pos.x;
+            let qY = item.pos.y;
+            let qR = null;
+            if (item.core != undefined) qR = item.core.range;
+            if (qops != undefined && qops != null) {
+                if ("x" in qops) qX = qops["x"];
+                if ("y" in qops) qX = qops["y"];
+                if ("range" in qops) qR = qops["range"];
+            }
+
+            if (qR != null) return me.hash.query(item,type,{ range: qR });
+        }
+        return [];
+    };
+    me.stop = () => {
+        clearTimeout(rt);
+        running = false;
+        lf.consoleset.statusIcon.style.color = "red";
+        lf.consoleset.status.innerHTML = "stopped";
+        console.log("stopped at step " + me.step);
+    };
+    me.roll = () => {
+        me.hash.roll(me.items);
+    };
+    me.refresh = () => {
+        for (let ih = me.items.length - 1; ih >= 0; ih--) {
+            if (!me.items[ih].active)
+                me.removeItem(me.items[ih].id);
+        }
+        for (let ih = 0; ih < me.items.length; ih++) {
+            me.iHash[me.items[ih].id] = ih;
+        }
+    };
+    me.generateID = () => {
+        return "i-" + me.idc++ + "-" + Math.floor(Math.random() * 10000000);
+    };
+    me.addItem = (item) => {
+        if (item.active && !(item.id in me.iHash)) {
+            item.gen = me.step;
+            me.items.push(item);
+            me.iHash[item.id] = me.items.length - 1;
+            me.obj.append(item.obj);
+            return true;
+        }
+
+        return false;
+    };
+    me.queueItem = (item) => {
+        if (item.active) me.additems.push(item);
+    };
+    me.removeItem = (itemID) => {
+        me.remEncode(itemID);
+        let rmItem = document.getElementById(itemID);
+        if (rmItem) rmItem.remove();
+        if (itemID in me.iHash) {
+            me.items.splice(me.iHash[itemID],1);
+            delete me.iHash[itemID];
+        }
+    };
+    me.inittests = (test = "") => {
+        switch (test) {
+
+        }
+    };
+    me.runtests = (test = "") => {
+        switch (test) {
+            case "single":
+
+                if (document.querySelectorAll(".proto").length == 0) {
+                    let mvCodes = ["aaa","bbb","bba","bbc","cba","cbb","cbc","cbd"]; 
+                    let mvDynamic = {
+                        codes: mvCodes
+                    };
+
+                    let nVel = 0;
+                    let nDir = Math.floor(Math.random() * 360);
+
+                    let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfd.proto.protoS, mvDynamic, {}, { init: true, complex: 1 });
+                    me.queueItem(mvPro);
+                }
+
+                break;
+        }
+    };
+    me.init = () => {
+        me.inittests();
+        me.refresh();
+    };
+    me.update = () => {
+        me.additems.length = 0;
+
+        me.roll();
+
+        for (let ev = me.events.length - 1; ev >= 0; ev--) {
+            if (typeof me.events[ev].run === 'function') me.events[ev].run(me.events[ev].params);
+            me.events.splice(ev,1); 
+        }
+
+        me.runtests("single");
+
+        Object.keys(me.extras).forEach((exk) => {
+            for (let ex = me.extras[exk].length - 1; ex >= 0; ex--) {
+                me.extras[exk][ex].update();
+                if (!me.extras[exk][ex].active) {
+                    if (me.extras[exk][ex].obj != null) me.extras[exk][ex].obj.remove();
+                    me.extras[exk].splice(ex,1);
+                }
+            }
+        });
+
+        let iCount = 0;
+        let aiCount = 0;
+        me.items.forEach((it) => {
+            iCount++;
+            it.update();
+            if (it.active) aiCount++;
+        });
+
+        me.refresh();
+
+        me.additems.forEach((ai) => {
+            aiCount++;
+            iCount++;
+            me.addItem(ai);
+        });
+
+        me.additems.length = 0;
+        let cOut = "s:" + me.step + "<br/>i:" + iCount + " (" + aiCount + ") / " + gVars.maxItems;
+        me.consoleset.out.innerHTML = cOut;
+        me.step++;
+    };
+}
+
+let rt = null;
+let running = false;
+let lastClick = new Date();
+
+function run() {
+    clearTimeout(rt);
+    lf.consoleset.statusIcon.style.color = "green";
+    lf.consoleset.status.innerHTML = "running";
+    lf.update();
+    if (running) rt = setTimeout(run, 50);
+}
+
+addEventListener("DOMContentLoaded", () => {
+    lf = new LF();
+    lf.init();
+});
+
+addEventListener("mouseup", (event) => {
+    let thisClick = new Date();
+    if (event.button == 0 && thisClick - lastClick <= 300) {
+        if (lf.initMode == "bomb" || lf.initMode == "r-bomb") {
+            lfd.xtra.bomb(event.clientX, event.clientY);
+        }
+        else if (lf.initMode == "r-puff") {
+            lf.events.push({run: function(params) {
+                lfd.xtra.puff(params.x, params.y);
+            }, params: { x: event.clientX, y: event.clientY }});
+        }
+        else if (lf.initMode == "t-puff") {
+            lf.events.push({run: function(params) {
+                lfd.xtra.puff(params.x, params.y);
+            }, params: { x: event.clientX, y: event.clientY }});
+        }
+        else if (lf.initMode == "chaos") {
+            lf.events.push({run: function(params) {
+                lfd.xtra.drip(params.x, params.y);
+            }, params: { x: event.clientX, y: event.clientY }});
+        }
+    }
+    lastClick = thisClick;
+});
+
+addEventListener("keyup", (event) => {
+    //if (event.code.toLowerCase() == 'space') lf.update();
+    if (event.code.toLowerCase() == 'space') {
+        if (running) {
+            lf.stop();
+        }
+        else {
+            console.log("running step " + lf.step);
+            running = true;
+            run();
+        }
+    }
+    else if (event.code.toLocaleLowerCase() == "arrowright") {
+        lf.update();
+    }
+    else if (event.code.toLocaleLowerCase() == "arrowdown") {
+        //lf.output();
+    }
+    else if (event.code.toLocaleLowerCase() == "arrowup") {
+        //lf.load();
+    }
+    else if (event.code.toLocaleLowerCase() == "arrowleft") {
+        // TODO
+    }
+    
+    if (event.key.toLocaleLowerCase() == "u") {
+        gVars.maxItems += 500;
+    }
+});
+
+addEventListener("mousemove", (event) => {
+    document.getElementById("mouseDisp").innerHTML = event.clientX + "," + event.clientY;
+});

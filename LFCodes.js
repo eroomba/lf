@@ -1,7 +1,7 @@
 let blkCount = 3;
 let replCount = 6;
 
-function codedBehaviors() {
+function LFCodedBehaviors() {
     let me = this;
     me.validOrts = ["a","b","c","d"];
     me.gens = {
@@ -13,15 +13,40 @@ function codedBehaviors() {
             // enable movement - see "bbb"
             if (!("speed" in item.genetic)) {
                 item.genetic["speed"] = Math.floor(Math.random() * 9) + 5;
+                item.obj.classList.add("mover");
+                let tail = item.obj.querySelector(".back");
+                if (tail != undefined) {
+                    let tailCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>";
+                    tail.innerHTML = tailCont;
+                }
             }
         },
         "aab": function(item) {
             // enable respiration 1 - see "aad"
-            if (!("respiration" in item.genetic)) item.genetic["respiration"] = ["spk-g1","spk-g2"];
+            if (!("respiration" in item.genetic)) {
+                item.genetic["respiration"] = ["spekG1","spekG2"];
+                item.obj.classList.add("breather");
+                let mid = item.obj.querySelector(".main");
+                if (mid != undefined) {
+                    let midCont = mid.innerHTML;
+                    midCont += "&Colon;";
+                    mid.innerHTML = midCont;
+                }
+            }
         },
         "aac": function(item) {
             // enable respiration 2 - see "aad"
-            if (!("respiration" in item.genetic)) item.genetic["respiration"] = ["spk-g2","spk-g1"];
+            if (!("respiration" in item.genetic)) {
+                item.genetic["respiration"] = ["spekG2","spekG1"];
+                item.obj.classList.add("breather");
+                let mid = item.obj.querySelector(".main");
+                if (mid != undefined) {
+                    let midCont = mid.innerHTML;
+                    if (midCont == "&horbar;") midCont = "&Colon;";
+                    else midCont += "&Colon;";
+                    mid.innerHTML = midCont;
+                }
+            }
         },
         "aad": function(item) {
             // respirate - enable see "aab"
@@ -33,7 +58,7 @@ function codedBehaviors() {
 
                     let r1 = [];
                     spks.forEach((sp) => {
-                        if (sp.ops.name == resp[0] && r1.length <= 2) r1.push(sp);
+                        if (sp.core.subtype == resp[0] && r1.length <= 2) r1.push(sp);
                     });
 
                     if (r1.length > 0) {
@@ -42,7 +67,7 @@ function codedBehaviors() {
                         for (let r2 = 0; r2 < count; r2++) {
                             let nDir =  Math.floor(Math.random() * 360);
                             let nVel = Math.floor(Math.random() * 6) + 3;
-                            let nSp = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), spekOps[resp[1]], { gen: lf.step });
+                            let nSp = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), lfd.spek[resp[1]], { gen: lf.step });
                             lf.queueItem(nSp);
                             let lifeAdd = 1;
                             if (resp[0] == "spk-g2") lifeAdd = 2;
@@ -96,14 +121,21 @@ function codedBehaviors() {
             // enable digestion 1 - see "bbc"
             if (!("digestion" in item.genetic)) {
                 let dOps = {
-                    "snp-ex": Math.floor(Math.random() * 5) + 5,
-                    "seed": Math.floor(Math.random() * 15) + 5
+                    "snipEx": Math.floor(Math.random() * 5) + 5,
+                    "struckSeed": Math.floor(Math.random() * 15) + 5
                 };
                 item.genetic["digestion"] = {
                     weights: dOps,
                     count: 0,
                     gut: []
                 };
+
+                item.obj.classList.add("eater");
+                let mouth = item.obj.querySelector(".front");
+                if (mouth != undefined) {
+                    let mouthCont = "<div class=\"mouth\"><span class=\"open\">&sum;</span><span class=\"closed\">O</span><div>";
+                    mouth.innerHTML = mouthCont;
+                }
             }
         },
         "bbc": function(item) {
@@ -122,13 +154,13 @@ function codedBehaviors() {
                         if (isDig) {
                             switch (digGut[0].type) {
                                 case "snip":
-                                    snipDecay(digGut[0].name, digGut[0].code, item.pos);
+                                    lfd.snip.decay(digGut[0].subtype, digGut[0].code, item.pos);
                                     break;
                                 case "struck":
-                                    struckDecay(digGut[0].name, item.pos)
+                                    lfd.struck.decay(digGut[0].subtype, item.pos);
                                     break;
                             }
-                            let addV = dWeights[digGut[0].name];
+                            let addV = dWeights[digGut[0].subtype];
                             item.life = item.life + addV > 100 ? 100 : item.life + addV;
                             item.genetic["digestion"]["gut"] = [];
                             item.obj.classList.remove("eating");
@@ -138,14 +170,14 @@ function codedBehaviors() {
                             let fd = lf.query(item, null, { range: qR });
 
                             fd.forEach((fItem) => {
-                                if (fItem.ops.name in dWeights && digGut.length == 0) {
+                                if (fItem.core.subtype in dWeights && digGut.length == 0) {
                                     let des = fItem.pos.subtract(item.pos);
 
                                     if (Math.abs(des.dir) < 30 || des.magnitude() < item.ops.range / 2) {
-                                        item.genetic["digestion"]["count"] = item.genetic["digestion"]["weights"][fItem.ops.name];
+                                        item.genetic["digestion"]["count"] = item.genetic["digestion"]["weights"][fItem.core.subtype];
                                         let fCode = "";
-                                        if (fItem.ops.type == "snip") fCode = fItem.dynamic["code"];
-                                        item.genetic["digestion"]["gut"].push({type:fItem.ops.type,name:fItem.ops.name,code:fCode});
+                                        if (fItem.core.type == "snip") fCode = fItem.dynamic["code"];
+                                        item.genetic["digestion"]["gut"].push({type:fItem.core.type,subtype:fItem.core.subtype,code:fCode});
                                         item.life++;
                                         fItem.deactivate();
                                         item.obj.classList.add("eating");
@@ -159,7 +191,17 @@ function codedBehaviors() {
         },
         "bab": function(item) {
             // enable chem - see "bac"
-            if (!("chem" in item.genetic)) item.genetic["chem"] = 0;
+            if (!("chem" in item.genetic)) {
+                item.genetic["chem"] = 0;
+                item.obj.classList.add("chem");
+                let mid = item.obj.querySelector(".main");
+                if (mid != undefined) {
+                    let midCont = mid.innerHTML;
+                    if (midCont == "&horbar;") midCont = "&divonx;";
+                    else midCont += "&divonx;";
+                    mid.innerHTML = midCont;
+                }
+            }
         },
         "bac": function(item) {
             // chem - enable see "bab"
@@ -169,7 +211,7 @@ function codedBehaviors() {
                     let g2s = lf.query(item,"spek");
 
                     g2s.forEach((g2) => {
-                        if (g2.ops.name == "spk-g3" && item.genetic["chem"] < 2) {
+                        if (g2.core.subtype == "spekG3" && item.genetic["chem"] < 2) {
                             item.genetic["chem"]++;
                             g2.deactivate();
                         }
@@ -178,7 +220,7 @@ function codedBehaviors() {
                     if (item.genetic["chem"] == 2) {
                         let nDir = Math.floor(Math.random() * 360);
                         let nVel = Math.floor(Math.random() * 10) + 5;
-                        let nG1 = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), spekOps["spk-x"], { gen: lf.step });
+                        let nG1 = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), lfd.spek["spekX"], { gen: lf.step });
 
                         item.genetic["chem"] = 0;
                         item.life = item.life + 10 > 100 ? 100 : item.life + 10;
@@ -220,21 +262,21 @@ function codedBehaviors() {
                     let minD = null;
                     item.genetic["perception"]["found"].forEach((sk) => {
                         if ("digestion" in item.genetic && item.genetic["digestion"]["count"] == 0) {
-                            if (sk.ops.name in item.genetic["digestion"]["weights"]) {
+                            if (sk.core.subtype in item.genetic["digestion"]["weights"]) {
                                 let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
                                 if (item.genetic["seek"]["target"] == null) { minD = dD; item.genetic["seek"]["target"] = sk; }
                                 else if (dD < minD) { minD = dD; item.genetic["seek"]["target"] = sk; }
                             }
                         }
                         if ("chem" in item.genetic && item.genetic["chem"] < 2) {
-                            if (sk.ops.name == "spk-g3") {
+                            if (sk.core.subtype == "spekG3") {
                                 let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
                                 if (item.genetic["seek"]["target"] == null) { minD = dD; item.genetic["seek"]["target"] = sk; }
                                 else if (dD < minD) { minD = dD; item.genetic["seek"]["target"] = sk; }
                             }
                         }
                         if ("respiration" in item.genetic) {
-                            if (sk.ops.name == item.genetic["respiration"][0]) {
+                            if (sk.core.subtype == item.genetic["respiration"][0]) {
                                 let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
                                 if (item.genetic["seek"]["target"] == null) { minD = dD; item.genetic["seek"]["target"] = sk; }
                                 else if (dD < minD) { minD = dD; item.genetic["seek"]["target"] = sk; }
@@ -259,8 +301,8 @@ function codedBehaviors() {
             if (item.complex >= 1) {
                 if (!("storage" in item.genetic)) {
                     item.genetic["storage"] = { "max": Math.floor(Math.random() * 20) + 10 };
-                    item.dynamic["storage"] = { "snp-blk": 0, "snp-ex": 0 };
-                    Object.keys(ortOps).forEach((ky) => {
+                    item.dynamic["storage"] = { "snipBlk": 0, "snipEx": 0 };
+                    Object.keys(ldf.ort).forEach((ky) => {
                         item.dynamic["storage"][ky] = 0;
                     });
                 }
@@ -276,18 +318,18 @@ function codedBehaviors() {
         // code starting with d does not combine into strands
         "ddd": function(item) {
             // trigger replication
-            if (item.ops.type == "snip") {
-                let oths = lf.query(item, null, { range: item.ops.range * 2 });
+            if (item.core.type == "snip") {
+                let oths = lf.query(item, null, { range: item.core.range * 2 });
 
                 oths.forEach((oth) => {
 
-                    if (oth.ops.type == "strand") {
+                    if (oth.core.type == "strand") {
 
                         let snps = lf.query(oth, "snip");
         
                         let blks = [];
                         snps.forEach((snp) => {
-                            if (snp.ops.name == "snp-blk" && blks.length <= 2) blks.push(snp);
+                            if (snp.core.subtype == "snipBlk" && blks.length <= 2) blks.push(snp);
                         });
         
                         if (blks.length == replCount) {
@@ -296,7 +338,7 @@ function codedBehaviors() {
                             let nDir2 = nDir - 180;
                             let nVel = Math.floor(Math.random() * 10) + 5;
 
-                            let nStrand = new LItem(new LVector(oth.pos.x, oth.pos.y, nDir, nVel), strandOps, { gen: lf.step, codes: oth.dynamic["codes"].slice(), genetic: JSON.parse(JSON.stringify(oth.genetic)) });
+                            let nStrand = new LItem(new LVector(oth.pos.x, oth.pos.y, nDir, nVel), ldf.strand.strand, { gen: lf.step, codes: oth.dynamic["codes"].slice(), genetic: JSON.parse(JSON.stringify(oth.genetic)) });
                             oth.pos.dir = nDir2;
                             oth.pos.vel = nVel;
                             lf.queueItem(nStrand);
@@ -313,7 +355,7 @@ function codedBehaviors() {
             let parts = lf.query(item);
             if (!("parts" in item.dynamic)) item.dynamic["parts"] = { "p":0 };
             for (let p = 0; p < parts.length; p++) {
-                if (parts[p].ops.type == "ort" && parts[p].ops.data == "p" && item.dynamic["parts"]["p"] < 3) {
+                if (parts[p].core.type == "ort" && parts[p].core.data == "p" && item.dynamic["parts"]["p"] < 3) {
                     item.dynamic["parts"]["p"]++;
                     parts[p].deactivate();
                 }
@@ -323,7 +365,7 @@ function codedBehaviors() {
                 parts.forEach((pt) => { pt.deactivate(); });
                 let nDir = Math.floor(Math.random() * 360);
                 let nVel = Math.floor(Math.random() * 10) + 5;
-                let nsnip = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), snipOps["snp-blk"], { gen: lf.step, code: snipVal, len: snipVal.length });
+                let nsnip = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), ldf.snip.snipBlk, { gen: lf.step, code: snipVal, len: snipVal.length });
                 lf.queueItem(nsnip);
                 item.dynamic["parts"]["p"] = 0;
                 if (item.complex == 0) item.obj.innerHTML = "&int;";
