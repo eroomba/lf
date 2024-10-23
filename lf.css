@@ -54,51 +54,51 @@ body {
     opacity: 0.2;
 }
 
-.spek.spk-a1 {
+.spek.spek-a1 {
     color: #990000;
 }
 
-.spek.spk-a2 {
+.spek.spek-a2 {
     color: #330000;
 }
 
-.spek.spk-b1 {
+.spek.spek-b1 {
     color: #003300;
 }
 
-.spek.spk-b2 {
+.spek.spek-b2 {
     color: #339933;
 }
 
-.spek.spk-c1 {
+.spek.spek-c1 {
     color: #000066;
 }
 
-.spek.spk-c2 {
+.spek.spek-c2 {
     color: #3333CC;
 }
 
-.spek.spk-d1 {
+.spek.spek-d1 {
     color: #990099;
 }
 
-.spek.spk-d2 {
+.spek.spek-d2 {
     color: #FF66FF;
 }
 
-.spek.spk-x {
+.spek.spek-x {
     color: #CC9900;
 }
 
-.spek.spk-g1 {
+.spek.spek-g1 {
     color: #99DDFF;
 }
 
-.spek.spk-g2 {
+.spek.spek-g2 {
     color: #99FF99;
 }
 
-.spek.spk-g3 {
+.spek.spek-g3 {
     color: #339966;
 }
 
@@ -143,42 +143,42 @@ body {
     color: #666666;
 }
 
-.snip.snp-pre {
+.snip.snip-pre {
     color: #3399CC;
     font-size: 0.8rem;
 }
 
-.snip.snp-go {
+.snip.snip-go {
     color: #9933CC;
 }
 
-.snip.snp-blk {
+.snip.snip-blk {
     color: #FF9900;
     font-size: 0.75rem;
 }
 
-.snip.snp-ex {
+.snip.snip-ex {
     color: #669900;
     font-size: 1rem;
 }
 
-.snip.snp-ddd {
+.snip.snip-ddd {
     color: #FF0000;
     font-size: 0.9rem;
 }
 
-.snip.snp-daa,
-.snip.snp-dab,
-.snip.snp-dac,
-.snip.snp-dad,
-.snip.snp-dbb,
-.snip.snp-dba,
-.snip.snp-dbc,
-.snip.snp-dbd,
-.snip.snp-dcc,
-.snip.snp-dca,
-.snip.snp-dcb,
-.snip.snp-dcd {
+.snip.snip-daa,
+.snip.snip-dab,
+.snip.snip-dac,
+.snip.snip-dad,
+.snip.snip-dbb,
+.snip.snip-dba,
+.snip.snip-dbc,
+.snip.snip-dbd,
+.snip.snip-dcc,
+.snip.snip-dca,
+.snip.snip-dcb,
+.snip.snip-dcd {
     color: #FFAA00;
     font-size: 0.9rem;
 }
@@ -188,7 +188,7 @@ body {
     font-size: 0.75rem;
 }
 
-.snip.snp-dxx
+.snip.snip-dxx
 {
     color: #00CCCC;
 }

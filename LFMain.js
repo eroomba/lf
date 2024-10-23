@@ -10,6 +10,169 @@ const gVars = {
     maxItems: 5000
 }
 
+function PNoise()  {
+    let me = this;
+    me.grid = [];
+    me.nodes = 4;   
+    me.gradients = {};
+    me.memory = {};
+    me.startx = 0.1;
+    me.starty = 0.1;
+    
+    me.rVector = () => {
+        let th = Math.random() * 2 * Math.PI;
+        return { x: Math.cos(th), y: Math.sin(th) };
+    };
+
+    me.dpGrid = (x,y,x2,y2) => {
+        let g1 = me.gradients[[x2,y2]] ? me.gradients[[x2,y2]] : me.rVector();
+        me.gradients[[x2,y2]] = g1;
+        let d1 = { x: x - x2, y: y - y2 };
+        return d1.x * g1.x + d1.y * g1.y;
+    };
+
+    me.smooth = (x) => {
+        return 6*x**5 - 15*x**4 + 10*x**3;
+    };
+
+    me.interp = (x, a, b) => {
+        return a + me.smooth(x) * (b-a);
+    };
+
+    me.get = (x,y) => {
+        if (me.memory.hasOwnProperty([x,y])) return me.memory[[x,y]];
+        let xf = Math.floor(x);
+        let yf = Math.floor(y);
+        //interpolate
+        let tl = this.dpGrid(x, y, xf,   yf);
+        let tr = this.dpGrid(x, y, xf+1, yf);
+        let bl = this.dpGrid(x, y, xf,   yf+1);
+        let br = this.dpGrid(x, y, xf+1, yf+1);
+        let xt = this.interp(x-xf, tl, tr);
+        let xb = this.interp(x-xf, bl, br);
+        let v = this.interp(y-yf, xt, xb);
+        this.memory[[x,y]] = v;
+        return v;
+    };
+
+    me.next = () => {
+        me.startx += 0.1;
+        me.starty += 0.1;
+        return me.get(me.startx,me.starty) * 0.5 + 0.5;
+    };
+
+    for (let i = 0; i < me.nodes * me.nodes; i++) {
+        me.grid.push(me.rVector());
+    }
+}
+
+const LFEngine = {
+    noise: new PNoise(),
+    default: {
+        init: function() {
+
+        },
+        run: function() {
+
+        }
+    },
+    chaos: {
+        init: function() {
+            let jj = 0;
+            let spks = [];
+            switch (lf.formation) {
+                case "haze":
+                    Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
+
+                    for (let ii = 0; ii < 500; ii++) {
+                        let nX = Math.floor(Math.random() * lf.w);
+                        let nY = Math.floor(Math.random() * lf.h);
+                        lf.haze.add(nX, nY, spks[jj], 1);
+
+                        jj = jj + 1 < spks.length ? jj + 1 : 0;
+                    }
+
+                    break;
+                default:
+                    Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
+                    for (let ii = 0; ii < 500; ii++) {
+                        let nX = Math.floor(Math.random() * lf.w);
+                        let nY = Math.floor(Math.random() * lf.h);
+                        let nDir = Math.floor(Math.random() * 360);
+                        let nSpek = new LFItem(new LFVector(nX, nY, nDir, 0), lfcore.spek[spks[jj]], {gen: lf.step});
+                        lf.addItem(nSpek);
+
+                        jj = jj + 1 < spks.length ? jj + 1 : 0;
+                    }
+
+                    break;
+            }
+        },
+        run: function() {
+
+            if (Math.random() > 0.6 && lf.items.length < gVars.maxItems) {
+                lfcore.xtra.puff();
+            }
+
+            if (Math.random() > 0.9 && lf.items.length < gVars.maxItems) {
+                lfcore.xtra.bomb();
+            }
+
+            if (lf.engine.noise.next() > 0.5) {
+                lfcore.xtra.drip();
+            }
+        }
+    },
+    single: {
+        init: function() {
+
+        },
+        run: function() {
+            if (document.querySelectorAll(".proto").length == 0) {
+                let mvCodes = ["aaa","bbb","bba","bbc","cba","cbb","cbc","cbd"]; 
+                let mvDynamic = {
+                    codes: mvCodes
+                };
+
+                let nVel = 0;
+                let nDir = Math.floor(Math.random() * 360);
+
+                let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfcore.proto.protoS, mvDynamic, {}, { init: true, complex: 1 });
+                lf.queueItem(mvPro);
+            }
+        }
+    },
+    hazetest: {
+        init: function() {
+            let jj = 0;
+            let spks = [];
+            
+            switch (lf.formation) {
+                case "haze":
+                    Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
+
+                    for (let ii = 0; ii < 500; ii++) {
+                        let nX = Math.floor(Math.random() * lf.w);
+                        let nY = Math.floor(Math.random() * lf.h);
+                        lf.haze.add(nX, nY, spks[jj], 1);
+
+                        jj = jj + 1 < spks.length ? jj + 1 : 0;
+                    }
+
+                    break;
+            }
+
+        },
+        run: function() {
+            lf.haze.update();
+
+            if (lf.engine.noise.next() > 0.5) {
+                lfcore.xtra.drip();
+            }
+        }
+    }
+};
+
 function LF() {
     let me = this;
     me.step = 0;
@@ -40,6 +203,10 @@ function LF() {
     me.events = [];
     me.behaviors = new LFCodedBehaviors();
     me.hash = new LFHash(me.w,me.h,50);
+    me.haze = new LFHaze(me.w, me.h, 100);
+    me.formation = "haze"; //"spek";
+    me.runmode = "chaos";
+    me.engine = LFEngine;
     me.remEncode = (itemID) => {
         if (itemID in me.items) {
             me.hash.remove(itemID, me.items[itemID].pos.x, me.items[itemID].pos.y);
@@ -107,46 +274,24 @@ function LF() {
             delete me.iHash[itemID];
         }
     };
-    me.inittests = (test = "") => {
-        switch (test) {
-
-        }
-    };
-    me.runtests = (test = "") => {
-        switch (test) {
-            case "single":
-
-                if (document.querySelectorAll(".proto").length == 0) {
-                    let mvCodes = ["aaa","bbb","bba","bbc","cba","cbb","cbc","cbd"]; 
-                    let mvDynamic = {
-                        codes: mvCodes
-                    };
-
-                    let nVel = 0;
-                    let nDir = Math.floor(Math.random() * 360);
-
-                    let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfd.proto.protoS, mvDynamic, {}, { init: true, complex: 1 });
-                    me.queueItem(mvPro);
-                }
-
-                break;
-        }
-    };
     me.init = () => {
-        me.inittests();
+        if (me.runmode in me.engine) me.engine[me.runmode].init();
+        else me.engine.default.init();
         me.refresh();
     };
     me.update = () => {
         me.additems.length = 0;
 
         me.roll();
+        if (me.formation == "haze") me.haze.update();
 
         for (let ev = me.events.length - 1; ev >= 0; ev--) {
             if (typeof me.events[ev].run === 'function') me.events[ev].run(me.events[ev].params);
             me.events.splice(ev,1); 
         }
 
-        me.runtests("single");
+        if (me.runmode in me.engine) me.engine[me.runmode].run();
+        else me.engine.default.run();
 
         Object.keys(me.extras).forEach((exk) => {
             for (let ex = me.extras[exk].length - 1; ex >= 0; ex--) {
@@ -201,22 +346,9 @@ addEventListener("DOMContentLoaded", () => {
 addEventListener("mouseup", (event) => {
     let thisClick = new Date();
     if (event.button == 0 && thisClick - lastClick <= 300) {
-        if (lf.initMode == "bomb" || lf.initMode == "r-bomb") {
-            lfd.xtra.bomb(event.clientX, event.clientY);
-        }
-        else if (lf.initMode == "r-puff") {
+        if (lf.runmode == "chaos" || lf.runmode == "hazetest") {
             lf.events.push({run: function(params) {
-                lfd.xtra.puff(params.x, params.y);
-            }, params: { x: event.clientX, y: event.clientY }});
-        }
-        else if (lf.initMode == "t-puff") {
-            lf.events.push({run: function(params) {
-                lfd.xtra.puff(params.x, params.y);
-            }, params: { x: event.clientX, y: event.clientY }});
-        }
-        else if (lf.initMode == "chaos") {
-            lf.events.push({run: function(params) {
-                lfd.xtra.drip(params.x, params.y);
+                lfcore.xtra.drip(params.x, params.y);
             }, params: { x: event.clientX, y: event.clientY }});
         }
     }
@@ -235,17 +367,26 @@ addEventListener("keyup", (event) => {
             run();
         }
     }
-    else if (event.code.toLocaleLowerCase() == "arrowright") {
+    else if (event.code.toLowerCase() == "arrowright") {
         lf.update();
     }
-    else if (event.code.toLocaleLowerCase() == "arrowdown") {
+    else if (event.code.toLowerCase() == "arrowdown") {
         //lf.output();
     }
-    else if (event.code.toLocaleLowerCase() == "arrowup") {
+    else if (event.code.toLowerCase() == "arrowup") {
         //lf.load();
     }
-    else if (event.code.toLocaleLowerCase() == "arrowleft") {
+    else if (event.code.toLowerCase() == "arrowleft") {
         // TODO
+    }
+    else if (event.key.toLowerCase() == "o") {
+        lf.events.push({run: function(params) {
+            lfcore.xtra.drip(params.x, params.y);
+        }, params: { x: lf.w / 2, y: lf.h / 2 }});
+    }
+    else if (event.key.toLowerCase() == "h") {
+        console.log("haze on");
+        lf.haze.show();
     }
     
     if (event.key.toLocaleLowerCase() == "u") {

@@ -13,39 +13,18 @@ function LFCodedBehaviors() {
             // enable movement - see "bbb"
             if (!("speed" in item.genetic)) {
                 item.genetic["speed"] = Math.floor(Math.random() * 9) + 5;
-                item.obj.classList.add("mover");
-                let tail = item.obj.querySelector(".back");
-                if (tail != undefined) {
-                    let tailCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>";
-                    tail.innerHTML = tailCont;
-                }
             }
         },
         "aab": function(item) {
             // enable respiration 1 - see "aad"
             if (!("respiration" in item.genetic)) {
                 item.genetic["respiration"] = ["spekG1","spekG2"];
-                item.obj.classList.add("breather");
-                let mid = item.obj.querySelector(".main");
-                if (mid != undefined) {
-                    let midCont = mid.innerHTML;
-                    midCont += "&Colon;";
-                    mid.innerHTML = midCont;
-                }
             }
         },
         "aac": function(item) {
             // enable respiration 2 - see "aad"
             if (!("respiration" in item.genetic)) {
                 item.genetic["respiration"] = ["spekG2","spekG1"];
-                item.obj.classList.add("breather");
-                let mid = item.obj.querySelector(".main");
-                if (mid != undefined) {
-                    let midCont = mid.innerHTML;
-                    if (midCont == "&horbar;") midCont = "&Colon;";
-                    else midCont += "&Colon;";
-                    mid.innerHTML = midCont;
-                }
             }
         },
         "aad": function(item) {
@@ -54,26 +33,32 @@ function LFCodedBehaviors() {
                 if ("respiration" in item.genetic && Array.isArray(item.genetic["respiration"])) {
                     let resp = item.genetic["respiration"];
 
-                    let spks = lf.query(item,"spek");
+                    switch (lf.formation) {
+                        default:
 
-                    let r1 = [];
-                    spks.forEach((sp) => {
-                        if (sp.core.subtype == resp[0] && r1.length <= 2) r1.push(sp);
-                    });
+                            let spks = lf.query(item,"spek");
 
-                    if (r1.length > 0) {
-                        let count = r1.length;
-                        r1.forEach((r) => { r.deactivate(); });
-                        for (let r2 = 0; r2 < count; r2++) {
-                            let nDir =  Math.floor(Math.random() * 360);
-                            let nVel = Math.floor(Math.random() * 6) + 3;
-                            let nSp = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), lfd.spek[resp[1]], { gen: lf.step });
-                            lf.queueItem(nSp);
-                            let lifeAdd = 1;
-                            if (resp[0] == "spk-g2") lifeAdd = 2;
-                            item.life = item.life + lifeAdd > 100 ? 100 : item.life + lifeAdd;
-                            console.log(item.id + " breathed!");
-                        } 
+                            let r1 = [];
+                            spks.forEach((sp) => {
+                                if (sp.core.subtype == resp[0] && r1.length <= 2) r1.push(sp);
+                            });
+
+                            if (r1.length > 0) {
+                                let count = r1.length;
+                                r1.forEach((r) => { r.deactivate(); });
+                                for (let r2 = 0; r2 < count; r2++) {
+                                    let nDir =  Math.floor(Math.random() * 360);
+                                    let nVel = Math.floor(Math.random() * 6) + 3;
+                                    let nSp = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.spek[resp[1]], { gen: lf.step });
+                                    lf.queueItem(nSp);
+                                    let lifeAdd = 1;
+                                    if (resp[0] == "spk-g2") lifeAdd = 2;
+                                    item.life = item.life + lifeAdd > 100 ? 100 : item.life + lifeAdd;
+                                    console.log(item.id + " breathed!");
+                                } 
+                            }
+
+                            break;
                     }
 
                 }
@@ -129,13 +114,6 @@ function LFCodedBehaviors() {
                     count: 0,
                     gut: []
                 };
-
-                item.obj.classList.add("eater");
-                let mouth = item.obj.querySelector(".front");
-                if (mouth != undefined) {
-                    let mouthCont = "<div class=\"mouth\"><span class=\"open\">&sum;</span><span class=\"closed\">O</span><div>";
-                    mouth.innerHTML = mouthCont;
-                }
             }
         },
         "bbc": function(item) {
@@ -154,10 +132,10 @@ function LFCodedBehaviors() {
                         if (isDig) {
                             switch (digGut[0].type) {
                                 case "snip":
-                                    lfd.snip.decay(digGut[0].subtype, digGut[0].code, item.pos);
+                                    lfcore.snip.decay(digGut[0].subtype, digGut[0].code, item.pos);
                                     break;
                                 case "struck":
-                                    lfd.struck.decay(digGut[0].subtype, item.pos);
+                                    lfcore.struck.decay(digGut[0].subtype, item.pos);
                                     break;
                             }
                             let addV = dWeights[digGut[0].subtype];
@@ -166,14 +144,14 @@ function LFCodedBehaviors() {
                             item.obj.classList.remove("eating");
                         }
                         else {
-                            let qR = item.ops.range / 2;
+                            let qR = item.core.range / 2;
                             let fd = lf.query(item, null, { range: qR });
 
                             fd.forEach((fItem) => {
                                 if (fItem.core.subtype in dWeights && digGut.length == 0) {
                                     let des = fItem.pos.subtract(item.pos);
 
-                                    if (Math.abs(des.dir) < 30 || des.magnitude() < item.ops.range / 2) {
+                                    if (Math.abs(des.dir) < 30 || des.magnitude() < item.core.range / 2) {
                                         item.genetic["digestion"]["count"] = item.genetic["digestion"]["weights"][fItem.core.subtype];
                                         let fCode = "";
                                         if (fItem.core.type == "snip") fCode = fItem.dynamic["code"];
@@ -193,14 +171,6 @@ function LFCodedBehaviors() {
             // enable chem - see "bac"
             if (!("chem" in item.genetic)) {
                 item.genetic["chem"] = 0;
-                item.obj.classList.add("chem");
-                let mid = item.obj.querySelector(".main");
-                if (mid != undefined) {
-                    let midCont = mid.innerHTML;
-                    if (midCont == "&horbar;") midCont = "&divonx;";
-                    else midCont += "&divonx;";
-                    mid.innerHTML = midCont;
-                }
             }
         },
         "bac": function(item) {
@@ -208,23 +178,28 @@ function LFCodedBehaviors() {
             if (item.complex >= 2) {
                 if ("chem" in item.genetic) {
                     
-                    let g2s = lf.query(item,"spek");
+                    switch (lf.formation) {
+                        default:
+                            let g2s = lf.query(item,"spek");
 
-                    g2s.forEach((g2) => {
-                        if (g2.core.subtype == "spekG3" && item.genetic["chem"] < 2) {
-                            item.genetic["chem"]++;
-                            g2.deactivate();
-                        }
-                    });
+                            g2s.forEach((g2) => {
+                                if (g2.core.subtype == "spekG3" && item.genetic["chem"] < 2) {
+                                    item.genetic["chem"]++;
+                                    g2.deactivate();
+                                }
+                            });
 
-                    if (item.genetic["chem"] == 2) {
-                        let nDir = Math.floor(Math.random() * 360);
-                        let nVel = Math.floor(Math.random() * 10) + 5;
-                        let nG1 = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), lfd.spek["spekX"], { gen: lf.step });
+                            if (item.genetic["chem"] == 2) {
+                                let nDir = Math.floor(Math.random() * 360);
+                                let nVel = Math.floor(Math.random() * 10) + 5;
+                                let nG1 = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.spek["spekX"], { gen: lf.step });
 
-                        item.genetic["chem"] = 0;
-                        item.life = item.life + 10 > 100 ? 100 : item.life + 10;
-                        console.log("chemed!!");
+                                item.genetic["chem"] = 0;
+                                item.life = item.life + 10 > 100 ? 100 : item.life + 10;
+                                console.log("chemed!!");
+                            }
+
+                            break;
                     }
                 }
             }
@@ -233,7 +208,7 @@ function LFCodedBehaviors() {
             // enable perception - see "cbb"
             if (item.complex >= 2) {
                 if (!("perception" in item.genetic)) {
-                    item.genetic["perception"] = { ran: false, range: (Math.floor(Math.random() * 4) + 2) * item.ops.range, found: new Array() };
+                    item.genetic["perception"] = { ran: false, range: (Math.floor(Math.random() * 4) + 2) * item.core.range, found: new Array() };
                     //console.log("perception: " + item.genetic["perception"]["range"]);
                 }
             }
@@ -302,8 +277,8 @@ function LFCodedBehaviors() {
                 if (!("storage" in item.genetic)) {
                     item.genetic["storage"] = { "max": Math.floor(Math.random() * 20) + 10 };
                     item.dynamic["storage"] = { "snipBlk": 0, "snipEx": 0 };
-                    Object.keys(ldf.ort).forEach((ky) => {
-                        item.dynamic["storage"][ky] = 0;
+                    Object.keys(lfcore.ort).forEach((ky) => {
+                        if (ky.indexOf("ort") == 0) item.dynamic["storage"][ky] = 0;
                     });
                 }
             }
@@ -338,7 +313,7 @@ function LFCodedBehaviors() {
                             let nDir2 = nDir - 180;
                             let nVel = Math.floor(Math.random() * 10) + 5;
 
-                            let nStrand = new LItem(new LVector(oth.pos.x, oth.pos.y, nDir, nVel), ldf.strand.strand, { gen: lf.step, codes: oth.dynamic["codes"].slice(), genetic: JSON.parse(JSON.stringify(oth.genetic)) });
+                            let nStrand = new LFItem(new LFVector(oth.pos.x, oth.pos.y, nDir, nVel), lfcore.strand.strand, { gen: lf.step, codes: oth.dynamic["codes"].slice(), genetic: JSON.parse(JSON.stringify(oth.genetic)) });
                             oth.pos.dir = nDir2;
                             oth.pos.vel = nVel;
                             lf.queueItem(nStrand);
@@ -365,7 +340,7 @@ function LFCodedBehaviors() {
                 parts.forEach((pt) => { pt.deactivate(); });
                 let nDir = Math.floor(Math.random() * 360);
                 let nVel = Math.floor(Math.random() * 10) + 5;
-                let nsnip = new LItem(new LVector(item.pos.x, item.pos.y, nDir, nVel), ldf.snip.snipBlk, { gen: lf.step, code: snipVal, len: snipVal.length });
+                let nsnip = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip.snipBlk, { gen: lf.step, code: snipVal, len: snipVal.length });
                 lf.queueItem(nsnip);
                 item.dynamic["parts"]["p"] = 0;
                 if (item.complex == 0) item.obj.innerHTML = "&int;";

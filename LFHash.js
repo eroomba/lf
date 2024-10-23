@@ -37,8 +37,12 @@ function LFHash(w,h,sub) {
             let id = item.id;
             let qX = Math.floor(x / me.sub);
             let qY = Math.floor(y / me.sub);
-            for (let i = qX - 1; i <= qX + 1; i++) {
-                for (let j = qY - 1; j <= qY + 1; j++) {
+            let qSpanX = 1;
+            let qSpanY = 1;
+            while (r > me.sW * (qSpanX + 1)) qSpanX++;
+            while (r > me.sH * (qSpanY + 1)) qSpanY++;
+            for (let i = qX - qSpanX; i <= qX + qSpanX; i++) {
+                for (let j = qY - qSpanY; j <= qY + qSpanY; j++) {
                     let qIdx = (j * me.sW) + i;
                     if (qIdx >= 0 && qIdx < me.table.length) {
                         let sLog = false;

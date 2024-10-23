@@ -15,7 +15,7 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
     me.transformFill = "translateX(-50%) translateY(-50%) rotate(***deg)";
     me.update = () => {
         if (me.active) {
-            lfd[me.core.type].update(me);
+            lfcore[me.core.type].update(me);
         }
 
         me.obj.setAttribute("x", me.pos.x);
@@ -55,7 +55,7 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
                     nCont =  me.core.content;
                     let sCode = me.dynamic["code"];
                     nObj.setAttribute("scode", sCode);
-                    nObj.classList.add("snp-" + sCode);
+                    nObj.classList.add("snip-" + sCode);
                     break;
                 case 'strand':
                     let cStrS = me.dynamic["codes"].join(":");
@@ -69,15 +69,41 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
                     nCont = me.core.content;
                     break;
                 case 'proto':
-                    let cStrP = me.dynamic["codes"].join(":");
+                    let cStrP = ":" + me.dynamic["codes"].join(":") + ":";
                     nObj.setAttribute("code",cStrP);
-                    let midCont = "&horbar;";
+                    let midCont = "";
+                    let backCont = "";
+                    let frontCont = "";
 
-                    pHTML = "<div class=\"back\"></div>";
+                    if (cStrP.indexOf(":aaa:") > 0 && cStrP.indexOf(":bbb:") > 0) {
+                        nObj.classList.add("mover");
+                        backCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>"
+                    }
+
+                    if (cStrP.indexOf(":bac:") > 0 && cStrP.indexOf(":bbb:") > 0) {
+                        nObj.classList.add("chem");
+                        if (me.complex >= 2) {
+                            midCont += "&divonx;";
+                        }
+                    }
+
+                    if (cStrP.indexOf(":bba:") > 0 && cStrP.indexOf(":bbc:") > 0) {
+                        nObj.classList.add("eater");
+                        frontCont = "<div class=\"mouth\"><span class=\"open\">&sum;</span><span class=\"closed\">O</span><div>";
+                    }
+
+                    if (cStrP.indexOf(":aab:") > 0 && (cStrP.indexOf(":aac:") > 0 || cStrP.indexOf(":aad:") > 0)) {
+                        nObj.classList.add("breather");
+                        midCont += "&Colon;"
+                    }
+
+                    if (midCont.length == 0) midCont = "&horbar;";
+
+                    pHTML = "<div class=\"back\">" + backCont + "</div>";
                     pHTML += "<div class=\"mid\">";
                     pHTML += "<div class=\"main\">" + midCont + "</div>";
                     pHTML += "</div>";
-                    pHTML += "<div class=\"front\"></div>";
+                    pHTML += "<div class=\"front\">" + frontCont + "</div>";
 
                     nCont = pHTML;
 

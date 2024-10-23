@@ -106,11 +106,19 @@ function LFVector(x,y,dir,vel,pType="",pID="") {
     };
 
     me.subtract = (oth) => {
-        let subX = me.x - oth.x;
-        let subY = me.y - oth.y;
-        let subDir = (Math.atan2(subY, subX) * 180 / Math.PI) % 360;
-        let subVel = me.vel - oth.vel;
-        return new LVector(me.x - oth.x, me.y - oth.y, subDir, subVel);
+        let subX = oth.x - me.x;
+        let subY = oth.y - me.y;
+        let subDir = (Math.atan2(subY, subX) * 180 / Math.PI);
+        let subVel = Math.hypot(subX, subY);
+        return new LFVector(subX, subY, subDir, subVel);
+    };
+
+    me.add = (oth) => {
+        let addX = me.x - oth.x;
+        let addY = me.y - oth.y;
+        let addDir = (Math.atan2(addY, addX) * 180 / Math.PI);
+        let addVel = Math.hypot(addX, addY);
+        return new LFVector(addX, addY, addDir, addVel);
     };
 
     me.accelerate = (acc) => {

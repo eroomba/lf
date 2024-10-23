@@ -1,5 +1,6 @@
-const lfd = {
+const lfcore = {
     curr: this,
+    cache: {},
     default: {
         // default
         default: {
@@ -224,6 +225,16 @@ const lfd = {
 
         // update
         update: function(spek) {
+
+            if (!("odata" in lfcore.cache)) {
+                let oData = {};
+                Object.keys(lfcore.ort).forEach((ky) => {
+                    if (ky.indexOf("ort") == 0) {
+                        oData["d-" + lfcore.ort[ky].formula()] = ky;
+                    }
+                });
+                lfcore.cache["odata"] = oData;
+            }
     
             let closespeks = lf.query(spek, "spek");
         
@@ -233,18 +244,16 @@ const lfd = {
                     if (join > 0) {
                         let comb = spek.core.data | c1.core.data;
                         let tkID = "d-" + comb;
-                        if (tkID in ortDataSel) {
-                            let tkKey = ortDataSel[tkID];
-                            let daX = spek.pos.x - c1.pos.x;
-                            let daY = spek.pos.y - c1.pos.y;
-                            let dD = Math.hypot(daX, daY);
-                            let dA =  (Math.atan2(daY, daX) * 180 / Math.PI) % 360;
-                            let nVel = dD;
-                            let nDir = Math.random() > 0.5 ? (dA - 180) % 360 : dA;
+                        if (tkID in lfcore.cache["odata"]) {
+                            let tkKey = lfcore.cache["odata"][tkID];
+                            let dRes = spek.pos.subtract(c1.pos);
                             spek.deactivate();
                             c1.deactivate();
-        
-                            let nOrt = new LFItem(new LFVector(spek.pos.x, spek.pos.y, nDir, nVel), lfd.ort[tkKey],{gen:lf.step});
+                            let nX = (spek.pos.x + c1.pos.x) / 2;
+                            let nY = (spek.pos.y + c1.pos.y) / 2;
+                            let nDir = dRes.dir;
+                            let nVel = spek.pos.vel - dRes.vel;
+                            let nOrt = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.ort[tkKey],{gen:lf.step});
                             lf.queueItem(nOrt);
                             //console.log("spek COMB: " + daX + "," + daY + ", " + dD + "," + dA);
                         }
@@ -298,9 +307,16 @@ const lfd = {
             data: "a",
             content: "&forall;", // upside down A
             formula: () => { 
-                // 00000011
-                // 00000010
-                return parseInt('00000011', 2); // a1 + a2
+                switch (lf.formation) {
+                    case "haze":
+                        return ["spekA1","spekA2"];
+                        break;
+                    default:
+                        // 00000011
+                        // 00000010
+                        return parseInt('00000011', 2); // a1 + a2
+                        break;
+                }
             }, 
             range: 8, 
             decay: 300,
@@ -319,9 +335,16 @@ const lfd = {
             data: "b", 
             content: "&bowtie;", // bowtie
             formula: () => {
-                // 00001100
-                // 00001000 
-                return parseInt('00001100', 2);  // b1 + b2
+                switch (lf.formation) {
+                    case "haze":
+                        return ["spekB1","spekB2"];
+                        break;
+                    default:
+                        // 00001100
+                        // 00001000 
+                        return parseInt('00001100', 2);  // b1 + b2
+                        break;
+                }
             }, 
             range: 8,
             decay: 300,
@@ -340,9 +363,16 @@ const lfd = {
             data: "c", 
             content: "&comp;", // long C
             formula: () => {
-                // 00110000
-                // 00100000 
-                return parseInt('00110000', 2);  // c1 + c2
+                switch (lf.formation) {
+                    case "haze":
+                        return ["spekC1","spekC2"];
+                        break;
+                    default:
+                        // 00110000
+                        // 00100000 
+                        return parseInt('00110000', 2);  // c1 + c2
+                        break;
+                }
             }, 
             range: 8,
             decay: 310,
@@ -361,9 +391,16 @@ const lfd = {
             data: "d", 
             content: "&part;", // loopy d
             formula: () => { 
-                // 11000000
-                // 10000100
-                return parseInt('11000100', 2); // d1 + d1
+                switch (lf.formation) {
+                    case "haze":
+                        return ["spekD1","spekD2"];
+                        break;
+                    default:
+                        // 11000000
+                        // 10000100
+                        return parseInt('11000100', 2); // d1 + d1
+                        break;
+                }
             }, 
             range: 10,
             decay: 350,
@@ -382,9 +419,16 @@ const lfd = {
             data: "p", 
             content: "&fork;", // U with line
             formula: () => { 
-                // 11000000
-                // 11000001
-                return parseInt('11000001', 2); // d1 + x
+                switch (lf.formation) {
+                    case "haze":
+                        return ["spekD1","spekX"];
+                        break;
+                    default:
+                        // 11000000
+                        // 11000001
+                        return parseInt('11000001', 2); // d1 + x
+                        break;
+                }
             }, 
             range: 10,
             decay: 450,
@@ -403,9 +447,16 @@ const lfd = {
             data: "e", 
             content: "&sum;", // summation
             formula: () => { 
-                // 10000100
-                // 11000001
-                return parseInt('11000101', 2); // d2 + x
+                switch (lf.formation) {
+                    case "haze":
+                        return ["spekD2","spekX"];
+                        break;
+                    default:
+                        // 10000100
+                        // 11000001
+                        return parseInt('11000101', 2); // d2 + x
+                        break;
+                }
             }, 
             range: 10,
             decay: 350,
@@ -416,16 +467,16 @@ const lfd = {
         },
 
 
-        // functions
+        // ort functions
 
-        // update
+        // ort update
         update: function(ort) {
 
             if (ort.life != null)
                 ort.life--;
             
             if (ort.life != null && ort.life <= 0 && ort.active) {
-                lfd.ort.decay(ort.core.subtype, ort.pos);
+                lfcore.ort.decay(ort.core.subtype, ort.pos);
                 ort.deactivate();
             }
             else {
@@ -440,9 +491,15 @@ const lfd = {
                     });
                     
                     if (g1 != null && g2 != null) {
-                        let nDir = Math.floor(Math.random() * 360);
-                        let nVel = ort.pos.vel * 1.5;
-                        let nSnip = new LFItem(new LFVector(ort.pos.x, ort.pos.y, nDir, nVel), lfd.snip.snipEx, { gen: lf.step, code: "e--", len: 3 });
+                        let nX = (g1.pos.x + g2.pos.x + ort.pos.x) / 3;
+                        let nY = (g1.pos.y + g2.pos.y + ort.pos.y) / 3;
+                        let nVel = ort.pos.vel;
+                        let dRes1 = ort.pos.subtract(g1.pos);
+                        nVel -= dRes1.vel;
+                        let dRes2 = ort.pos.subtract(g2.pos);
+                        nVel -= dRes2.vel;
+                        let nDir = dRes2.subtract(dRes1).dir;
+                        let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip.snipEx, { gen: lf.step, code: "e--", len: 3 });
                         lf.queueItem(nSnip);
         
                         g1.deactivate();
@@ -453,8 +510,11 @@ const lfd = {
                 else {
                     let closeOrts = lf.query(ort, "ort");
                     let chVal = "";
-                    let nv = ort.pos.vel;
-                    let ndr = ort.pos.dir;
+                    let nVel = ort.pos.vel;
+                    let nDir = ort.pos.dir;
+                    let nX = ort.pos.x;
+                    let nY = ort.pos.y;
+                    let dRes = new LFVector(ort.pos.x, ort.pos.y, ort.pos.dir, ort.pos.vel);
                     let tv = 1;
         
                     let snipC = [];
@@ -462,32 +522,38 @@ const lfd = {
                     for (let sc = 0; sc < closeOrts.length; sc++) {
                         snipC.push(closeOrts[sc]);
                         snipVal += closeOrts[sc].core.data;
-                        nv += closeOrts[sc].pos.vel;
-                        ndr += closeOrts[sc].pos.dir;
+                        nX += closeOrts[sc].pos.x;
+                        nY += closeOrts[sc].pos.y;
+                        dRes = dRes.subtract(closeOrts[sc].pos);
+                        nVel -= dRes.vel;
+                        nDir = dRes.dir;
                         if (snipC.length == 2) break;
                     }
         
                     let validSnip = false;
                     let snipType = null;
-                    Object.keys(lfd.snip).forEach((sn) => {
-                        if (!validSnip) {
-                            if (typeof lfd.snip[sn].formula === 'function')
-                                snipType = lfd.snip[sn].formula(snipVal); 
-                            if (snipType != null && snipType.length > 0) {
-                                validSnip = true;
+                    if (snipVal.length >= 2) {
+                        Object.keys(lfcore.snip).forEach((sn) => {
+                            if (sn.indexOf("snip") == 0) {
+                                if (!validSnip) {
+                                    snipType = lfcore.snip[sn].formula(snipVal); 
+                                    if (snipType != null && snipType.length > 0) {
+                                        validSnip = true;
+                                    }
+                                    else {
+                                        snipType = null;
+                                    }
+                                }
                             }
-                            else {
-                                snipType = null;
-                            }
-                        }
-                    });
+                        });
+                    }
         
                     if (validSnip) {
+                        nX /= (snipC.length + 1);
+                        nY /= (snipC.length + 1);
                         for (let sc = snipC.length - 1; sc >= 0; sc--) snipC[sc].deactivate();
         
-                        let nDir = ndr / 3;
-                        let nVel = nv / 3;
-                        let nSnip = new LFItem(new LFVector(ort.pos.x, ort.pos.y, nDir, nVel), lfd.snip[snipType], { gen: lf.step, code: snipVal, len: snipVal.length });
+                        let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip[snipType], { gen: lf.step, code: snipVal, len: snipVal.length });
                         if (snipVal[0] == "d") {
                             nSnip.life *= 4;
                             nSnip.dynamic["proc"] = 1;
@@ -510,18 +576,28 @@ const lfd = {
             }
         },
         
-        // decay
+        // ort decay
         decay: function(ortName, pos) {
             let sA = Math.floor(Math.random() * 360);
-            lfd.ort[ortName].dformula.forEach((di) => {
-                let nDir = sA;
-                sA += 120;
-                sA = sA % 360;
-                let aX = 8 * Math.cos(nDir * Math.PI / 180);
-                let aY = 8 * Math.sin(nDir * Math.PI / 180);
-                let nVel = Math.floor(Math.random() * 9) + 4;
-                let nDobj = new LFItem(new LFVector(pos.x + aX, pos.y + aY, nDir, nVel), lfd.spek[di.subtype], {gen:lf.step});
-                lf.queueItem(nDobj);
+            lfcore.ort[ortName].dformula.forEach((di) => {
+                switch (lf.formation) {
+                    case "haze":
+
+                        lf.haze.add(pos.x,pos.y,di.subtype,1);
+
+                        break;
+                    default:
+                        let nDir = sA;
+                        sA += 120;
+                        sA = sA % 360;
+                        let aX = 8 * Math.cos(nDir * Math.PI / 180);
+                        let aY = 8 * Math.sin(nDir * Math.PI / 180);
+                        let nVel = Math.floor(Math.random() * 9) + 4;
+                        let nDobj = new LFItem(new LFVector(pos.x + aX, pos.y + aY, nDir, nVel), lfcore.spek[di.subtype], {gen:lf.step});
+                        lf.queueItem(nDobj);
+
+                        break;
+                }
             });
         }
     },
@@ -540,7 +616,7 @@ const lfd = {
             formula: (check) => { 
                 if (check.length == 2) {
                     let v1 = "abcd";
-                    if (v1.indexOf(check[0]) >= 0 && v1.indexOf(check[1]) >= 0) return "snp-pre";
+                    if (v1.indexOf(check[0]) >= 0 && v1.indexOf(check[1]) >= 0) return "snipPre";
                 }
                 return null;
             }, 
@@ -560,7 +636,7 @@ const lfd = {
             formula: (check) => { 
                 if (check.length == 3) {
                     let v1 = "abcd";
-                    if (v1.indexOf(check[0]) >= 0 && v1.indexOf(check[1]) >= 0 && v1.indexOf(check[2]) >= 0) return "snp-go";
+                    if (v1.indexOf(check[0]) >= 0 && v1.indexOf(check[1]) >= 0 && v1.indexOf(check[2]) >= 0) return "snipGo";
                 }
                 return null;
             }, 
@@ -578,7 +654,7 @@ const lfd = {
             data: "ppp",
             content: "&origof;", 
             formula: (check) => { 
-                if (check.toLowerCase() == ":ppp") return "snp-blk";
+                if (check.toLowerCase() == ":ppp") return "snipBlk";
                 return null;
             }, 
             range: 15, 
@@ -595,7 +671,7 @@ const lfd = {
             data: "e--",
             content: "&sim;", 
             formula: (check) => { 
-                if (check.toLowerCase() == "e--") return "snp-ex";
+                if (check.toLowerCase() == "e--") return "snipEx";
                 return null;
             }, 
             range: 12, 
@@ -613,7 +689,7 @@ const lfd = {
             if (snip.life != null && snip.life <= 0 && snip.active) {
                 if ("parts" in snip.dynamic && "p" in snip.dynamic["parts"] && snip.dynamic["parts"]["p"] > 0) snip.life = snip.core.decay;
                 else {
-                    lfd.snip.decay(snip.core.subtype, snip.dynamic["code"], snip.pos);
+                    lfcore.snip.decay(snip.core.subtype, snip.dynamic["code"], snip.pos);
                     snip.deactivate();
                 }
             }
@@ -632,14 +708,16 @@ const lfd = {
         
                         let validSnip = false;
                         let snipType = null;
-                        Object.keys(lfd.snip).forEach((sn) => {
-                            if (!validSnip) {
-                                snipType = lfd.snip[sn].formula(newVal); 
-                                if (snipType != null && snipType.length > 0) {
-                                    validSnip = true;
-                                }
-                                else {
-                                    snipType = null;
+                        Object.keys(lfcore.snip).forEach((sn) => {
+                            if (sn.indexOf("snip") == 0) {
+                                if (!validSnip) {
+                                    snipType = lfcore.snip[sn].formula(newVal); 
+                                    if (snipType != null && snipType.length > 0) {
+                                        validSnip = true;
+                                    }
+                                    else {
+                                        snipType = null;
+                                    }
                                 }
                             }
                         });
@@ -647,7 +725,7 @@ const lfd = {
                         if (validSnip) {
                             let nDir = Math.floor(Math.random() * 360);
                             let velAdd = Math.floor(Math.random() * 5) + 3;
-                            let nSnip = new LFItem(new LFVector(snip.pos.x, snip.pos.y, nDir, snip.pos.vel + velAdd), lfd.snip[snipType], { gen: lf.step, code: newVal, len: newVal.length });
+                            let nSnip = new LFItem(new LFVector(snip.pos.x, snip.pos.y, nDir, snip.pos.vel + velAdd), lfcore.snip[snipType], { gen: lf.step, code: newVal, len: newVal.length });
                             lf.queueItem(nSnip);
                             
                             addOrt.deactivate();
@@ -686,13 +764,13 @@ const lfd = {
                         });
                         snip.deactivate();
         
-                        let nBrane = new LFItem(new LFVector(Math.floor(mxSum / mCount), Math.floor(mySum / mCount), 0, 0), lfd.struck.struckBrane, { gen: lf.step });
+                        let nBrane = new LFItem(new LFVector(Math.floor(mxSum / mCount), Math.floor(mySum / mCount), 0, 0), lfcore.struck.struckBrane, { gen: lf.step });
                         lf.queueItem(nBrane);
                     }
                     else if (closest != undefined && closest != null) {
                         let des = closest.pos.subtract(snip.pos);
                         if (des.magnitude() > snip.core.range) {
-                            snip.pos.dir = des.dir;
+                            snip.pos.dir = des.dir - 180;
                             snip.pos.vel = 2;
                         }
                         else snip.pos.vel = snip.pos.vel - 2 >= 0 ? snip.pos.vel - 2 : 0;
@@ -719,7 +797,7 @@ const lfd = {
                             s.deactivate(); 
                         });
         
-                        let nSeed = new LFItem(new LFVector(Math.floor(sxSum / sCount), Math.floor(sySum / sCount), 0, 0), lfd.struck.struckSeed, { gen: lf.step });
+                        let nSeed = new LFItem(new LFVector(Math.floor(sxSum / sCount), Math.floor(sySum / sCount), 0, 0), lfcore.struck.struckSeed, { gen: lf.step });
                         lf.queueItem(nSeed);
                     }
                 }
@@ -743,12 +821,13 @@ const lfd = {
                         lf.behaviors.run(snip, snip.dynamic["code"]);
                     }
                     else {
-                        let mX = Math.random() > 0.5 ? snip.pos.x - Math.floor(Math.random() * 4) : snip.pos.x + Math.floor(Math.random() * 4);
-                        let mY = Math.random() > 0.5 ? snip.pos.y - Math.floor(Math.random() * 4) : snip.pos.y + Math.floor(Math.random() * 4);
-                        let nDir = (snip.pos.dir + addTo.pos.dir) / 2;
-                        let nVel = (snip.pos.vel + addTo.pos.vel) / 2;
+                        let mX = (snip.pos.x + addTo.pos.x) / 2;
+                        let mY = (snip.pos.y + addTo.pos.y) / 2;
+                        let nRes = snip.pos.subtract(addTo.pos);
+                        let nDir = nRes.dir;
+                        let nVel = snip.pos.vel - nRes.vel;
                         let codes = [ snip.dynamic["code"], addTo.dynamic["code"] ]; 
-                        let nStrand = new LFItem(new LFVector(mX, mY, nDir, nVel), lfd.strand.strand, { gen: lf.step, codes: codes });
+                        let nStrand = new LFItem(new LFVector(mX, mY, nDir, nVel), lfcore.strand.strand, { gen: lf.step, codes: codes });
                         lf.queueItem(nStrand);
         
                         addTo.deactivate();
@@ -771,40 +850,50 @@ const lfd = {
         
         // decay
         decay: function(snipName, snipCode, pos) {
-            if (lfd.snip[snipName].subtype == "snipPre" || snipCode.length == 2) {
+            if (lfcore.snip[snipName].subtype == "snipPre" || snipCode.length == 2) {
                 let nDir = Math.floor(Math.random() * 360);
                 let nVel = Math.floor(Math.random() * 7) + 6;
                 let comps = [ snipCode[0], snipCode[1] ];
                 comps.forEach((orta) => {
                     let xDir = 12 * Math.cos(nDir * Math.PI / 180);
                     let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfd.ort["ort" + orta], {gen:lf.step});
+                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta], {gen:lf.step});
                     lf.queueItem(nOrt);
                     nDir += (360 / comps.length);
                     nDir = nDir % 360;
                 });
             }
-            else if (lfd.snip[snipName].subtype == "snipEx" || snipCode == "e--") {
+            else if (lfcore.snip[snipName].subtype == "snipEx" || snipCode == "e--") {
                 let nDir = pos.dir + 180;
                 nDir = nDir % 360;
                 let nVel = Math.floor(Math.random() * 5) + 10;
                 let dX = 12 * Math.cos(nDir * Math.PI / 180);
                 let dY = 12 * Math.sin(nDir * Math.PI / 180);
-                let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.ort.ortP, {gen:lf.step});
+                let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort.ortP, {gen:lf.step});
                 lf.queueItem(nOrt);
                 nDir = pos.dir - 60;
                 nDir = nDir % 360;
-                nVel = Math.floor(Math.random() * 5) + 10;
-                dX = 12 * Math.cos(nDir * Math.PI / 180);
-                dY = 12 * Math.sin(nDir * Math.PI / 180);
-                let nSpk1 = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.spek.spkX, {gen:lf.step});
-                lf.queueItem(nSpk1);
-                nDir = pos.dir + 60;
-                nDir = nDir % 360;
-                dX = 12 * Math.cos(nDir * Math.PI / 180);
-                dY = 12 * Math.sin(nDir * Math.PI / 180);
-                let nSpk2 = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.spek.spkX, {gen:lf.step});
-                lf.queueItem(nSpk2);
+                switch (lf.formation) {
+                    case "haze":
+
+                        lf.haze.add(pos.x, pos.y, "spkX", 2);
+
+                        break;
+                    default:
+                        nVel = Math.floor(Math.random() * 5) + 10;
+                        dX = 12 * Math.cos(nDir * Math.PI / 180);
+                        dY = 12 * Math.sin(nDir * Math.PI / 180);
+                        let nSpk1 = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek.spkX, {gen:lf.step});
+                        lf.queueItem(nSpk1);
+                        nDir = pos.dir + 60;
+                        nDir = nDir % 360;
+                        dX = 12 * Math.cos(nDir * Math.PI / 180);
+                        dY = 12 * Math.sin(nDir * Math.PI / 180);
+                        let nSpk2 = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek.spkX, {gen:lf.step});
+                        lf.queueItem(nSpk2);
+
+                        break;
+                }
             }
             else if (snipCode.length == 3) {
                 let comps = [ snipCode[0], snipCode[1] ];
@@ -814,23 +903,35 @@ const lfd = {
                 comps.forEach((orta) => {
                     let xDir = 12 * Math.cos(nDir * Math.PI / 180);
                     let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfd.ort["ort" + orta.toUpperCase()], {gen:lf.step});
+                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta.toUpperCase()], {gen:lf.step});
                     lf.queueItem(nOrt);
                     nDir += (360 / comps.length);
                     nDir = nDir % 360;
                 });
-                let dCmpX = lfd.ort["ort" + dComp.toUpperCase()].dformula;
+                let dCmpX = lfcore.ort["ort" + dComp.toUpperCase()].dformula;
                 let oA = Math.floor(Math.random() * 360);
                 let oCount = dCmpX.length;
                 dCmpX.forEach((spk) => {
-                    let nDir = oA;
-                    let dX = 8 * Math.cos(nDir * Math.PI / 180);
-                    let dY = 8 * Math.sin(nDir * Math.PI / 180);
-                    let nVel = Math.floor(Math.random() * 9) + 4;
-                    let nSpk = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.spek[spk.subtype], {gen:lf.step});
-                    lf.queueItem(nSpk);
-                    oA += 360 / oCount;
-                    oA = oA % 360;
+                    switch (lf.formation) {
+                        case "haze":
+
+                            lf.haze.add(pos.x, pos.y, spk.subtype, 1);
+
+                            break;
+                        default:
+                            
+                                let nDir = oA;
+                                let dX = 8 * Math.cos(nDir * Math.PI / 180);
+                                let dY = 8 * Math.sin(nDir * Math.PI / 180);
+                                let nVel = Math.floor(Math.random() * 9) + 4;
+                                let nSpk = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek[spk.subtype], {gen:lf.step});
+                                lf.queueItem(nSpk);
+                                oA += 360 / oCount;
+                                oA = oA % 360;
+                            
+
+                            break;
+                    }
                 });
             }
         }
@@ -863,7 +964,7 @@ const lfd = {
                 strand.life--;
             
             if (strand.life != null && strand.life <= 0 && strand.active) {
-                lfd.strand.decay(strand.dynamic["codes"], strand.pos);
+                lfcore.strand.decay(strand.dynamic["codes"], strand.pos);
                 strand.deactivate();
             }
             else {
@@ -875,7 +976,7 @@ const lfd = {
         
                 let membrane = null;
                 close.forEach((itm) => {
-                    let sums = groupObj(strand.dynamic["codes"],[lfd.snip.snipEx.data]);
+                    let sums = groupObj(strand.dynamic["codes"],[lfcore.snip.snipEx.data]);
                     if ((itm.core.subtype== "struckBrane" || itm.core.subtype == "struckBlip") && membrane == null) {
                         membrane = itm;
                     }
@@ -890,8 +991,12 @@ const lfd = {
                             let newLen = strand.dynamic["codes"].length;
                             if (newLen >= gVars.minStrandLen) strand.obj.classList.add("sz-full"); 
                             else strand.obj.classList.add("sz-" + newLen);
-                            strand.pos.vel += itm.pos.vel;
-                            strand.pos.dir += itm.pos.dir;
+
+                            let nX = (strand.pos.x + itm.pos.x) / 2;
+                            let nY = (strand.pos.y + itm.pos.y) / 2;
+                            let nRes = strand.pos.subtract(itm.pos);
+                            strand.pos.vel -= nRes.vel;
+                            strand.pos.dir = nRes.dir;
                             itm.deactivate();
                         }
                     }
@@ -900,8 +1005,8 @@ const lfd = {
         
                         let codeLen = strand.dynamic["codes"].length + itm.dynamic["codes"].length;
                         let canComb = false;
-                        let sumB = groupObj(itm.dynamic["codes"],[lfd.snip.snipEx.data]);
-                        let sumE = sums[lfd.snip.snipEx.data] + sumB[lfd.snip.snipEx.data];
+                        let sumB = groupObj(itm.dynamic["codes"],[lfcore.snip.snipEx.data]);
+                        let sumE = sums[lfcore.snip.snipEx.data] + sumB[lfcore.snip.snipEx.data];
                         if (sumE / codeLen <= 0.25 && codeLen <= 48) { 
                             canComb = true;
                             nCodes = itm.dynamic["codes"];
@@ -914,8 +1019,13 @@ const lfd = {
                             let newLen = strand.dynamic["codes"].length;
                             if (newLen >= gVars.minStrandLen) strand.obj.classList.add("sz-full"); 
                             else strand.obj.classList.add("sz-" + newLen);
-                            strand.pos.vel += itm.pos.vel;
-                            strand.pos.dir += itm.pos.dir;
+                            
+                            let nX = (strand.pos.x + itm.pos.x) / 2;
+                            let nY = (strand.pos.y + itm.pos.y) / 2;
+                            let nRes = strand.pos.subtract(itm.pos);
+                            strand.pos.vel -= nRes.vel;
+                            strand.pos.dir = nRes.dir;
+
                             itm.deactivate();
                             combined = true;
                             let dspCode = strand.dynamic["codes"].join(":");
@@ -940,9 +1050,9 @@ const lfd = {
                         iOps.complex = 1;
                     }
         
-                    let nVel = Math.floor(Math.random() * 360);
-                    let nDir = Math.floor(Math.random() * 9);
-                    let nPro= new LFItem(new LFVector(strand.pos.x, strand.pos.y,nDir,nVel),ldf.proto[protoType], ptDyn, strand.genetic, iOps);
+                    let nDir = Math.floor(Math.random() * 360);
+                    let nVel = Math.floor(Math.random() * 9);
+                    let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, strand.genetic, iOps);
                     lf.queueItem(nPro);
         
                     membrane.deactivate();
@@ -956,7 +1066,7 @@ const lfd = {
                     strand.dynamic["codes"].forEach((cd) => {
                         lf.behaviors.run(strand, cd);
                     });
-                    strand.obj.innerHTML = lfd.strand.strand.content.replace("<!--nm-->",strand.dynamic["codes"].length);
+                    strand.obj.innerHTML = lfcore.strand.strand.content.replace("<!--nm-->",strand.dynamic["codes"].length);
                 }
             }
         
@@ -992,8 +1102,8 @@ const lfd = {
                     let dY = 15 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;
                     let sType = "snipGo";
-                    if (rCodes[0] == lfd.snip.snipEx.data) sType = "snipEx"
-                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.snip[sType], {gen:lf.step, code: rCodes[0]});
+                    if (rCodes[0] == lfcore.snip.snipEx.data) sType = "snipEx"
+                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], {gen:lf.step, code: rCodes[0]});
                     lf.queueItem(nSnp);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1003,7 +1113,7 @@ const lfd = {
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.strand.strand, {gen:lf.step, codes: rCodes, len: rCodes.length});
+                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand.strand, {gen:lf.step, codes: rCodes, len: rCodes.length});
                     lf.queueItem(nStd);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1016,8 +1126,8 @@ const lfd = {
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;
                     let sType = "snipGo";
-                    if (rCodes2[0] == lfd.snip.snipEx.data) sType = "snipEx";
-                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.snip[sType], {gen:lf.step, code: rCodes2[0]});
+                    if (rCodes2[0] == lfcore.snip.snipEx.data) sType = "snipEx";
+                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], {gen:lf.step, code: rCodes2[0]});
                     lf.queueItem(nSnp);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1027,16 +1137,16 @@ const lfd = {
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.strand.strand, {gen:lf.step, codes: rCodes2, len: rCodes2.length});
+                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand.strand, {gen:lf.step, codes: rCodes2, len: rCodes2.length});
                     lf.queueItem(nStd);
                     oA += 360 / sCount;
                     oA = oA % 360;
                 }
             }
             let dType = "snipGo";
-            if (dCode == lfd.snip.snipEx.data) dType = "snipEx";
+            if (dCode == lfcore.snip.snipEx.data) dType = "snipEx";
             if (dCode != undefined && dCode != null) {
-                lfd.snip.decay(dType, dCode, pos);
+                lfcore.snip.decay(dType, dCode, pos);
             }
         }
     },
@@ -1084,7 +1194,7 @@ const lfd = {
                 proto.life--;
             
             if (proto.life != null && proto.life <= 0 && proto.active) {
-                lfd.proto.decay(proto);
+                lfcore.proto.decay(proto);
                 proto.deactivate();
             }
             else {
@@ -1102,7 +1212,7 @@ const lfd = {
                         init: true,
                         complex: proto.complex
                     }
-                    let nProto = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDir, nVel), ldf.proto[proto.core.subtype], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)), iOps);
+                    let nProto = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDir, nVel), lfcore.proto[proto.core.subtype], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)), iOps);
                     nProto.life = 40;
                     proto.life -= 40;
                     lf.queueItem(nProto);
@@ -1154,13 +1264,13 @@ const lfd = {
                 let dX = 12 * Math.cos(oA);
                 let dY = 12 * Math.cos(oA);
                 let nVel = Math.floor(Math.random() * 5) + 5;
-                let nBlk = new LFItem(new LFVector(proto.pos.x + dX, proto.pos.y + dY, oA, nVel), lfd.snip.snipBlk, { gen: lf.step, code: "ppp"});
+                let nBlk = new LFItem(new LFVector(proto.pos.x + dX, proto.pos.y + dY, oA, nVel), lfcore.snip.snipBlk, { gen: lf.step, code: "ppp"});
                 lf.queueItem(nBlk);
                 oA += 360 / blkCount;
                 oA = oA % 360;
             }
         
-            lfd.strand.decay(proto.dynamic["codes"], proto.pos);
+            lfcore.strand.decay(proto.dynamic["codes"], proto.pos);
         }
     },
 
@@ -1224,7 +1334,7 @@ const lfd = {
                 struck.life--;
             
             if (struck.life != null && struck.life <= 0 && struck.active) {
-                lfd.struck.decay(struck);
+                lfcore.struck.decay(struck);
                 struck.deactivate();
             }
         
@@ -1257,7 +1367,7 @@ const lfd = {
                         let dX = 15 * Math.cos(nDir * Math.PI / 180);
                         let dY = 15 * Math.sin(nDir * Math.PI / 180);
                         let nVel = Math.floor(Math.random() * 10) + 5;
-                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.snip.snipBlk, {gen: lf.step,code:"ppp",len: 3});
+                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip.snipBlk, {gen: lf.step,code:"ppp",len: 3});
                         lf.queueItem(nDobj);
                         oA += 360 / snipCount;
                         oA = oA % 360;
@@ -1265,16 +1375,27 @@ const lfd = {
                     oA = Math.floor(Math.random() * 360);
                     let oCount = degradeCount * 3;
                     for (let pp = 0; pp < oCount; pp++) {
-                        let dForm = lfd.ort["ortP"].core.dformula;
+                        let dForm = lfcore.ort["ortP"].core.dformula;
                         dForm.array.forEach((spOps) => {
-                            let nDir = oA;
-                            let dX = 8 * Math.cos(nDir * Math.PI / 180);
-                            let dY = 8 * Math.sin(nDir * Math.PI / 180);
-                            let nVel = Math.floor(Math.random() * 9) + 4;
-                            let nSobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.spek[spOps.subtype], {gen: lf.step});
-                            lf.queueItem(nSobj);
-                            oA += 360 / oCount;
-                            oA = oA % 360;
+                            switch (lf.formation) {
+                                case "haze":
+
+                                    lf.haze.add(pos.x, pos.y, spOps.subType, 1);
+                                
+                                    break;
+                                default:
+                                    
+                                        let nDir = oA;
+                                        let dX = 8 * Math.cos(nDir * Math.PI / 180);
+                                        let dY = 8 * Math.sin(nDir * Math.PI / 180);
+                                        let nVel = Math.floor(Math.random() * 9) + 4;
+                                        let nSobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek[spOps.subtype], {gen: lf.step});
+                                        lf.queueItem(nSobj);
+                                        oA += 360 / oCount;
+                                        oA = oA % 360;
+                                    
+                                    break;
+                            }
                         });
                     }
                     break;
@@ -1290,7 +1411,7 @@ const lfd = {
                         let dX = 15 * Math.cos(nDir * Math.PI / 180);
                         let dY = 15 * Math.sin(nDir * Math.PI / 180);
                         let nVel = Math.floor(Math.random() * 10) + 5;
-                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfd.snip.snipEx, {gen: lf.step,code:"e--",len: 3});
+                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip.snipEx, {gen: lf.step,code:"e--",len: 3});
                         lf.queueItem(nDobj);
                         oA2 += 360 / snipCount2;
                         oA2 = oA2 % 360;
@@ -1298,7 +1419,7 @@ const lfd = {
                     oA2 = Math.floor(Math.random() * 360);
                     let oCount2 = degradeCount2;
                     for (let ss = 0; ss < oCount2; ss++) {
-                        lfd.snip.decay("snp-ex","e--", pos);
+                        lfcore.snip.decay("snipEx","e--", pos);
                     }
                     break;
             }
@@ -1335,22 +1456,42 @@ const lfd = {
                 mY = Math.floor(Math.random() * (lf.h - (r * 2))) + r;
             }
     
-            let addR = Math.floor(Math.random() * 15) + 5;
-            for (let a = 0; a < 360; a+=addR) {
-                let count = Math.floor(Math.random() * 3) + 1;
-                for (let j = 0; j < count; j++) {
-                    let r1 = Math.floor(Math.random() * r);
-                    let ix1 = Math.floor(Math.random() * validSpeks.length);
-                    let k1 = validSpeks[ix1];
-                    let nD = Math.floor(Math.random() * (r - 20)) + 20;
-                    let nX = mX + (nD * Math.cos(a * Math.PI / 180));
-                    let nY = mY + (nD * Math.sin(a * Math.PI / 180));
-                    let nDir = a;
-                    let nVel = Math.floor(Math.random() * 11) + 10;
-                    let nItem = new LFItem(new LFVector(nX, nY, nDir, nVel), lfd.spek[k1], {gen:lf.step});
-                    lf.addItem(nItem);
-                }
-                addR += Math.floor(Math.random() * 15) + 5;
+            switch (lf.formation) {
+                case "haze":
+
+                    let count = Math.floor(Math.random() * 60) + 10;
+                    
+                    for (let j = 0; j < count; j++) {
+                        let r1 = Math.floor(Math.random() * r);
+                        let ix1 = Math.floor(Math.random() * validSpeks.length);
+                        let k1 = validSpeks[ix1];
+
+                        lf.haze.add(mX, mY, k1, 1);
+                    }
+
+                    lf.haze.effect(new LFVector(mX, mY, 0, (Math.random() * 11) + 10 ));
+
+                    break;
+                default:
+                    let addR = Math.floor(Math.random() * 15) + 5;
+                    for (let a = 0; a < 360; a+=addR) {
+                        let count = Math.floor(Math.random() * 3) + 1;
+                        for (let j = 0; j < count; j++) {
+                            let r1 = Math.floor(Math.random() * r);
+                            let ix1 = Math.floor(Math.random() * validSpeks.length);
+                            let k1 = validSpeks[ix1];
+                            let nD = Math.floor(Math.random() * (r - 20)) + 20;
+                            let nX = mX + (nD * Math.cos(a * Math.PI / 180));
+                            let nY = mY + (nD * Math.sin(a * Math.PI / 180));
+                            let nDir = a;
+                            let nVel = Math.floor(Math.random() * 11) + 10;
+                            let nItem = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.spek[k1], {gen:lf.step});
+                            lf.addItem(nItem);
+                        }
+                        addR += Math.floor(Math.random() * 15) + 5;
+                    }
+
+                    break;
             }
     
             let bID = "bomb-" + lf.step;
@@ -1413,21 +1554,41 @@ const lfd = {
                 mY = Math.floor(Math.random() * lf.h);
             }
     
-            let addR = Math.floor(Math.random() * 30);
-            for (let a = 0; a < 360; a+=addR) {
-                let r1 = Math.floor(Math.random() * r);
-                let ix1 = Math.floor(Math.random() * validSpeks.length);
-                let k1 = validSpeks[ix1];
-                let nDir = a;
-                let nVel = Math.floor(Math.random() * 5) + 5;
-                let nD = Math.floor(Math.random() * (r - 15)) + 15;
-                let nX = mX + (nD * Math.cos(a * Math.PI / 180));
-                let nY = mY + (nD * Math.sin(a * Math.PI / 180));
-                if (nX > 0 && nX < lf.w && nY > 0 && nY < lf.h) {
-                    let nItem = new LFItem(new LFVector(nX, nY, nDir, nVel), lfd.spek[k1], {gen:lf.step});
-                    lf.addItem(nItem);
-                }
-                addR += Math.floor(Math.random() * 20) + 10;
+            switch (lf.formation) {
+                case "haze":
+
+                    let count = Math.floor(Math.random() * 7) + 6;
+                        
+                    for (let j = 0; j < count; j++) {
+                        let r1 = Math.floor(Math.random() * r);
+                        let ix1 = Math.floor(Math.random() * validSpeks.length);
+                        let k1 = validSpeks[ix1];
+
+                        lf.haze.add(mX, mY, k1, 1);
+                    }
+
+                    lf.haze.effect(new LFVector(mX, mY, 0, (Math.random() * 6) + 5 ));
+
+                    break;
+                default:
+                    let addR = Math.floor(Math.random() * 30);
+                    for (let a = 0; a < 360; a+=addR) {
+                        let r1 = Math.floor(Math.random() * r);
+                        let ix1 = Math.floor(Math.random() * validSpeks.length);
+                        let k1 = validSpeks[ix1];
+                        let nDir = a;
+                        let nVel = Math.floor(Math.random() * 5) + 5;
+                        let nD = Math.floor(Math.random() * (r - 15)) + 15;
+                        let nX = mX + (nD * Math.cos(a * Math.PI / 180));
+                        let nY = mY + (nD * Math.sin(a * Math.PI / 180));
+                        if (nX > 0 && nX < lf.w && nY > 0 && nY < lf.h) {
+                            let nItem = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.spek[k1], {gen:lf.step});
+                            lf.addItem(nItem);
+                        }
+                        addR += Math.floor(Math.random() * 20) + 10;
+                    }
+
+                    break;
             }
             //console.log("puff - made");
     
@@ -1481,50 +1642,59 @@ const lfd = {
             let dID = "drip-" + lf.step;
             let drip = {
                 id: dID,
-                pos: new LFVector(mX, mY, 0, 0),
-                ops: { range: r, type: "drip" }
+                pos: new LFVector(mX, mY, 0, r),
+                core: { range: r, type: "drip" }
             };
+
+    
+            if (lf.items.length < gVars.maxItems) {
+                if (Math.random() > 0.5) {
+                    let nDir = Math.floor(Math.random() * 360);
+                    let nBlip = new LFItem(new LFVector(mX, mY, 0, nDir), lfcore.struck.struckBlip, { gen: lf.step });
+                    nBlip.obj.style.opacity = 0.4;
+                    lf.queueItem(nBlip);
+                }
+        
+                switch (lf.formation) {
+                    case "haze":
+                        if (mX > 0 && mX < lf.w && mY > 0 && mY < lf.h) {
+                            lf.haze.add(mX, mY, "spekG1", 1);
+                            lf.haze.add(mX, mY, "spekG2", 1);
+                        }
+
+                        break;
+                    default:
+                        let gs = [ "spekG1", "spekG2" ];
+                        let gCount = Math.floor(Math.random() * 4) + 3;
+                        let gA = Math.floor(Math.random() * 360);
+                        let addA = 360 / gCount;
+                        for (let g = 0; g < gCount; g++) {
+                            let nVel = Math.floor(Math.random() * 10) + 10;
+                            let gName = gs[Math.floor(Math.random() * gs.length)];
+                            let nGas = new LFItem(new LFVector(mX, mY, nVel,gA), lfcore.spek[gName], { gen: lf.step });
+                            lf.queueItem(nGas);
+                            gA += addA;
+                            gA = gA % 360;
+                        }
+
+                        break;
+                }
+        
+            }
+
             let close = lf.query(drip);
             close.forEach((elem) => {
                 if (elem.active) {
-                    let dRes = elem.pos.subtract(drip.pos);
-    
+                    let dRes = elem.pos.add(drip.pos);
                     let dA = dRes.dir % 360;
-                    let force = 20;
-                    let nVel = ((r - dRes.magnitude()) + 1) * 3;
-                    if (elem.pos.vel < 0.5) {
-                        elem.obj.classList.add("hit-by-" + dID + "-1");
-                        elem.pos.dir = dA;
-                        elem.pos.vel += nVel;
-                    }
-                    else {
-                        elem.obj.classList.add("hit-by-" + dID + "-2");
-                        elem.pos.vel += nVel;
-                        elem.pos.dir = dA;
-                    }
+                    let dVel = dRes.vel * ((r - dRes.magnitude()) / r);
+                    elem.pos.dir = dA;
+                    elem.pos.vel += dVel;
                 }
             });
-    
-            if (Math.random() > 0.5) {
-                let nDir = Math.floor(Math.random() * 360);
-                let nBlip = new LFItem(new LFVector(mX, mY, 0, nDir), lfd.struck.struckBlip, { gen: lf.step });
-                nBlip.obj.style.opacity = 0.4;
-                lf.queueItem(nBlip);
-            }
-    
-            let gs = [ "spekG1", "spekG2" ];
-            let gCount = Math.floor(Math.random() * 4) + 3;
-            let gA = Math.floor(Math.random() * 360);
-            let addA = 360 / gCount;
-            for (let g = 0; g < gCount; g++) {
-                let nVel = Math.floor(Math.random() * 10) + 10;
-                let gName = gs[Math.floor(Math.random() * gs.length)];
-                let nGas = new LFItem(new LFVector(mX, mY, nVel,gA), lfd.spek[gName], { gen: lf.step });
-                lf.queueItem(nGas);
-                gA += addA;
-                gA = gA % 360;
-            }
-    
+
+            lf.haze.effect(drip.pos);
+
             if (!("drips" in lf.extras)) lf.extras["drips"] = [];
             lf.extras["drips"].push(
                 new LFXtra(new LFVector(mX, mY, 0, 0), {
@@ -1565,6 +1735,195 @@ const lfd = {
     }
 };
 
+function LFHaze(w, h, sub) {
+    let me = this;
+    me.h = h;
+    me.w = w;
+    me.sub = sub;
+    me.sW = Math.ceil(me.w / me.sub);
+    me.sH = Math.ceil(me.h / me.sub);
+    me.table = new Array(me.sW * me.sH);
+    me.dispInit = false;
+    me.contents = [
+        "spekA1", 
+        "spekA2",
+        "spekB1", 
+        "spekB2",
+        "spekC1", 
+        "spekC2",
+        "spekD1", 
+        "spekD2",
+        "spekX", 
+        "spekG1",
+        "spekG2", 
+        "spekG3"
+    ];
+    me.checkupdate = ["ortA","ortB","ortC","ortD","ortP","ortE"];
+    for (let i = 0; i < me.table.length; i++) {
+        me.table[i] = {};
+        me.contents.forEach((oo) => { me.table[i][oo] = 0; });
+    }
+
+    me.query = (item, options = {}) => {
+        let res = {};
+        me.contents.forEach((oo) => { res[oo] = 0; });
+        let qRange = item.core.range;
+
+        if ("range" in options) qRange = options["range"];
+
+        if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
+            let x = item.pos.x;
+            let y = item.pos.y;
+            let r = qRange;
+            let qX = Math.floor(x / me.sub);
+            let qY = Math.floor(y / me.sub);
+            let qSpanX = 1;
+            let qSpanY = 1;
+            while (r > me.sW * (qSpanX + 1)) qSpanX++;
+            while (r > me.sH * (qSpanY + 1)) qSpanY++;
+            for (let i = qX - qSpanX; i <= qX + qSpanX; i++) {
+                for (let j = qY - qSpanY; j <= qY + qSpanY; j++) {
+                    let qIdx = (j * me.sW) + i;
+                    if (qIdx >= 0 && qIdx < me.table.length) {
+                        me.contents.forEach((spk) => {
+                            res[spk] += me.table[qIdx][spk];
+                        });
+                    }
+                }
+            }
+        }
+
+        return res;
+    };
+
+    me.add = (x,y,type,count) => {
+        let aX = Math.floor(x / me.sub);
+        let aY = Math.floor(y / me.sub);
+        let aIdx = (aY * me.sW) + aX;
+        if (aIdx >= 0 && aIdx < me.table.length) {
+            if (type in me.table[aIdx]) {
+                me.table[aIdx][type] += count;
+            }
+        }
+    };
+
+    me.remove = (x,y,type,count) => {
+        let rX = Math.floor(x / me.sub);
+        let rY = Math.floor(y / me.sub);
+        let rIdx = (rY * me.sW) + rX;
+        if (type in me.table[rIdx]) me.table[rIdx][type] -= count;
+    }
+
+    me.effect = (force) => {
+        let mIdxX = Math.floor(force.x / me.sub);
+        let mIdxY = Math.floor(force.y / me.sub);
+        let mIdx = (mIdxY * me.sW) + mIdxX;
+        if (mIdxX >= 0 && mIdxX <= me.sW && mIdxY >= 0 && mIdxY <= me.sH && mIdx >= 0 && mIdx < me.table.length) {
+            let mLeft = mIdxX * me.sub;
+            let mRight = mLeft + me.sub;
+            let mTop = mIdxY * me.sub;
+            let mBottom = mTop + me.sub;
+            let forceVal = force.magnitude();
+            let forces = new Array(8);
+            forces[0] = { x: 1, y: 0, run: mRight - force.x >= forceVal ? false : true };
+            forces[1] = { x: 1, y: 1, run: Math.hypot(mRight - force.x, mTop - force.y) >= forceVal ? false : true };
+            forces[2] = { x: 0, y: 1, run: mTop - force.y >= forceVal ? false : true };
+            forces[3] = { x: -1, y: 1, run: Math.hypot(force.x - mLeft, mTop - force.y) >= forceVal ? false : true };
+            forces[4] = { x: -1, y: 0, run: force.x - mLeft >= forceVal ? false : true};
+            forces[5] = { x: -1, y: -1, run: Math.hypot(force.x - mLeft, force.y - mBottom) >= forceVal ? false : true };
+            forces[6] = { x: 0, y: -1, run: force.y - mBottom >= forceVal ? false : true };
+            forces[7] = { x: 1, y: -1, run: Math.hypot(mRight - force.x, force.y - mBottom) >= forceVal ? false : true };
+            let div = 0;
+            forces.forEach((f) => { if (f.run) div++; });
+            shuffleArray(forces);
+
+            if (sub > 0) {
+                forces.forEach((f) => {
+                    if (f.run) {
+                        let mvIdxX = mIdxX + f.x;
+                        let mvIdxY = mIdxY + f.y;
+                        if (mvIdxX >= 0 && mvIdxY >= 0 && mvIdxX <= me.sW && mvIdxY <= me.sH) {
+                            let mvIdx = (mvIdxY * me.sW) + mvIdxX;
+                            if (mvIdx >= 0 && mvIdx < me.table.length) {
+                                me.contents.forEach((ky) => {
+                                    let delta = Math.floor(me.table[mIdx][ky] / div);
+                                    if (delta == 0 && me.table[mIdx][ky] > 0 && Math.random() > 0.5) delta = 1;
+                                    if (delta > 0) {
+                                        me.table[mIdx][ky] -= delta;
+                                        me.table[mvIdx][ky] += delta;
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    };
+
+    me.update = () => {
+        if (me.dispInit) {
+            for (let ti = 0; ti < lf.haze.table.length; ti++) {
+                let tbid = "haze-disp-" + ti;
+                let tbObj = document.getElementById(tbid);
+                if (tbObj) {
+                    let tbHTML = "";
+
+                    Object.keys(me.contents).forEach((ky) => {
+                        if (lf.haze.table[ti][ky] > 0)
+                            tbHTML += "<div>" + ky + ": " + lf.haze.table[ti][ky] + "</div>";
+                    });
+
+                    tbObj.innerHTML = tbHTML;
+                }
+            }
+        }
+
+        for (let ti = 0; ti < me.table.length; ti++) {
+            let tLeft = (ti % me.sW) * me.sub;
+            let tTop = Math.floor(ti / me.sW) * me.sub;
+            me.checkupdate.forEach((ort) => {
+                let formula = lfcore.ort[ort].formula();
+                if (formula.length == 2 && me.table[ti][formula[0]] > 0 && me.table[ti][formula[1]] > 0 && Math.random() > 0.95) {
+                    me.table[ti][formula[0]]--;
+                    me.table[ti][formula[1]]--;
+
+                    let nX = Math.floor(Math.random() * me.sub) + tLeft;
+                    let nY = Math.floor(Math.random() * me.sub) + tTop;
+                    let nDir = Math.floor(Math.random() * 360);
+                    let nVel = Math.floor(Math.random() * 4) + 3;
+
+                    let nOrt = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.ort[ort], {gen: lf.step});
+                    lf.queueItem(nOrt);
+                }
+            });
+        }
+    };
+
+    me.show = () => {
+        if (!me.dispInit) {
+            for (let ti = 0; ti < lf.haze.table.length; ti++) {
+                let tbObj = document.createElement("div");
+                tbObj.id = "haze-disp-" + ti;
+                tbObj.classList.add("haze-disp");
+                tbObj.style.border = "1px solid white";
+                tbObj.style.opacity = 0.4;
+                tbObj.style.width = lf.haze.sub + "px";
+                tbObj.style.height = lf.haze.sub + "px";
+                tbObj.style.left = (lf.haze.sub * (ti % lf.haze.sW)) + "px";
+                tbObj.style.top = (lf.haze.sub * (Math.floor(ti / lf.haze.sW))) + "px";
+                tbObj.style.position = "absolute";
+                tbObj.style.color = "#666666";
+                tbObj.style.fontSize = "0.4rem";
+                tbObj.style.zIndex = 999999;
+                lf.obj.appendChild(tbObj);
+            }
+            me.dispInit = true;
+        }
+    }
+
+}
+
 function meanAngleDeg(a) {
     return 180 / Math.PI * Math.atan2(
         aSum(a.map(degToRad).map(Math.sin)) / a.length,
@@ -1591,3 +1950,13 @@ function groupObj(obj,req = []) {
     });
     return sums;
 }
+
+const shuffleArray = array => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+  }
+  
