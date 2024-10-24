@@ -18,22 +18,40 @@ function LFCodedBehaviors() {
         "aab": function(item) {
             // enable respiration 1 - see "aad"
             if (!("respiration" in item.genetic)) {
-                item.genetic["respiration"] = ["spekG1","spekG2"];
+                item.genetic["respiration"] = { code:["spekG1","spekG2"], counter: 0 };
             }
         },
         "aac": function(item) {
             // enable respiration 2 - see "aad"
             if (!("respiration" in item.genetic)) {
-                item.genetic["respiration"] = ["spekG2","spekG1"];
+                item.genetic["respiration"] = { code: ["spekG2","spekG1"], counter: 0 };
             }
         },
         "aad": function(item) {
             // respirate - enable see "aab"
             if (item.complex >= 1) {
-                if ("respiration" in item.genetic && Array.isArray(item.genetic["respiration"])) {
-                    let resp = item.genetic["respiration"];
+                if ("respiration" in item.genetic && Array.isArray(item.genetic["respiration"]["code"])) {
+                    let resp = item.genetic["respiration"].code;
+
+                    let hasBreath = false;
 
                     switch (lf.formation) {
+                        case "haze":
+
+                            let found = lf.haze.query(item,resp[0]);
+                            if (found.length > 0) {
+                                shuffleArray(found);
+                                lf.haze.transact(found[0].tableIndex,resp[0],-1);
+                                lf.haze.add(item.pos.x, item.pos.y, resp[1], 1);
+                                let lifeAdd = 1;
+                                //if (resp[0] == "spekG2") lifeAdd = 2;
+                                item.life = item.life + lifeAdd > 100 ? 100 : item.life + lifeAdd;
+                                //console.log(item.id + " breathed!");
+                                hasBreath = true;
+                            }
+
+                            break;
+
                         default:
 
                             let spks = lf.query(item,"spek");
@@ -52,15 +70,28 @@ function LFCodedBehaviors() {
                                     let nSp = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.spek[resp[1]], { gen: lf.step });
                                     lf.queueItem(nSp);
                                     let lifeAdd = 1;
-                                    if (resp[0] == "spk-g2") lifeAdd = 2;
+                                    //if (resp[0] == "spk-g2") lifeAdd = 2;
                                     item.life = item.life + lifeAdd > 100 ? 100 : item.life + lifeAdd;
-                                    console.log(item.id + " breathed!");
-                                } 
+                                    //console.log(item.id + " breathed!");
+                                } ;
                             }
 
                             break;
                     }
 
+                    let pip = item.obj.querySelector(".breath-pip");
+                    if (item.genetic.respiration.counter > 0) item.genetic.respiration.counter--;
+                    if (item.genetic.respiration.counter == 0) {
+                        if (hasBreath) {
+                            item.genetic.respiration.counter = 20;
+                            if (!pip.classList.contains("breathing")) pip.classList.add("breathing"); 
+                            else pip.classList.remove("breathing");
+                        }
+                        else {
+                            item.genetic.respiration.counter = 0;
+                            pip.classList.remove("breathing"); 
+                        }
+                    }
                 }
             }
         },
@@ -170,36 +201,75 @@ function LFCodedBehaviors() {
         "bab": function(item) {
             // enable chem - see "bac"
             if (!("chem" in item.genetic)) {
-                item.genetic["chem"] = 0;
+                item.genetic["chem"] = { step: 0, counter: 0 };
             }
         },
         "bac": function(item) {
             // chem - enable see "bab"
-            if (item.complex >= 2) {
+            if (item.complex >= 1) {
                 if ("chem" in item.genetic) {
+
+                    let hasChem = false;
                     
                     switch (lf.formation) {
+                        case "haze":
+
+                            let found = lf.haze.query(item,"spekG3");
+                            if (found.length > 0) {
+                                shuffleArray(found);
+                                found.forEach((tb) => {
+                                    if (tb.count > 0 && item.genetic["chem"].step < 2) {
+                                        item.genetic["chem"].step++;
+                                        lf.haze.transact(tb.tableIndex,"spekG3",-1);
+                                    }
+                                });
+
+                                if (item.genetic["chem"].step == 2) {
+                                    lf.haze.add(item.x, item.y, "spekX", 1);
+                                    item.genetic["chem"].step = 0;
+                                    item.life = item.life + 10 > 100 ? 100 : item.life + 10;
+                                    //console.log("chemed!!");
+                                    hasChem = true;
+                                }
+                            }
+
+                            break;
                         default:
                             let g2s = lf.query(item,"spek");
 
                             g2s.forEach((g2) => {
                                 if (g2.core.subtype == "spekG3" && item.genetic["chem"] < 2) {
-                                    item.genetic["chem"]++;
+                                    item.genetic["chem"].step++;
                                     g2.deactivate();
                                 }
                             });
 
-                            if (item.genetic["chem"] == 2) {
+                            if (item.genetic["chem"].step == 2) {
                                 let nDir = Math.floor(Math.random() * 360);
                                 let nVel = Math.floor(Math.random() * 10) + 5;
                                 let nG1 = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.spek["spekX"], { gen: lf.step });
 
-                                item.genetic["chem"] = 0;
-                                item.life = item.life + 10 > 100 ? 100 : item.life + 10;
-                                console.log("chemed!!");
+                                item.genetic["chem"].step = 0;
+                                item.life = item.life + 6 > 100 ? 100 : item.life + 6;
+                                //console.log("chemed!!");
+                                hasChem = true;
                             }
 
                             break;
+                    }
+
+                    let pip = item.obj.querySelector(".chem-pip");
+                    if (item.genetic.chem.counter > 0) item.genetic.chem.counter--;
+                    if (item.genetic.chem.counter == 0) {
+                        if (hasChem) {
+                            item.genetic.chem.counter = 10;
+                            if (!pip.classList.contains("cheming")) pip.classList.add("cheming"); 
+                            else pip.classList.remove("cheming");
+                        }
+                        else {
+                            item.genetic.chem.counter = 0;
+                            pip.classList.remove("cheming"); 
+                        }
                     }
                 }
             }

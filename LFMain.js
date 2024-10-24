@@ -170,6 +170,48 @@ const LFEngine = {
                 lfcore.xtra.drip();
             }
         }
+    },
+    piptest: {
+        init: function() {
+            switch (lf.formation) {
+                case "haze":
+
+                    for (let ii = 0; ii < 100; ii++) {
+                        let nX = lf.w / 2; //Math.floor(Math.random() * lf.w);
+                        let nY = lf.h / 2; //Math.floor(Math.random() * lf.h);
+                        lf.haze.add(nX, nY, "spekG1", 1);
+                    }
+
+                    for (let ii = 0; ii < 100; ii++) {
+                        let nX = lf.w / 2; //Math.floor(Math.random() * lf.w);
+                        let nY = lf.h / 2; //Math.floor(Math.random() * lf.h);
+                        lf.haze.add(nX, nY, "spekG2", 1);
+                    }
+
+                    for (let ii = 0; ii < 100; ii++) {
+                        let nX = lf.w / 2; //Math.floor(Math.random() * lf.w);
+                        let nY = lf.h / 2; //Math.floor(Math.random() * lf.h);
+                        lf.haze.add(nX, nY, "spekG3", 1);
+                    }
+
+                    break;
+            }
+        },
+        run: function() {
+            if (document.querySelectorAll(".proto").length == 0) {
+                let codes = ["aab","aad"]; // ["aab","aad","aaa","bbb"]; // aab, aad = resp, aaa, bbb = move, bac, bab = chem
+                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes }, {}, { init: true, complex: 1});
+                lf.addItem(nPro);
+
+                let codes3 = ["aac","aad"]; // ["aab","aad","aaa","bbb"]; // aab, aad = resp, aaa, bbb = move, bac, bab = chem
+                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes3 }, {}, { init: true, complex: 1});
+                lf.addItem(nPro3);
+
+                let codes2 = ["aaa","bbb","bab","bac","bba","bbc"]; // ["aab","aad","aaa","bbb"]; // aab, aad = resp, aaa, bbb = move, bac, bab = chem
+                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto["protoC"], { gen: 0, codes: codes2 }, {}, { init: true, complex: 2});
+                lf.addItem(nPro2);
+            }
+        }
     }
 };
 
@@ -205,7 +247,7 @@ function LF() {
     me.hash = new LFHash(me.w,me.h,50);
     me.haze = new LFHaze(me.w, me.h, 100);
     me.formation = "haze"; //"spek";
-    me.runmode = "chaos";
+    me.runmode = "piptest";
     me.engine = LFEngine;
     me.remEncode = (itemID) => {
         if (itemID in me.items) {
@@ -274,6 +316,28 @@ function LF() {
             delete me.iHash[itemID];
         }
     };
+    me.pip = (x,y,id,content,pClass=null) => {
+        let pipid = "pip-" + id;
+        let p = document.getElementById(pipid);
+        if (p == undefined || p == null) {
+            p = document.createElement("div");
+            p.id = pipid;
+            p.classList.add("pip");
+            me.obj.appendChild(p);
+        }
+        if (pClass != null && !p.classList.contains(pClass)) p.classList.add(pClass);
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+        p.style.transform = "translateX(-50%) translateY(-50%) rotate(" + Math.floor(Math.random() * 360) + "deg)";
+        p.innerHTML = content;
+        p.classList.remove("fade-out-1");
+        void p.offsetWidth;
+        p.classList.add("fade-out-1");
+    };
+    me.rempip = (id) => {
+        let pip = document.getElementById("pip-" + id);
+        if (pip != undefined && pip != null) pip.remove();
+    }
     me.init = () => {
         if (me.runmode in me.engine) me.engine[me.runmode].init();
         else me.engine.default.init();
@@ -350,6 +414,10 @@ addEventListener("mouseup", (event) => {
             lf.events.push({run: function(params) {
                 lfcore.xtra.drip(params.x, params.y);
             }, params: { x: event.clientX, y: event.clientY }});
+        }
+        if (lf.runmode == "piptest") {
+            console.log("pip test!");
+            lf.pip(event.clientX, event.clientY, "test-pip", "&curren;", "zap");
         }
     }
     lastClick = thisClick;

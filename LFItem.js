@@ -74,30 +74,34 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
                     let midCont = "";
                     let backCont = "";
                     let frontCont = "";
+                    let mainClasses = [];
 
-                    if (cStrP.indexOf(":aaa:") > 0 && cStrP.indexOf(":bbb:") > 0) {
+                    if (cStrP.indexOf(":aaa:") >= 0 && cStrP.indexOf(":bbb:") >= 0) {
                         nObj.classList.add("mover");
-                        backCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>"
+                        backCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>";
                     }
 
-                    if (cStrP.indexOf(":bac:") > 0 && cStrP.indexOf(":bbb:") > 0) {
+                    if (cStrP.indexOf(":bab:") >= 0 && cStrP.indexOf(":bac:") >= 0) {
                         nObj.classList.add("chem");
                         if (me.complex >= 2) {
-                            midCont += "&divonx;";
+                            midCont += "<div class=\"core chem-pip\">&divonx;</div>";
+                        }
+                        else if (me.complex == 1) {
+                            mainClasses.push("chem-pip");
                         }
                     }
 
-                    if (cStrP.indexOf(":bba:") > 0 && cStrP.indexOf(":bbc:") > 0) {
+                    if (cStrP.indexOf(":bba:") >= 0 && cStrP.indexOf(":bbc:") >= 0) {
                         nObj.classList.add("eater");
                         frontCont = "<div class=\"mouth\"><span class=\"open\">&sum;</span><span class=\"closed\">O</span><div>";
                     }
 
-                    if (cStrP.indexOf(":aab:") > 0 && (cStrP.indexOf(":aac:") > 0 || cStrP.indexOf(":aad:") > 0)) {
+                    if (cStrP.indexOf(":aad:") >= 0 && (cStrP.indexOf(":aab:") >= 0 || cStrP.indexOf(":aac:") >= 0)) {
                         nObj.classList.add("breather");
-                        midCont += "&Colon;"
+                        midCont += "<div class=\"core breath-pip\">&Colon;</div>"
                     }
 
-                    if (midCont.length == 0) midCont = "&horbar;";
+                    if (midCont.length == 0) midCont = "<div class=\"core " + mainClasses.join(" ") + "\">&horbar;</div>";
 
                     pHTML = "<div class=\"back\">" + backCont + "</div>";
                     pHTML += "<div class=\"mid\">";

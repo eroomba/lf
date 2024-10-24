@@ -679,9 +679,9 @@ const lfcore = {
             dformula: [] 
         },
 
-        // functions
+        // snip functions
 
-        // update
+        // snip update
         update: function(snip) {
             if (snip.life != null)
                 snip.life--;
@@ -848,7 +848,7 @@ const lfcore = {
             }
         },
         
-        // decay
+        // snip decay
         decay: function(snipName, snipCode, pos) {
             if (lfcore.snip[snipName].subtype == "snipPre" || snipCode.length == 2) {
                 let nDir = Math.floor(Math.random() * 360);
@@ -950,14 +950,14 @@ const lfcore = {
             formula: () => { 
                 return "strand"; 
             }, 
-            range: 25, 
+            range: 15, 
             decay: 1000,
             dformula: []
         },
 
-        // functions
+        // strand functions
 
-        // update
+        // strand update
         update: function(strand) {
 
             if (strand.life != null)
@@ -1030,7 +1030,7 @@ const lfcore = {
                             combined = true;
                             let dspCode = strand.dynamic["codes"].join(":");
                             let cLen = strand.dynamic["codes"].length;
-                            console.log("s " + strand.id + " combined : " + dspCode + " [" + cLen + "]");
+                            //console.log("s " + strand.id + " combined : " + dspCode + " [" + cLen + "]");
                         }
                     }
                 });
@@ -1081,7 +1081,7 @@ const lfcore = {
             }
         },
         
-        // decay
+        // strand decay
         decay: function(strandCodes, pos) {
             let sCount = strandCodes.length;
             let sCodes = strandCodes.slice();
@@ -1185,9 +1185,9 @@ const lfcore = {
         },
 
 
-        // functions
+        // proto functions
 
-        // update
+        // proto update
         update: function(proto) {
 
             if (proto.life != null)
@@ -1205,19 +1205,24 @@ const lfcore = {
                     proto.obj.style.opacity = 0.9;
                 }
         
+                /* 
                 if (proto.life >= 80) {
                     let nDir = (proto.pos.dir + 180) % 360;
                     let nVel = proto.pos.vel;
+                    if (nVel < 1) nVel = Math.floor(Math.random() * 11) + 5;
                     let iOps = {
                         init: true,
                         complex: proto.complex
                     }
-                    let nProto = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDir, nVel), lfcore.proto[proto.core.subtype], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)), iOps);
+                    let dX = nVel - Math.floor(Math.random() * ((nVel * 2) + 1));
+                    let dY = nVel - Math.floor(Math.random() * ((nVel * 2) + 1));
+                    let nProto = new LFItem(new LFVector(proto.pos.x + dX, proto.pos.y + dY, nDir, nVel), lfcore.proto[proto.core.subtype], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)), iOps);
                     nProto.life = 40;
-                    proto.life -= 40;
+                    proto.life = 40;
                     lf.queueItem(nProto);
                     console.log("divided!!!");
                 }
+                */
         
                 let preX = proto.pos.x;
                 let preY = proto.pos.y;
@@ -1252,7 +1257,7 @@ const lfcore = {
             }
         },
         
-        // decay
+        // proto decay
         decay: function(proto) {
             let blkCount = 3;
             if (proto.core.subtype == "protoS") blkCount = 0;
@@ -1271,6 +1276,8 @@ const lfcore = {
             }
         
             lfcore.strand.decay(proto.dynamic["codes"], proto.pos);
+
+            console.log("proto " + proto.id + " died.");
         }
     },
 
@@ -1764,35 +1771,34 @@ function LFHaze(w, h, sub) {
         me.contents.forEach((oo) => { me.table[i][oo] = 0; });
     }
 
-    me.query = (item, options = {}) => {
-        let res = {};
-        me.contents.forEach((oo) => { res[oo] = 0; });
-        let qRange = item.core.range;
+    me.query = (item, type = null, options = {}) => {
+        let res = [];
+        if (type != null) {
+            let qRange = item.core.range;
 
-        if ("range" in options) qRange = options["range"];
+            if ("range" in options) qRange = options["range"];
 
-        if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
-            let x = item.pos.x;
-            let y = item.pos.y;
-            let r = qRange;
-            let qX = Math.floor(x / me.sub);
-            let qY = Math.floor(y / me.sub);
-            let qSpanX = 1;
-            let qSpanY = 1;
-            while (r > me.sW * (qSpanX + 1)) qSpanX++;
-            while (r > me.sH * (qSpanY + 1)) qSpanY++;
-            for (let i = qX - qSpanX; i <= qX + qSpanX; i++) {
-                for (let j = qY - qSpanY; j <= qY + qSpanY; j++) {
-                    let qIdx = (j * me.sW) + i;
-                    if (qIdx >= 0 && qIdx < me.table.length) {
-                        me.contents.forEach((spk) => {
-                            res[spk] += me.table[qIdx][spk];
-                        });
+            if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
+                let x = item.pos.x;
+                let y = item.pos.y;
+                let r = qRange;
+                let qX = Math.floor(x / me.sub);
+                let qY = Math.floor(y / me.sub);
+                let qSpanX = 1;
+                let qSpanY = 1;
+                while (r > me.sub * (qSpanX + 1)) qSpanX++;
+                while (r > me.sub * (qSpanY + 1)) qSpanY++;
+                for (let i = qX - qSpanX; i <= qX + qSpanX; i++) {
+                    for (let j = qY - qSpanY; j <= qY + qSpanY; j++) {
+                        let qIdx = (j * me.sW) + i;
+                        if (qIdx >= 0 && qIdx < me.table.length) {
+                            if (type in me.table[qIdx] && me.table[qIdx][type] > 0)
+                                res.push({tableIndex: qIdx, count: me.table[qIdx][type]});
+                        }
                     }
                 }
             }
         }
-
         return res;
     };
 
@@ -1812,6 +1818,11 @@ function LFHaze(w, h, sub) {
         let rY = Math.floor(y / me.sub);
         let rIdx = (rY * me.sW) + rX;
         if (type in me.table[rIdx]) me.table[rIdx][type] -= count;
+    }
+
+    me.transact = (tableIndex,type,amount) => {
+        if (tableIndex >= 0 && tableIndex < me.table.length && me.table[tableIndex][type] != undefined)
+            me.table[tableIndex][type] += amount;
     }
 
     me.effect = (force) => {
@@ -1869,9 +1880,10 @@ function LFHaze(w, h, sub) {
                 if (tbObj) {
                     let tbHTML = "";
 
-                    Object.keys(me.contents).forEach((ky) => {
-                        if (lf.haze.table[ti][ky] > 0)
+                    me.contents.forEach((ky) => {
+                        if (lf.haze.table[ti][ky] > 0) {
                             tbHTML += "<div>" + ky + ": " + lf.haze.table[ti][ky] + "</div>";
+                        }
                     });
 
                     tbObj.innerHTML = tbHTML;
