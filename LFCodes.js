@@ -1,424 +1,535 @@
 let blkCount = 3;
 let replCount = 6;
 
-function LFCodedBehaviors() {
+const genRanIdx = 0;
+
+const genMovementSpeed = 1;
+
+const genDigestionCount = 1;
+const genDigestionGutCount = 2;
+const genDigestionWeight = 3;
+const genxDigestionGutType = 0;
+const genxDigestionGutSubtype = 1;
+const genxDigestionGutCode = 2;
+const genxDigestionGutParentId = 3;
+
+const genChemCap = 1;
+const genChemStep = 2;
+const genChemCounter = 3;
+const genChemEmit = 4;
+
+const genRespCounter = 1;
+const genRespIn = 2;
+const genRespOut = 3;
+
+const genSeekTargetX = 1;
+const genSeekTargetY = 2;
+
+const genPerceptionRange = 1;
+const genPerceptionCount = 2;
+
+const genOffingWeight = 1;
+
+function LFGenetic(parentVals = null) {
     let me = this;
-    me.validOrts = ["a","b","c","d"];
-    me.gens = {
-        "reset": function(item) {
-            if ("perception" in item.genetic) item.genetic["perception"]["ran"] = false; 
-            if ("seek" in item.genetic) { item.genetic["seek"]["target"] = null;  item.genetic["seek"]["ran"] = false; }
-        },
-        "aaa": function(item) {
-            // enable movement - see "bbb"
-            if (!("speed" in item.genetic)) {
-                item.genetic["speed"] = Math.floor(Math.random() * 9) + 5;
-            }
-        },
-        "aab": function(item) {
-            // enable respiration 1 - see "aad"
-            if (!("respiration" in item.genetic)) {
-                item.genetic["respiration"] = { code:["spekG1","spekG2"], counter: 0 };
-            }
-        },
-        "aac": function(item) {
-            // enable respiration 2 - see "aad"
-            if (!("respiration" in item.genetic)) {
-                item.genetic["respiration"] = { code: ["spekG2","spekG1"], counter: 0 };
-            }
-        },
-        "aad": function(item) {
-            // respirate - enable see "aab"
-            if (item.complex >= 1) {
-                if ("respiration" in item.genetic && Array.isArray(item.genetic["respiration"]["code"])) {
-                    let resp = item.genetic["respiration"].code;
+    me.flags = {
+        movement: false,
+        digestion: false,
+        chem: false,
+        respiration: false,
+        seek: false,
+        perception: false,
+        offing: false
+    };
+    me.vals = {
+        movement: [0,-1],
+        digestion: [0,-1,-1,-1,-1,-1],
+        chem: [0,-1,-1,-1,-1],
+        respiration: [0,-1,-1,-1],
+        seek: [0,-1,-1],
+        perception: [0, -1, -1],
+        offing: [0,-1]
+    };
+    me.extra = {
+        digestion: ["","","",""],
+        perception: []
+    }
 
-                    let hasBreath = false;
+    me.reset = function(item) {
+        Object.keys(me.vals).forEach(ky => me.vals[ky][genRanIdx] = 0);
+        me.vals.perception[genPerceptionCount] = 0;
+        me.extra.perception = [];
+        me.vals.seek[genSeekTargetX] = -1;
+        me.vals.seek[genSeekTargetY] = -1;
+    };
 
-                    switch (lf.formation) {
-                        case "haze":
+    if (parentVals != null && parentVals != undefined) {
+        me.vals = JSON.parse(JSON.stringify(parentVals));
+    }
 
-                            let found = lf.haze.query(item,resp[0]);
-                            if (found.length > 0) {
-                                shuffleArray(found);
-                                lf.haze.transact(found[0].tableIndex,resp[0],-1);
-                                lf.haze.add(item.pos.x, item.pos.y, resp[1], 1);
-                                let lifeAdd = 1;
-                                //if (resp[0] == "spekG2") lifeAdd = 2;
-                                item.life = item.life + lifeAdd > 100 ? 100 : item.life + lifeAdd;
-                                //console.log(item.id + " breathed!");
-                                hasBreath = true;
-                            }
+    me.vals.digestion[genDigestionCount] = 0;
+    me.vals.digestion[genDigestionGutCount] = 0;
+    me.extra.digestion[genxDigestionGutType] = "";
+    me.extra.digestion[genxDigestionGutSubtype] = "";
+    me.extra.digestion[genxDigestionGutCode] = "";
+    me.extra.digestion[genxDigestionGutParentId] = "";
 
-                            break;
+    me.vals.perception[genPerceptionCount] = 0;
+    me.extra.perception = [];
 
-                        default:
+    me.vals.chem[genChemCap] = 0;
+    me.vals.chem[genChemCounter] = 10;
+    me.vals.chem[genChemStep] = 0;
+    me.vals.chem[genChemEmit] = 0;
+    
+    me.vals.respiration[genRespCounter] = 0;
 
-                            let spks = lf.query(item,"spek");
+    me.vals.movement[genSeekTargetX] = -1;
+    me.vals.movement[genSeekTargetY] = -1;
+}
 
-                            let r1 = [];
-                            spks.forEach((sp) => {
-                                if (sp.core.subtype == resp[0] && r1.length <= 2) r1.push(sp);
-                            });
-
-                            if (r1.length > 0) {
-                                let count = r1.length;
-                                r1.forEach((r) => { r.deactivate(); });
-                                for (let r2 = 0; r2 < count; r2++) {
-                                    let nDir =  Math.floor(Math.random() * 360);
-                                    let nVel = Math.floor(Math.random() * 6) + 3;
-                                    let nSp = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.spek[resp[1]], { gen: lf.step });
-                                    lf.queueItem(nSp);
-                                    let lifeAdd = 1;
-                                    //if (resp[0] == "spk-g2") lifeAdd = 2;
-                                    item.life = item.life + lifeAdd > 100 ? 100 : item.life + lifeAdd;
-                                    //console.log(item.id + " breathed!");
-                                } ;
-                            }
-
-                            break;
-                    }
-
-                    let pip = item.obj.querySelector(".breath-pip");
-                    if (item.genetic.respiration.counter > 0) item.genetic.respiration.counter--;
-                    if (item.genetic.respiration.counter == 0) {
-                        if (hasBreath) {
-                            item.genetic.respiration.counter = 20;
-                            if (!pip.classList.contains("breathing")) pip.classList.add("breathing"); 
-                            else pip.classList.remove("breathing");
-                        }
-                        else {
-                            item.genetic.respiration.counter = 0;
-                            pip.classList.remove("breathing"); 
-                        }
-                    }
+const LFBehavior = {
+    respOps: ["spekG1","spekG2"],
+    breathe: (item) => {
+        if (item.genetic.flags.respiration && item.complex >= 1) {
+            let resp = [];
+            if (item.genetic.flags.respiration) {
+                let respIn = null;
+                let respOut = null
+                if (item.genetic.vals.respiration[genRespIn] < 0 || item.genetic.vals.respiration[genRespOut] < 0) {
+                    // init respiration
+                    if (Math.random() > 0.5) { item.genetic.vals.respiration[genRespIn] = 0; item.genetic.vals.respiration[genRespOut] = 1; }
+                    else { item.genetic.vals.respiration[genRespIn] = 1; item.genetic.vals.respiration[genRespOut] = 0; }
                 }
-            }
-        },
-        "bbb": function(item) {
-            // movement - enable see "aaa"
-            if (item.complex >= 1) {
-                if ("speed" in item.genetic) {
+                
+                respIn = LFBehavior.respOps[item.genetic.vals.respiration[genRespIn]];
+                respOut = LFBehavior.respOps[item.genetic.vals.respiration[genRespOut]];
 
-                    let iSpeed = item.genetic["speed"];
-                    if (item.complex == 1) iSpeed *= 0.5;
+                let hasBreath = false;
 
-                    let mvSet = false;
-                    if ("seek" in item.genetic) { 
-                        if (!item.genetic["seek"]["ran"]) this["cbd"](item);
-                        if (item.genetic["seek"]["target"] != null) {
-                            let target = item.genetic["seek"]["target"];
-                            let des = target.pos.subtract(item.pos);
-                            item.pos.dir = des.dir;
-                            if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
-                                item.pos.vel = iSpeed;
-                                if (des.magnitude() < iSpeed) item.pos.vel = des.magnitude();
-                            }
-                            mvSet = true;
-                        }
-                    }
-                    
-                    if (!mvSet) {
-                        if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
-                            item.pos.dir += 10 - Math.floor(Math.random() * 21);
-                            item.pos.vel = iSpeed; 
-                        }
-                    } 
-
-                    item.obj.setAttribute("dir", item.pos.dir);
-                    item.obj.setAttribute("speed", item.genetic["speed"]);
-
-                    item.pos.move(0);
-                    //console.log(item.id + " moved!");
+                let found = lf.haze.query(item,respIn);
+                if (found.length > 0) {
+                    shuffleArray(found);
+                    lf.haze.transact(found[0].tableIndex,respIn,-1);
+                    lf.haze.add(item.pos.x, item.pos.y, respOut, 1);
+                    let lifeAdd = 1;
+                    //if (resp[0] == "spekG2") lifeAdd = 2;
+                    item.life = item.life + lifeAdd > 100 ? 100 : item.life + lifeAdd;
+                    //console.log(item.id + " breathed!");
+                    hasBreath = true;
                 }
-            }
-        },
-        "bba": function(item) {
-            // enable digestion 1 - see "bbc"
-            if (!("digestion" in item.genetic)) {
-                let dOps = {
-                    "snipEx": Math.floor(Math.random() * 5) + 5,
-                    "struckSeed": Math.floor(Math.random() * 15) + 5
-                };
-                item.genetic["digestion"] = {
-                    weights: dOps,
-                    count: 0,
-                    gut: []
-                };
-            }
-        },
-        "bbc": function(item) {
-            // digestion - enable see "bba"
-            if (item.complex >= 2) {           
-                if ("digestion" in item.genetic) {
-                    let gCount = item.genetic["digestion"]["count"];
-                    let digGut = item.genetic["digestion"]["gut"];
-                    let isDig = digGut.length > 0 ? true : false;
-                    let dWeights = item.genetic["digestion"]["weights"];
-                    if (gCount > 0) {
-                        item.genetic["digestion"]["count"]--;
-                        item.life++;
+
+                let pip = item.obj.querySelector(".breath-pip");
+                if (item.genetic.vals.respiration[genRespCounter] > 0) item.genetic.vals.respiration[genRespCounter]--;
+                if (item.genetic.vals.respiration[genRespCounter] == 0) {
+                    if (hasBreath) {
+                        item.genetic.vals.respiration[genRespCounter]= 20;
+                        if (!pip.classList.contains("breathing")) pip.classList.add("breathing"); 
+                        else pip.classList.remove("breathing");
                     }
                     else {
-                        if (isDig) {
-                            switch (digGut[0].type) {
-                                case "snip":
-                                    lfcore.snip.decay(digGut[0].subtype, digGut[0].code, item.pos);
-                                    break;
-                                case "struck":
-                                    lfcore.struck.decay(digGut[0].subtype, item.pos);
-                                    break;
-                            }
-                            let addV = dWeights[digGut[0].subtype];
-                            item.life = item.life + addV > 100 ? 100 : item.life + addV;
-                            item.genetic["digestion"]["gut"] = [];
-                            item.obj.classList.remove("eating");
-                        }
-                        else {
-                            let qR = item.core.range / 2;
-                            let fd = lf.query(item, null, { range: qR });
-
-                            fd.forEach((fItem) => {
-                                if (fItem.core.subtype in dWeights && digGut.length == 0) {
-                                    let des = fItem.pos.subtract(item.pos);
-
-                                    if (Math.abs(des.dir) < 30 || des.magnitude() < item.core.range / 2) {
-                                        item.genetic["digestion"]["count"] = item.genetic["digestion"]["weights"][fItem.core.subtype];
-                                        let fCode = "";
-                                        if (fItem.core.type == "snip") fCode = fItem.dynamic["code"];
-                                        item.genetic["digestion"]["gut"].push({type:fItem.core.type,subtype:fItem.core.subtype,code:fCode});
-                                        item.life++;
-                                        fItem.deactivate();
-                                        item.obj.classList.add("eating");
-                                    }
-                                }
-                            });
-                        }
+                        item.genetic.vals.respiration[genRespCounter] = 0;
+                        pip.classList.remove("breathing"); 
                     }
                 }
             }
-        },
-        "bab": function(item) {
-            // enable chem - see "bac"
-            if (!("chem" in item.genetic)) {
-                item.genetic["chem"] = { step: 0, counter: 0 };
+        }
+    },
+    move: function(item) {
+        if (item.genetic.flags.movement && item.complex >= 1) {
+            if (item.genetic.vals.movement[genMovementSpeed] < 0) item.genetic.vals.movement[genMovementSpeed] = Math.floor(Math.random() * 8) + 3;
+
+            let iSpeed =item.genetic.vals.movement[genMovementSpeed];
+            if (item.complex == 1) iSpeed *= 0.5;
+
+            let mvSet = false;
+            if (item.genetic.flags.seek) { 
+                if (item.genetic.vals.seek[genRanIdx] == 0) LFBehavior.seek(item);
+                if (item.genetic.vals.seek[genSeekTargetX] >= 0 && item.genetic.vals.seek[genSeekTargetY]) {
+                    let target = new LFVector(item.genetic.vals.seek[genSeekTargetX], item.genetic.vals.seek[genSeekTargetY], 0, 0);
+                    let des = item.pos.subtract(target);
+                    let desDir = des.dir;
+                    if (Math.abs(item.pos.dir - desDir) > 30) {
+                        desDir = item.pos.dir + (30 * (Math.abs(desDir)/desDir));
+                    }
+                    item.pos.dir = desDir;
+                    if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
+                        item.pos.vel = iSpeed;
+                        if (des.magnitude() < iSpeed) item.pos.vel = des.magnitude();
+                    }
+                    mvSet = true;
+                }
             }
-        },
-        "bac": function(item) {
-            // chem - enable see "bab"
-            if (item.complex >= 1) {
-                if ("chem" in item.genetic) {
+            
+            if (!mvSet) {
+                if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
+                    item.pos.dir += 10 - Math.floor(Math.random() * 21);
+                    item.pos.vel = iSpeed; 
+                }
+            } 
 
-                    let hasChem = false;
-                    
-                    switch (lf.formation) {
-                        case "haze":
+            item.obj.setAttribute("dir", item.pos.dir);
+            item.obj.setAttribute("speed", item.genetic["speed"]);
 
-                            let found = lf.haze.query(item,"spekG3");
-                            if (found.length > 0) {
-                                shuffleArray(found);
-                                found.forEach((tb) => {
-                                    if (tb.count > 0 && item.genetic["chem"].step < 2) {
-                                        item.genetic["chem"].step++;
-                                        lf.haze.transact(tb.tableIndex,"spekG3",-1);
-                                    }
-                                });
-
-                                if (item.genetic["chem"].step == 2) {
-                                    lf.haze.add(item.x, item.y, "spekX", 1);
-                                    item.genetic["chem"].step = 0;
-                                    item.life = item.life + 10 > 100 ? 100 : item.life + 10;
-                                    //console.log("chemed!!");
-                                    hasChem = true;
-                                }
-                            }
-
+            item.pos.move(0);
+            //console.log(item.id + " moved!");
+        }
+    },
+    digestionps: ["snipEx","struckSeed","struckHusk"],
+    eat: function(item) {
+        if (item.genetic.flags.digestion && item.complex >= 2) {  
+            if (item.genetic.flags.offing && item.genetic.vals.offing[genOffingWeight] < 0) item.genetic.vals.offing[genOffingWeight] = Math.random() > 0.5 ? 0.25 : 0;
+            let w1 = 0;
+            let w2 = 0;
+            let w3 = 0;
+            if (item.genetic.vals.digestion[genDigestionWeight] < 0) {
+                let maxWeight = 20;
+                w1 = Math.floor(Math.random() * maxWeight);
+                w2 = w1 * 3;
+                w3 = maxWeight - w1;
+                item.genetic.vals.digestion[genDigestionWeight] = w1;
+                item.genetic.vals.digestion[genDigestionWeight + 1] = w2;
+                item.genetic.vals.digestion[genDigestionWeight + 2] = w3;
+            }
+            else {
+                w1 = item.genetic.vals.digestion[genDigestionWeight];
+                w2 = item.genetic.vals.digestion[genDigestionWeight + 1];
+                w3 = item.genetic.vals.digestion[genDigestionWeight + 2];
+            }
+                 
+            let digCount = item.genetic.vals.digestion[genDigestionCount];
+            let digGutCount = item.genetic.vals.digestion[genDigestionGutCount];
+            let digGut = [];
+            if (digGutCount > 0) {
+                digGut = [ {
+                    type: item.genetic.extra.digestion[genxDigestionGutType],
+                    subtype: item.genetic.extra.digestion[genxDigestionGutSubtype],
+                    code: item.genetic.extra.digestion[genxDigestionGutCode],
+                    parent: item.genetic.extra.digestion[genxDigestionGutParentId],
+                } ];
+            }
+            let isDig = digGutCount > 0 ? true : false;
+            let dWeights = {};
+            if (w1 > 0) dWeights[LFBehavior.digestionps[0]] = w1; 
+            if (w2 > 0) dWeights[LFBehavior.digestionps[1]] = w2; 
+            if (w3 > 0) dWeights[LFBehavior.digestionps[2]] = w3;
+            if (digCount > 0) {
+                item.genetic.vals.digestion[genDigestionCount]--;
+                item.life++;
+            }
+            else {
+                if (isDig) {
+                    switch (item.genetic.extra.digestion[genxDigestionGutType]) {
+                        case "snip":
+                            lfcore.snip.decay(item.genetic.extra.digestion[genxDigestionGutSubtype], item.genetic.extra.digestion[genxDigestionGutCode], item.pos);
                             break;
-                        default:
-                            let g2s = lf.query(item,"spek");
-
-                            g2s.forEach((g2) => {
-                                if (g2.core.subtype == "spekG3" && item.genetic["chem"] < 2) {
-                                    item.genetic["chem"].step++;
-                                    g2.deactivate();
-                                }
-                            });
-
-                            if (item.genetic["chem"].step == 2) {
-                                let nDir = Math.floor(Math.random() * 360);
-                                let nVel = Math.floor(Math.random() * 10) + 5;
-                                let nG1 = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.spek["spekX"], { gen: lf.step });
-
-                                item.genetic["chem"].step = 0;
-                                item.life = item.life + 6 > 100 ? 100 : item.life + 6;
-                                //console.log("chemed!!");
-                                hasChem = true;
-                            }
-
+                        case "struck":
+                            lfcore.struck.decay(item.genetic.extra.digestion[genxDigestionGutSubtype], item.pos);
                             break;
                     }
+                    let addV = dWeights[item.genetic.extra.digestion[genxDigestionGutSubtype]];
+                    if (item.genetic.flags.offing && item.genetic.extra.digestion[genxDigestionGutParentId] == item.id) addV = Math.floor(addV * item.genetic.vals.offing[genOffingWeight]);
+                    if (addV < 1) addV = 1;
+                    else if (addV > 20) addV = 20;
+                    item.life = item.life + addV > 100 ? 100 : item.life + addV;
+                    item.genetic.vals.digestion[genDigestionGutCount] = 0;
+                    item.obj.classList.remove("eating");
+                }
+                else {
+                    let qR = item.core.range / 2;
+                    let fd = lf.query(item, null, { range: qR });
 
-                    let pip = item.obj.querySelector(".chem-pip");
-                    if (item.genetic.chem.counter > 0) item.genetic.chem.counter--;
-                    if (item.genetic.chem.counter == 0) {
-                        if (hasChem) {
-                            item.genetic.chem.counter = 10;
-                            if (!pip.classList.contains("cheming")) pip.classList.add("cheming"); 
-                            else pip.classList.remove("cheming");
-                        }
-                        else {
-                            item.genetic.chem.counter = 0;
-                            pip.classList.remove("cheming"); 
-                        }
-                    }
-                }
-            }
-        },
-        "cba": function(item) {
-            // enable perception - see "cbb"
-            if (item.complex >= 2) {
-                if (!("perception" in item.genetic)) {
-                    item.genetic["perception"] = { ran: false, range: (Math.floor(Math.random() * 4) + 2) * item.core.range, found: new Array() };
-                    //console.log("perception: " + item.genetic["perception"]["range"]);
-                }
-            }
-        },
-        "cbb": function(item) {
-            // perception - enable see "cba"
-            if (item.complex >= 2) {
-                if ("perception" in item.genetic && !item.genetic["perception"].ran) {
-                    let pRange = item.genetic["perception"]["range"];
+                    fd.forEach((fItem) => {
+                        if (fItem.core.subtype in dWeights && digGutCount == 0 && (fItem.parent != item.id || (item.genetic.flags.offing && item.genetic.vals.offing[genOffingWeight] > 0))) {
+                            let des = fItem.pos.subtract(item.pos);
 
-                    item.genetic["perception"]["found"] = lf.query(item, null, { range: pRange });
-                    //item.genetic["perception"]["found"].forEach((it) => {it.obj.style.color = "orange"; });
-                    item.genetic["perception"]["ran"] = true;
-                }
-            }
-        },
-        "cbc": function(item) {
-            // enable seek - see "cbd"
-            if (!("seek" in item.genetic)) item.genetic["seek"] = { target: null, ran: false };
-        },
-        "cbd": function(item) {
-            // seek - enable see "cbc"
-            if (item.complex >= 2) {
-                if ("seek" in item.genetic && "perception" in item.genetic) {
-                    if (!item.genetic["perception"]["ran"]) { this["cbb"](item); }
-                    let minD = null;
-                    item.genetic["perception"]["found"].forEach((sk) => {
-                        if ("digestion" in item.genetic && item.genetic["digestion"]["count"] == 0) {
-                            if (sk.core.subtype in item.genetic["digestion"]["weights"]) {
-                                let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
-                                if (item.genetic["seek"]["target"] == null) { minD = dD; item.genetic["seek"]["target"] = sk; }
-                                else if (dD < minD) { minD = dD; item.genetic["seek"]["target"] = sk; }
-                            }
-                        }
-                        if ("chem" in item.genetic && item.genetic["chem"] < 2) {
-                            if (sk.core.subtype == "spekG3") {
-                                let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
-                                if (item.genetic["seek"]["target"] == null) { minD = dD; item.genetic["seek"]["target"] = sk; }
-                                else if (dD < minD) { minD = dD; item.genetic["seek"]["target"] = sk; }
-                            }
-                        }
-                        if ("respiration" in item.genetic) {
-                            if (sk.core.subtype == item.genetic["respiration"][0]) {
-                                let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
-                                if (item.genetic["seek"]["target"] == null) { minD = dD; item.genetic["seek"]["target"] = sk; }
-                                else if (dD < minD) { minD = dD; item.genetic["seek"]["target"] = sk; }
+                            if (Math.abs(des.dir) < 30 || des.magnitude() < item.core.range / 2) {
+                                console.log("got to eat");
+                                item.genetic.vals.digestion[genDigestionCount] = dWeights[fItem.core.subtype];
+                                let fCode = "";
+                                if (fItem.core.type == "snip") fCode = fItem.dynamic["code"];
+                                item.genetic.vals.digestion[genDigestionGutCount]++;
+                                item.genetic.extra.digestion[genxDigestionGutType] = fItem.core.type;
+                                item.genetic.extra.digestion[genxDigestionGutSubtype] = fItem.core.subtype;
+                                item.genetic.extra.digestion[genxDigestionGutCode] = fCode;
+                                item.genetic.extra.digestion[genxDigestionGutParentId] = fItem.parent;
+                                item.life++;
+                                fItem.deactivate();
+                                item.obj.classList.add("eating");
                             }
                         }
                     });
-                    //if (item.genetic["seek"]["target"] != null) {
-                        //item.genetic["seek"]["target"].obj.style.color = "red";
-                        //console.log("Seeking " + item.genetic["seek"]["target"].id);
-                    //}
                 }
             }
-        },
-        "ccc": function(item) {
-            // build blks and store
-            if (item.type == "strand") {
-                // TODO
-            }
-        },
-        "cab": function(item) {
-            // enable storage - see "cad"
-            if (item.complex >= 1) {
-                if (!("storage" in item.genetic)) {
-                    item.genetic["storage"] = { "max": Math.floor(Math.random() * 20) + 10 };
-                    item.dynamic["storage"] = { "snipBlk": 0, "snipEx": 0 };
-                    Object.keys(lfcore.ort).forEach((ky) => {
-                        if (ky.indexOf("ort") == 0) item.dynamic["storage"][ky] = 0;
-                    });
+        }
+    },
+    chem: function(item) {
+        if (item.genetic.flags.chem && item.complex >= 1) {
+
+            let hasChem = false;
+            
+            let found = lf.haze.query(item,"spekG3");
+            if (found.length > 0) {
+                shuffleArray(found);
+                found.forEach((tb) => {
+                    if (tb.count > 0 && item.genetic.vals.chem[genChemCap] < 3) {
+                        item.genetic.vals.chem[genChemCap]++;
+                        lf.haze.transact(tb.tableIndex,"spekG3",-1);
+                    }
+                });
+
+                if (item.genetic.vals.chem[genChemCap] >= 3) {
+                    hasChem = true;
+                    if (item.genetic.vals.chem[genChemStep] >= 3) {
+                        item.genetic.vals.chem[genChemCounter] = 0;
+                        item.genetic.vals.chem[genChemCap] -= 3;
+                        item.genetic.vals.chem[genChemStep] = 0;
+                        item.genetic.vals.chem[genChemEmit]++;
+                        item.life = item.life + 5 > 100 ? 100 : item.life + 5;
+                        lf.haze.add(item.x, item.y, "spekX", 1);
+                        if (item.genetic.vals.chem[genChemEmit] >= 24) {
+                            let nDir = (item.pos.dir + 180) % 360;
+                            let nVel = 2;
+                            let nEx = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip["snipEx"], { gen: lf.step, parent: item.id, code: lfcore.snip["snipEx"].data });
+                            lf.queueItem(nEx);
+                            item.genetic.vals.chem[genChemEmit] = 0;
+                        }
+                        //console.log("chemed!!");
+                    }
+                    else {
+                        item.genetic.vals.chem[genChemStep]++;
+                    }
                 }
             }
-        },
-        "cad": function(item) {
-            // use storage - enable see "cab"
-            if ("storage" in item.genetic) {
-                let maxS = item.genetic["storage"];
 
+            let pip = item.obj.querySelector(".chem-pip");
+            if (item.genetic.vals.chem[genChemCounter] > 0) item.genetic.vals.chem[genChemCounter]--;
+            if (item.genetic.vals.chem[genChemCounter] == 0) {
+                if (hasChem) {
+                    item.genetic.vals.chem[genChemCounter] = 10;
+                    if (!pip.classList.contains("cheming")) pip.classList.add("cheming"); 
+                    else pip.classList.remove("cheming");
+                }
+                else {
+                    item.genetic.vals.chem[genChemCounter] = 0;
+                    pip.classList.remove("cheming"); 
+                }
             }
-        },
-        // code starting with d does not combine into strands
-        "ddd": function(item) {
-            // trigger replication
-            if (item.core.type == "snip") {
-                let oths = lf.query(item, null, { range: item.core.range * 2 });
+            else if (!hasChem) {
+                pip.classList.remove("cheming"); 
+                item.genetic.vals.chem[genChemCounter] = 10;
+            }   
+        }
+    },
+    perceive: function(item) {
+        if (item.genetic.flags.perception && item.complex >= 1) {
+            if (item.genetic.vals.perception[genPerceptionRange] < 0) item.genetic.vals.perception[genPerceptionRange] =  (Math.floor(Math.random() * 4) + 2) * item.core.range;
+            if (item.genetic.vals.perception[genRanIdx] == 0) {
+                let pRange = item.genetic.vals.perception[genPerceptionRange];
 
-                oths.forEach((oth) => {
+                item.genetic.extra.perception = [];
 
-                    if (oth.core.type == "strand") {
-
-                        let snps = lf.query(oth, "snip");
-        
-                        let blks = [];
-                        snps.forEach((snp) => {
-                            if (snp.core.subtype == "snipBlk" && blks.length <= 2) blks.push(snp);
+                item.genetic.extra.perception = lf.query(item, null, { range: pRange });
+                //item.genetic["perception"]["found"].forEach((it) => {it.obj.style.color = "orange"; });
+                item.genetic.vals.perception[genRanIdx] = 1;
+            }
+        }
+    },
+    seek: function(item) {
+        if (item.genetic.flags.perception && item.genetic.flags.seek && item.complex >= 1) {
+            
+            if (item.genetic.vals.perception[genRanIdx] == 0) LFBehavior.perceive(item);
+            if (item.genetic.flags.respiration) {
+                let rsp = lf.haze.query(item, item.genetic.vals.respiration[LFBehavior.respOps[item.genetic.vals.respiration[genRespIn]]]);
+                let minD = null;
+                rsp.forEach((tb) => {
+                    let tbC = lf.haze.getCellPos(tb.tableIndex);
+                    let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                    if (item.genetic.vals.seek[genSeekTargetX] < 0 &&  item.genetic.vals.seek[genSeekTargetY]) { 
+                        minD = dD;
+                        item.genetic.vals.seek[genSeekTargetX] = tbC.x;
+                        item.genetic.vals.seek[genSeekTargetY] = tbC.y;
+                    }
+                    else if (dD < minD) { 
+                        minD = dD;
+                        item.genetic.vals.seek[genSeekTargetX] = tbC.x;
+                        item.genetic.vals.seek[genSeekTargetY] = tbC.y; 
+                    }
+                });
+            }
+            if (item.genetic.flags.chem) {
+                if (item.genetic.vals.chem[genChemCap] < 3) {
+                    let fG3 = lf.haze.query(item, "spekG3");
+                    if (fG3.length > 0) {
+                        let minD = null;
+                        fG3.forEach((tb) => {
+                            let tbC = lf.haze.getCellPos(tb.tableIndex);
+                            let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                            if (item.genetic.vals.seek[genSeekTargetX] < 0 &&  item.genetic.vals.seek[genSeekTargetY]) { 
+                                minD = dD; 
+                                item.genetic.vals.seek[genSeekTargetX] = tbC.x;
+                                item.genetic.vals.seek[genSeekTargetY] = tbC.y;
+                            }
+                            else if (minD == null || dD < minD) { 
+                                minD = dD; 
+                                item.genetic.vals.seek[genSeekTargetX] = tbC.x;
+                                item.genetic.vals.seek[genSeekTargetY] = tbC.y; 
+                            }
                         });
-        
-                        if (blks.length == replCount) {
-                            blks.forEach((blk) => { blk.deactivate(); });
-                            let nDir = Math.floor(Math.random() * 360);
-                            let nDir2 = nDir - 180;
-                            let nVel = Math.floor(Math.random() * 10) + 5;
-
-                            let nStrand = new LFItem(new LFVector(oth.pos.x, oth.pos.y, nDir, nVel), lfcore.strand.strand, { gen: lf.step, codes: oth.dynamic["codes"].slice(), genetic: JSON.parse(JSON.stringify(oth.genetic)) });
-                            oth.pos.dir = nDir2;
-                            oth.pos.vel = nVel;
-                            lf.queueItem(nStrand);
+                    }
+                }
+            }
+            if (item.genetic.flags.digestion) {
+                let minD = null;
+                item.genetic.extra.perception.forEach((sk) => {
+                    if (LFBehavior.digestionps.includes(sk.core.subtype)) {
+                        if (item.genetic.vals.digestion[genDigestionGutCount] == 0) {
+                            let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
+                            if (item.genetic.vals.seek[genSeekTargetX] < 0 &&  item.genetic.vals.seek[genSeekTargetY]) { 
+                                minD = dD; 
+                                item.genetic.vals.seek[genSeekTargetX] = sk.pos.x;
+                                item.genetic.vals.seek[genSeekTargetY] = sk.pos.y;
+                            }
+                            else if (minD == null || dD < minD) { 
+                                minD = dD; 
+                                item.genetic.vals.seek[genSeekTargetX] = sk.pos.x;
+                                item.genetic.vals.seek[genSeekTargetY] = sk.pos.y;
+                            }
                         }
                     }
                 });
             }
-        },
-        "daa": function(item) {
-            // build blks
-            me.gens["buildBlock"](item);
-        },
-        "buildBlock": function(item) {
-            let parts = lf.query(item);
-            if (!("parts" in item.dynamic)) item.dynamic["parts"] = { "p":0 };
-            for (let p = 0; p < parts.length; p++) {
-                if (parts[p].core.type == "ort" && parts[p].core.data == "p" && item.dynamic["parts"]["p"] < 3) {
-                    item.dynamic["parts"]["p"]++;
-                    parts[p].deactivate();
-                }
-            }
-            if (item.dynamic["parts"]["p"] == 3) {
-                let snipVal = "ppp";
-                parts.forEach((pt) => { pt.deactivate(); });
-                let nDir = Math.floor(Math.random() * 360);
-                let nVel = Math.floor(Math.random() * 10) + 5;
-                let nsnip = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip.snipBlk, { gen: lf.step, code: snipVal, len: snipVal.length });
-                lf.queueItem(nsnip);
-                item.dynamic["parts"]["p"] = 0;
-                if (item.complex == 0) item.obj.innerHTML = "&int;";
-            }
-            else if (item.complex == 0 && item.dynamic["parts"]["p"] == 2) item.obj.innerHTML = "<i class=\"loaded\">&cwconint;</i>"; // int with circle
-            else if (item.complex == 0 && item.dynamic["parts"]["p"] == 1) item.obj.innerHTML = "<i class=\"loaded\">&cwint;</i>"; // int with slash
-            else if (item.complex == 0) item.obj.innerHTML = "&int;";
+            
         }
+    },
+    buildBlock: function(item) {
+        let parts = lf.query(item);
+        if (!("parts" in item.dynamic)) item.dynamic["parts"] = { "p":0 };
+        for (let p = 0; p < parts.length; p++) {
+            if (parts[p].core.type == "ort" && parts[p].core.data == "p" && item.dynamic["parts"]["p"] < 3) {
+                item.dynamic["parts"]["p"]++;
+                parts[p].deactivate();
+            }
+        }
+        if (item.dynamic["parts"]["p"] == 3) {
+            let snipVal = "ppp";
+            parts.forEach((pt) => { pt.deactivate(); });
+            let nDir = Math.floor(Math.random() * 360);
+            let nVel = Math.floor(Math.random() * 10) + 5;
+            let nsnip = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip.snipBlk, { gen: lf.step, code: snipVal, len: snipVal.length });
+            lf.queueItem(nsnip);
+            item.dynamic["parts"]["p"] = 0;
+            if (item.core.type == "snip") item.obj.innerHTML = "&int;";
+            else if (item.core.type == "strand") item.obj.innerHTML = "&Int;"
+        }
+        else if (item.dynamic["parts"]["p"] == 2) {
+            if (item.core.type == "strand") item.obj.innerHTML = "<i class=\"loaded\">&Conint;</i>"; // double int w/ circle
+            else item.obj.innerHTML = "<i class=\"loaded\">&cwconint;</i>"; // int with circle
+        }
+        else if (item.dynamic["parts"]["p"] == 1) {
+            if (item.core.type == "strand") item.obj.innerHTML = "<i class=\"loaded\" style=\"text-decoration: line-through;\">&Int;</i>"; // double int with line
+            else item.obj.innerHTML = "<i class=\"loaded\">&cwint;</i>"; // int with slash
+        }
+        else if (item.core.type == "strand") item.obj.innerHTML = "&Int;";
+        else item.obj.innerHTML = "&int;";
+    }
+}
+
+function LFCodedBehaviors() {
+    let me = this;
+    me.validOrts = ["a","b","c","d","u"];
+    me.gens = {
+        "reset": function(item) { item.genetic.reset(); },
+        "aaa": function(item) {
+            // enable movement - see "bbb"
+            if (!item.genetic.flags.movement) item.genetic.flags.movement = true;
+        },
+        "aab": function(item) {
+            // enable respiration 1 - see "aad"
+            if (!item.genetic.flags.respiration) {
+                item.genetic.flags.respiration = true;
+                item.genetic.vals.respiration[genRespIn] = 0; 
+                item.genetic.vals.respiration[genRespOut] = 1;
+            }
+        },
+        "aac": function(item) {
+            // enable respiration 2 - see "aad"
+            if (!item.genetic.flags.respiration) {
+                item.genetic.flags.respiration = true;
+                item.genetic.vals.respiration[genRespIn] = 1; 
+                item.genetic.vals.respiration[genRespOut] = 0;
+            }
+        },
+        "aad": function(item) {
+            // respirate - enable see "aab"
+            LFBehavior.breathe(item);
+        },
+        "bbb": function(item) {
+            // movement - enable see "aaa"
+            LFBehavior.move(item);
+        },
+        "bba": function(item) {
+            // enable digestion 1 - see "bbc"
+            if (!item.genetic.flags.digestion) item.genetic.flags.digestion = true;
+        },
+        "bbc": function(item) {
+            // digestion - enable see "bba"
+            LFBehavior.eat(item);
+        },
+        "bbd": function(item) {
+            // 25% chance proto can digest their own offings at 1/2 value
+            if (!item.genetic.flags.offing) item.genetic.flags.offing = true;
+        },
+        "bab": function(item) {
+            // enable chem - see "bac"
+            if (!item.genetic.flags.chem) item.genetic.flags.chem = true;
+        },
+        "bac": function(item) {
+            // chem - enable see "bab"
+            LFBehavior.chem(item);
+        },
+        "cba": function(item) {
+            // enable perception - see "cbb"
+            if (!item.genetic.flags.perception) item.genetic.flags.perception = true;
+        },
+        "cbb": function(item) {
+            // perception - enable see "cba"
+            LFBehavior.perceive(item);
+        },
+        "cbc": function(item) {
+            // enable seek - see "cbd"
+            if (!item.genetic.flags.seek) item.genetic.flags.seek = true;
+        },
+        "cbd": function(item) {
+            // seek - enable see "cbc"
+            LFBehavior.seek(item);
+        },
+        "ccc": function(item) {
+            // build blks and store
+            // TODO
+        },
+        "cab": function(item) {
+            // enable storage - see "cad"
+            // TODO
+        },
+        "cad": function(item) {
+            // use storage - enable see "cab"
+            // TODO
+        },
+        "dac": function(item) {
+            // sets shorter husk decay
+            if (!("htime" in item.genetic)) item.genetic["htime"] = gVars.huskDeay - Math.floor(Math.random() * 2000);
+        },
+        // code containing u does not make it into cells
+        // most run buildBlock that build Blk type snips
+        "uua": function (item) { LFBehavior.buildBlock(item); },
+        "uub": function (item) { LFBehavior.buildBlock(item); },
+        "uuc": function (item) { LFBehavior.buildBlock(item); },
+        "uud": function (item) { LFBehavior.buildBlock(item); },
+        "uau": function (item) { LFBehavior.buildBlock(item); },
+        "ubu": function (item) { LFBehavior.buildBlock(item); },
+        "ucu": function (item) { LFBehavior.buildBlock(item); },
+        "udu": function (item) { LFBehavior.buildBlock(item); }
     };
     me.run = (item,code) => {
         if (code in me.gens)
@@ -429,29 +540,16 @@ function LFCodedBehaviors() {
     me.singles = [
         "e--",
         "ppp",
-        "ddd",
-        "daa",
-        "dab",
-        "dac",
-        "dad",
-        "dba",
-        "dbb",
-        "dbc",
-        "dbd",
-        "dca",
-        "dcc",
-        "dcd"
+        "pd-",
+        "uua",
+        "uub",
+        "uuc",
+        "uud",
+        "uau",
+        "ubu",
+        "ucu",
+        "udu",
     ];
 
-    me.gens["dab"] = me.gens["daa"];
-    me.gens["dac"] = me.gens["daa"];
-    me.gens["dad"] = me.gens["daa"];
-    me.gens["dba"] = me.gens["daa"];
-    me.gens["dbb"] = me.gens["daa"];
-    me.gens["dbc"] = me.gens["daa"];
-    me.gens["dbd"] = me.gens["daa"];
-    me.gens["dca"] = me.gens["daa"];
-    me.gens["dcb"] = me.gens["daa"];
-    me.gens["dcc"] = me.gens["daa"];
-    me.gens["dcd"] = me.gens["daa"];
+    me.activeCodes = Object.keys(me.gens);
 }

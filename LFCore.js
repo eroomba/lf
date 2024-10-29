@@ -5,7 +5,7 @@ const lfcore = {
         // default
         default: {
             class: "",
-            weight: 1,
+            weight: 1.003,
             data: null, 
             content: "",
             formula: (val) => { 
@@ -26,8 +26,8 @@ const lfcore = {
             type: "spek",
             subtype: "spekA1",
             class: "spek-a1",
-            weight: 1.05,
-            data: parseInt('00000011', 2), 
+            weight: 1.003,
+            data: 101, 
             content: "&ominus;", // circle with -
             formula: (val) => { 
                 return val <= 3 ? 1 : 0 
@@ -43,8 +43,8 @@ const lfcore = {
             type: "spek",
             subtype: "spekA2",
             class: "spek-a2",
-            weight: 1.05, 
-            data: parseInt('00000010', 2),
+            weight: 1.003, 
+            data: 11,
             content: "&oast;", // circle with asterisk
             formula: (val) => { 
                 return val <= 5 && val > 3 ? val > 3 : 0 
@@ -60,8 +60,8 @@ const lfcore = {
             type: "spek",
             subtype: "spekB1",
             class: "spek-b1",
-            weight: 1.05, 
-            data: parseInt('00001100', 2),
+            weight: 1.003, 
+            data: 201,
             content: "&minusb;", // square with dash
             formula: (val) => { 
                 return val <= 7 && val > 5 ? 1 : 0 
@@ -77,8 +77,8 @@ const lfcore = {
             type: "spek",
             subtype: "spekB2",
             class: "spek-b2",
-            weight: 1.1, 
-            data: parseInt('00001000', 2),
+            weight: 1.003, 
+            data: 202,
             content: "&sdotb;", // square with dot
             formula: (val) => { 
                 return val <= 9 && val > 7 ? 1 : 0 
@@ -94,8 +94,8 @@ const lfcore = {
             type: "spek",
             subtype: "spekC1",
             class: "spek-c1",
-            weight: 1.1, 
-            data: parseInt('00110000', 2),
+            weight: 1.003, 
+            data: 301,
             content: "&odot;", // circle with dot
             formula: (val) => { 
                 return val <= 11 && val > 9 ? 1 : 0 
@@ -111,8 +111,8 @@ const lfcore = {
             type: "spek",
             subtype: "spekC2",
             class: "spek-c2",
-            weight: 1.05, 
-            data: parseInt('00100000', 2),
+            weight: 1.004, 
+            data: 302,
             content: "&ocir;", // circle with ring
             formula: (val) => { 
                 return val <= 13 && val > 11 ? 1 : 0 
@@ -128,8 +128,8 @@ const lfcore = {
             type: "spek",
             subtype: "spekD1",
             class: "spek-d1",
-            weight: 1.1, 
-            data: parseInt('11000000', 2),
+            weight: 1.004, 
+            data: 401,
             content: "&timesb;", // square with x
             formula: (val) => { 
                 return val <= 15 && val > 13 ? 1 : 0 
@@ -145,11 +145,45 @@ const lfcore = {
             type: "spek",
             subtype: "spekD2",
             class: "spek-d2",
-            weight: 1.05, 
-            data: parseInt('10000100', 2),
+            weight: 1.003, 
+            data: 402,
             content: "&plusb;", // square with +
             formula: (val) => { 
                 return val <= 17 && val > 15 ? 1 : 0 
+            }, 
+            range: 5, 
+            decay: null,
+            dformula: [] 
+        },
+
+        // spekU1
+        spekU1: { 
+            // d1 can combine w/d2 to form d OR w/x to form p
+            type: "spek",
+            subtype: "spekU1",
+            class: "spek-u1",
+            weight: 1.004, 
+            data: 501,
+            content: "&timesb;", // square with x
+            formula: (val) => { 
+                return val <= 19 && val > 17 ? 1 : 0 
+            }, 
+            range: 5, 
+            decay: null,
+            dformula: [] 
+        },
+
+        // spekU2
+        spekU2: { 
+            // d2 can combine w/d1 to form d OR w/x to form e
+            type: "spek",
+            subtype: "spekU2",
+            class: "spek-u2",
+            weight: 1.003, 
+            data: 502,
+            content: "&plusb;", // square with +
+            formula: (val) => { 
+                return val <= 21 && val > 19 ? 1 : 0 
             }, 
             range: 5, 
             decay: null,
@@ -162,11 +196,11 @@ const lfcore = {
             type: "spek",
             subtype: "spekX",
             class: "spek-x",
-            weight: 1.1, 
-            data: parseInt('11000001', 2),
+            weight: 1.006, 
+            data: 600,
             content: "&otimes;", // circle with X
             formula: (val) => { 
-                return val <= 19 && val > 17 ? 1 : 0 
+                return val <= 23 && val > 21 ? 1 : 0 
             }, 
             range: 5, 
             decay: null,
@@ -178,11 +212,11 @@ const lfcore = {
             type: "spek",
             subtype: "spekG1",
             class: "spek-g1",
-            weight: 1.02, 
-            data: -1,
+            weight: 1.001, 
+            data: 701,
             content: "&trie;", // equal with triangle
             formula: (val) => { 
-                return val <= 21 && val > 19 ? 1 : 0 
+                return val <= 25 && val > 23 ? 1 : 0 
             }, 
             range: 5,
             decay: null,
@@ -194,11 +228,11 @@ const lfcore = {
             type: "spek",
             subtype: "spekG2",
             class: "spek-g2",
-            weight: 1.03, 
-            data: -1,
+            weight: 1.002, 
+            data: 702,
             content: "&eDot;", // equal with dots 
             formula: (val) => { 
-                return val == 22 ? 1 : 0 
+                return val <= 27 && val > 25 ? 1 : 0 
             }, 
             range: 5, 
             decay: null,
@@ -210,11 +244,27 @@ const lfcore = {
             type: "spek",
             subtype: "spekG3",
             class: "spek-g3",
-            weight: 1.08,  
-            data: -1,
+            weight: 1.1,  
+            data: 703,
             content: "&epar;", // equal with 2 crosses (hash) 
             formula: (val) => { 
-                return val == 23 ? 1 : 0 
+                return val <= 29 && val > 27 ? 1 : 0 
+            }, 
+            range: 5, 
+            decay: null,
+            dformula: [] 
+        },
+
+        // spekV
+        spekV: { 
+            type: "spek",
+            subtype: "spekV",
+            class: "spek-v",
+            weight: 1.001,  
+            data: 800,
+            content: "&veebar;", // k 
+            formula: (val) => { 
+                return val <= 31 && val > 29 ? 1 : 0  
             }, 
             range: 5, 
             decay: null,
@@ -225,68 +275,7 @@ const lfcore = {
 
         // update
         update: function(spek) {
-
-            if (!("odata" in lfcore.cache)) {
-                let oData = {};
-                Object.keys(lfcore.ort).forEach((ky) => {
-                    if (ky.indexOf("ort") == 0) {
-                        oData["d-" + lfcore.ort[ky].formula()] = ky;
-                    }
-                });
-                lfcore.cache["odata"] = oData;
-            }
-    
-            let closespeks = lf.query(spek, "spek");
-        
-            closespeks.forEach((c1) => {
-                if (c1.active && c1.id != spek.id && spek.core.data != c1.core.data) {
-                    let join = spek.core.data & c1.core.data; 
-                    if (join > 0) {
-                        let comb = spek.core.data | c1.core.data;
-                        let tkID = "d-" + comb;
-                        if (tkID in lfcore.cache["odata"]) {
-                            let tkKey = lfcore.cache["odata"][tkID];
-                            let dRes = spek.pos.subtract(c1.pos);
-                            spek.deactivate();
-                            c1.deactivate();
-                            let nX = (spek.pos.x + c1.pos.x) / 2;
-                            let nY = (spek.pos.y + c1.pos.y) / 2;
-                            let nDir = dRes.dir;
-                            let nVel = spek.pos.vel - dRes.vel;
-                            let nOrt = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.ort[tkKey],{gen:lf.step});
-                            lf.queueItem(nOrt);
-                            //console.log("spek COMB: " + daX + "," + daY + ", " + dD + "," + dA);
-                        }
-                    }
-                    else if (lf.spekColl) {
-                        let daX = c1.pos.x - spek.pos.x;
-                        let daY = c1.pos.y - spek.pos.y;
-                        let dD = Math.hypot(daX, daY);
-                        let dA = (Math.atan2(daY, daX) * 180 / Math.PI) % 360;
-                        dA += 15 - Math.floor(Math.random() * 31);
-                        c1.pos.dir = dA;
-                        spek.pos.dir = (dA + 180) % 360;
-                        c1.pos.vel += dD / 2;
-                        spek.pos.vel += dD / 2;
-                        //console.log("spek HIT: " + daX + "," + daY + ", " + dD + "," + dA);
-                    }
-                }
-            });
-            
-            if (spek.active) {
-        
-                if (spek.pos.x < 0 || spek.pos.x > lf.w) spek.pos.x = Math.floor(Math.random() * lf.w);
-                if (spek.pos.y < 0 || spek.pos.y > lf.h) spek.pos.y = Math.floor(Math.random() * lf.h);
-        
-                spek.pos.move(spek.core.weight);
-                spek.obj.style.left = spek.pos.x + "px";
-                spek.obj.style.top = spek.pos.y + "px";
-                spek.obj.style.transform = spek.transformFill.replace("***",spek.pos.dir);
-        
-            }
-            else {
-                spek.obj.style.display = "none";
-            }
+            // old version
         },
 
         // decay
@@ -303,22 +292,13 @@ const lfcore = {
             type: "ort",
             subtype: "ortA",
             class: "ort-a",
-            weight: 1.3,
+            weight: 1.1,
             data: "a",
             content: "&forall;", // upside down A
             formula: () => { 
-                switch (lf.formation) {
-                    case "haze":
-                        return ["spekA1","spekA2"];
-                        break;
-                    default:
-                        // 00000011
-                        // 00000010
-                        return parseInt('00000011', 2); // a1 + a2
-                        break;
-                }
+                return ["spekA1","spekA2"];
             }, 
-            range: 8, 
+            range: 5, 
             decay: 300,
             dformula: [
                 {name: "spk-b1", type: "spek"},
@@ -331,22 +311,13 @@ const lfcore = {
             type: "ort",
             subtype: "ortB",
             class: "ort-b",
-            weight: 1.3,
+            weight: 1.1,
             data: "b", 
             content: "&bowtie;", // bowtie
             formula: () => {
-                switch (lf.formation) {
-                    case "haze":
-                        return ["spekB1","spekB2"];
-                        break;
-                    default:
-                        // 00001100
-                        // 00001000 
-                        return parseInt('00001100', 2);  // b1 + b2
-                        break;
-                }
+                return ["spekB1","spekB2"];
             }, 
-            range: 8,
+            range: 5,
             decay: 300,
             dformula: [
                 {name: "spekC1", type: "spek"},
@@ -359,22 +330,13 @@ const lfcore = {
             type: "ort",
             subtype: "ortC",
             class: "ort-c",
-            weight: 1.3,
+            weight: 1.1,
             data: "c", 
             content: "&comp;", // long C
             formula: () => {
-                switch (lf.formation) {
-                    case "haze":
-                        return ["spekC1","spekC2"];
-                        break;
-                    default:
-                        // 00110000
-                        // 00100000 
-                        return parseInt('00110000', 2);  // c1 + c2
-                        break;
-                }
+                return ["spekC1","spekC2"];
             }, 
-            range: 8,
+            range: 5,
             decay: 310,
             dformula: [
                 {name: "spekD1", type: "spek"},
@@ -387,22 +349,13 @@ const lfcore = {
             type: "ort",
             subtype: "ortD",
             class: "ort-d",
-            weight: 1.5,
+            weight: 1.15,
             data: "d", 
             content: "&part;", // loopy d
             formula: () => { 
-                switch (lf.formation) {
-                    case "haze":
-                        return ["spekD1","spekD2"];
-                        break;
-                    default:
-                        // 11000000
-                        // 10000100
-                        return parseInt('11000100', 2); // d1 + d1
-                        break;
-                }
+                return ["spekD1","spekD2"];
             }, 
-            range: 10,
+            range: 5,
             decay: 350,
             dformula: [
                 {name: "spekA1", type: "spek"},
@@ -417,24 +370,15 @@ const lfcore = {
             class: "ort-p",
             weight: 1.1,
             data: "p", 
-            content: "&fork;", // U with line
+            content: "&empty;", // circle with cross line
             formula: () => { 
-                switch (lf.formation) {
-                    case "haze":
-                        return ["spekD1","spekX"];
-                        break;
-                    default:
-                        // 11000000
-                        // 11000001
-                        return parseInt('11000001', 2); // d1 + x
-                        break;
-                }
+                return ["spekD1","spekX"];
             }, 
-            range: 10,
+            range: 6,
             decay: 450,
             dformula: [
-                {name: "spekX", type: "spek"},
-                {name: "spekG2", type: "spek"}
+                {name: "spekU1", type: "spek"},
+                {name: "spekG1", type: "spek"}
             ] 
         },
 
@@ -447,21 +391,50 @@ const lfcore = {
             data: "e", 
             content: "&sum;", // summation
             formula: () => { 
-                switch (lf.formation) {
-                    case "haze":
-                        return ["spekD2","spekX"];
-                        break;
-                    default:
-                        // 10000100
-                        // 11000001
-                        return parseInt('11000101', 2); // d2 + x
-                        break;
-                }
+                return ["spekD2","spekX"];
             }, 
-            range: 10,
+            range: 7,
             decay: 350,
             dformula: [
-                {name: "spekG1", type: "spek"},
+                {name: "spekU2", type: "spek"},
+                {name: "spekG2", type: "spek"}
+            ] 
+        },
+
+        // ortU
+        ortU: { 
+            type: "ort",
+            subtype: "ortU",
+            class: "ort-u",
+            weight: 1.15,
+            data: "u", 
+            content: "&cup;", // cup
+            formula: () => { 
+                return ["spekU1","spekU2"];
+            }, 
+            range: 7,
+            decay: 350,
+            dformula: [
+                {name: "spekX", type: "spek"},
+                {name: "spekG3", type: "spek"}
+            ] 
+        },
+
+        // ortI
+        ortI: { 
+            type: "ort",
+            subtype: "ortI",
+            class: "ort-i",
+            weight: 1.2,
+            data: "i", 
+            content: "&ecolon;", // equal colon
+            formula: () => { 
+                return ["spekV","spekX"];
+            }, 
+            range: 7,
+            decay: 350,
+            dformula: [
+                {name: "spekX", type: "spek"},
                 {name: "spekG3", type: "spek"}
             ] 
         },
@@ -481,31 +454,30 @@ const lfcore = {
             }
             else {
                 if (ort.core.subtype == "ortE") {
-                    let closeSpeks = lf.query(ort, "spek");
-                    let g1 = null;
-                    let g2 = null;
-        
-                    closeSpeks.forEach((spk) => {
-                        if (spk.core.subtype == "spekG1" && g1 == null) g1 = spk;
-                        if (spk.core.subtype == "spekG2" && g2 == null) g2 = spk;
-                    });
-                    
-                    if (g1 != null && g2 != null) {
-                        let nX = (g1.pos.x + g2.pos.x + ort.pos.x) / 3;
-                        let nY = (g1.pos.y + g2.pos.y + ort.pos.y) / 3;
+
+                    let spkPull = lf.haze.queryM(ort,["spekG1","spekG2"]);
+                    let G1 = null;
+                    let G2 = null;
+                    shuffleArray(spkPull);
+                    for (let gg = 0; gg < spkPull.length; gg++) {
+                        if (G1 == null && spkPull[gg]["spekG1"] > 0) G1 = spkPull[gg];
+                        if (G2 == null && spkPull[gg]["spekG2"] > 0) G2 = spkPull[gg];
+                    }
+
+                    if (G1 != null && G2 != null && Math.random() > 0.999) {
+                        lf.haze.transact(G1.tableIndex, "spekG1", -1);
+                        lf.haze.transact(G2.tableIndex, "spekG2", -1);
+
+                        let nX = ort.pos.x;
+                        let nY = ort.pos.y;
                         let nVel = ort.pos.vel;
-                        let dRes1 = ort.pos.subtract(g1.pos);
-                        nVel -= dRes1.vel;
-                        let dRes2 = ort.pos.subtract(g2.pos);
-                        nVel -= dRes2.vel;
-                        let nDir = dRes2.subtract(dRes1).dir;
+                        let nDir = ort.pos.dir;
                         let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip.snipEx, { gen: lf.step, code: "e--", len: 3 });
                         lf.queueItem(nSnip);
         
-                        g1.deactivate();
-                        g2.deactivate();
                         ort.deactivate();
                     }
+
                 }
                 else {
                     let closeOrts = lf.query(ort, "ort");
@@ -518,6 +490,10 @@ const lfcore = {
                     let tv = 1;
         
                     let snipC = [];
+                    let snipPD = null;
+                    let kCountQ = lf.haze.query(ort, "spekK");
+                    let kIdx = null;
+                    if (kCountQ.length > 0) kIdx = kCountQ[0].tableIndex;
                     let snipVal = ort.core.data;
                     for (let sc = 0; sc < closeOrts.length; sc++) {
                         snipC.push(closeOrts[sc]);
@@ -554,7 +530,7 @@ const lfcore = {
                         for (let sc = snipC.length - 1; sc >= 0; sc--) snipC[sc].deactivate();
         
                         let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip[snipType], { gen: lf.step, code: snipVal, len: snipVal.length });
-                        if (snipVal[0] == "d") {
+                        if (snipVal.indexOf("u") == 0 && lf.behaviors.singles.includes(snipVal)) {
                             nSnip.life *= 4;
                             nSnip.dynamic["proc"] = 1;
                         }
@@ -580,24 +556,7 @@ const lfcore = {
         decay: function(ortName, pos) {
             let sA = Math.floor(Math.random() * 360);
             lfcore.ort[ortName].dformula.forEach((di) => {
-                switch (lf.formation) {
-                    case "haze":
-
-                        lf.haze.add(pos.x,pos.y,di.subtype,1);
-
-                        break;
-                    default:
-                        let nDir = sA;
-                        sA += 120;
-                        sA = sA % 360;
-                        let aX = 8 * Math.cos(nDir * Math.PI / 180);
-                        let aY = 8 * Math.sin(nDir * Math.PI / 180);
-                        let nVel = Math.floor(Math.random() * 9) + 4;
-                        let nDobj = new LFItem(new LFVector(pos.x + aX, pos.y + aY, nDir, nVel), lfcore.spek[di.subtype], {gen:lf.step});
-                        lf.queueItem(nDobj);
-
-                        break;
-                }
+                lf.haze.add(pos.x,pos.y,di.subtype,1);
             });
         }
     },
@@ -610,12 +569,12 @@ const lfcore = {
             type: "snip",
             subtype: "snipPre",
             class: "snip-pre",
-            weight: 1.5,
+            weight: 1.18,
             data: "snip",
             content: "&percnt;", 
             formula: (check) => { 
                 if (check.length == 2) {
-                    let v1 = "abcd";
+                    let v1 = "abcdu";
                     if (v1.indexOf(check[0]) >= 0 && v1.indexOf(check[1]) >= 0) return "snipPre";
                 }
                 return null;
@@ -630,18 +589,19 @@ const lfcore = {
             type: "snip",
             subtype: "snipGo",
             class: "snip-go",
-            weight: 1.8, 
+            weight: 1.2, 
             data: "snip",
             content: "&int;", 
             formula: (check) => { 
                 if (check.length == 3) {
                     let v1 = "abcd";
+                    if (check[0] == "u" && ((check[1] == "u" && v1.indexOf(check[2]) >= 0) || (check[2] == "u" && v1.indexOf(check[1]) >= 0))) return "snipGo";
                     if (v1.indexOf(check[0]) >= 0 && v1.indexOf(check[1]) >= 0 && v1.indexOf(check[2]) >= 0) return "snipGo";
                 }
                 return null;
             }, 
-            range: 12, 
-            decay: 220,
+            range: 10, 
+            decay: 1000,
             dformula: [] 
         },
 
@@ -650,15 +610,15 @@ const lfcore = {
             type: "snip",
             subtype: "snipBlk",
             class: "snip-blk",
-            weight: 1.8, 
+            weight: 1.3, 
             data: "ppp",
             content: "&origof;", 
             formula: (check) => { 
                 if (check.toLowerCase() == ":ppp") return "snipBlk";
                 return null;
             }, 
-            range: 15, 
-            decay: 400,
+            range: 10, 
+            decay: 1400,
             dformula: [] 
         },
 
@@ -674,8 +634,8 @@ const lfcore = {
                 if (check.toLowerCase() == "e--") return "snipEx";
                 return null;
             }, 
-            range: 12, 
-            decay: 230,
+            range: 8, 
+            decay: 1200,
             dformula: [] 
         },
 
@@ -734,25 +694,29 @@ const lfcore = {
                     }
                 }
                 else if (snip.core.subtype == "snipBlk") {
-                    let closeSnips = lf.query(snip, "snip", { range: snip.core.range * 2 });
+                    let close = lf.query(snip, null, { range: snip.core.range * 2 });
                         
                     let branes = [];
                     let closest = null;
                     let closeDist = null;
-                    closeSnips.forEach((sn) => {
-                        if (sn.core.subtype == "snipBlk") {
+                    let iTrig = null;
+                    close.forEach((cl) => {
+                        if (cl.core.type == "snip" && cl.core.subtype == "snipBlk") {
                             if(branes.length < gVars.braneCount - 1) { 
-                                branes.push(sn);
+                                branes.push(cl);
                             }
-                            let dist = sn.pos.subtract(snip.pos).magnitude();
+                            let dist = cl.pos.subtract(snip.pos).magnitude();
                             if (closest == null || dist < closeDist) {
-                                closest = sn;
+                                closest = cl;
                                 closeDist = dist;
                             }
                         }
+                        else if (cl.core.type == "ort" && cl.core.subtype == "ortI" && iTrig == null) {
+                            iTrig = cl;
+                        }
                     });
         
-                    if (branes.length == gVars.braneCount - 1) {
+                    if (branes.length == gVars.braneCount - 1 && iTrig != null) {
                         let mxSum = 0;
                         let mySum = 0;
                         let mCount = 0;
@@ -762,9 +726,10 @@ const lfcore = {
                             mCount++;
                             b.deactivate(); 
                         });
+                        iTrig.deactivate();
                         snip.deactivate();
         
-                        let nBrane = new LFItem(new LFVector(Math.floor(mxSum / mCount), Math.floor(mySum / mCount), 0, 0), lfcore.struck.struckBrane, { gen: lf.step });
+                        let nBrane = new LFItem(new LFVector(Math.floor(mxSum / mCount), Math.floor(mySum / mCount), 0, 0), lfcore.struck.struckBrane, { gen: lf.step, mtype: "C" });
                         lf.queueItem(nBrane);
                     }
                     else if (closest != undefined && closest != null) {
@@ -803,15 +768,26 @@ const lfcore = {
                 }
                 else {
                             
-                    if (snip.dynamic["code"].indexOf("d") != 0 && snip.dynamic["code"].indexOf("p") < 0 && snip.dynamic["code"].indexOf("e") < 0) {
+                    if (snip.dynamic["code"].indexOf("p") < 0 && snip.dynamic["code"].indexOf("e") < 0) {
                         let closeSnips = lf.query(snip, "snip");
                         
                         for (let sn = closeSnips.length - 1; sn >= 0; sn--) {
-                            if (closeSnips[sn].core.subtype == "snipGo" && 
-                                !(lf.behaviors.singles.includes(closeSnips[sn].dynamic["code"])) &&
-                                closeSnips[sn].dynamic["code"] != snip.dynamic["code"]) {
-                                addTo = closeSnips[sn];
-                                break;
+                            if (closeSnips[sn].core.subtype == "snipGo" && closeSnips[sn].dynamic["code"] != snip.dynamic["code"]) {
+                                
+                                if (snip.dynamic.code.indexOf("u") >=0 && closeSnips[sn].dynamic.code.indexOf("u") >=0) {
+                                    if (!(("parts" in snip.dynamic && "p" in snip.dynamic["parts"] && snip.dynamic["parts"]["p"] > 0) ||
+                                        ("parts" in closeSnips[sn].dynamic && "p" in closeSnips[sn].dynamic["parts"] && closeSnips[sn].dynamic["parts"]["p"] > 0))) 
+                                    {
+                                        addTo = closeSnips[sn];
+                                        break;
+                                    }
+                                }
+                                else if (snip.dynamic.code.indexOf("u") < 0 && closeSnips[sn].dynamic.code.indexOf("u") < 0 && 
+                                        !(lf.behaviors.singles.includes(closeSnips[sn].dynamic["code"]))) 
+                                {
+                                        addTo = closeSnips[sn];
+                                        break;
+                                }
                             }
                         }
                     }
@@ -827,7 +803,9 @@ const lfcore = {
                         let nDir = nRes.dir;
                         let nVel = snip.pos.vel - nRes.vel;
                         let codes = [ snip.dynamic["code"], addTo.dynamic["code"] ]; 
-                        let nStrand = new LFItem(new LFVector(mX, mY, nDir, nVel), lfcore.strand.strand, { gen: lf.step, codes: codes });
+                        let strandType = "strandD";
+                        if (snip.dynamic["code"].indexOf("u") >= 0) strandType = "strandR";
+                        let nStrand = new LFItem(new LFVector(mX, mY, nDir, nVel), lfcore.strand[strandType], { gen: lf.step, codes: codes });
                         lf.queueItem(nStrand);
         
                         addTo.deactivate();
@@ -873,27 +851,7 @@ const lfcore = {
                 lf.queueItem(nOrt);
                 nDir = pos.dir - 60;
                 nDir = nDir % 360;
-                switch (lf.formation) {
-                    case "haze":
-
-                        lf.haze.add(pos.x, pos.y, "spkX", 2);
-
-                        break;
-                    default:
-                        nVel = Math.floor(Math.random() * 5) + 10;
-                        dX = 12 * Math.cos(nDir * Math.PI / 180);
-                        dY = 12 * Math.sin(nDir * Math.PI / 180);
-                        let nSpk1 = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek.spkX, {gen:lf.step});
-                        lf.queueItem(nSpk1);
-                        nDir = pos.dir + 60;
-                        nDir = nDir % 360;
-                        dX = 12 * Math.cos(nDir * Math.PI / 180);
-                        dY = 12 * Math.sin(nDir * Math.PI / 180);
-                        let nSpk2 = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek.spkX, {gen:lf.step});
-                        lf.queueItem(nSpk2);
-
-                        break;
-                }
+                lf.haze.add(pos.x, pos.y, "spkX", 2);
             }
             else if (snipCode.length == 3) {
                 let comps = [ snipCode[0], snipCode[1] ];
@@ -912,26 +870,7 @@ const lfcore = {
                 let oA = Math.floor(Math.random() * 360);
                 let oCount = dCmpX.length;
                 dCmpX.forEach((spk) => {
-                    switch (lf.formation) {
-                        case "haze":
-
-                            lf.haze.add(pos.x, pos.y, spk.subtype, 1);
-
-                            break;
-                        default:
-                            
-                                let nDir = oA;
-                                let dX = 8 * Math.cos(nDir * Math.PI / 180);
-                                let dY = 8 * Math.sin(nDir * Math.PI / 180);
-                                let nVel = Math.floor(Math.random() * 9) + 4;
-                                let nSpk = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek[spk.subtype], {gen:lf.step});
-                                lf.queueItem(nSpk);
-                                oA += 360 / oCount;
-                                oA = oA % 360;
-                            
-
-                            break;
-                    }
+                    lf.haze.add(pos.x, pos.y, spk.subtype, 1);
                 });
             }
         }
@@ -940,18 +879,33 @@ const lfcore = {
 
     // strands
     strand: {
-        strand: { 
+        strandD: { 
             type: "strand",
-            subtype: "strand",
-            class: "strand",
-            weight: 2,
-            data: "strand", 
+            subtype: "strandD",
+            class: "strand-d",
+            weight: 1.35,
+            data: "strandD", 
             content: "<div class=\"st-cn\">&nbsp;</div><div class=\"st-ct\">&infin;</div><div class=\"st-cn\"><!--nm--></div>",
             formula: () => { 
-                return "strand"; 
+                return "strandD"; 
             }, 
-            range: 15, 
-            decay: 1000,
+            range: 17, 
+            decay: 5000,
+            dformula: []
+        },
+
+        strandR: { 
+            type: "strand",
+            subtype: "strandR",
+            class: "strand-r",
+            weight: 1.3,
+            data: "strandR", 
+            content: "<div class=\"st-ct\">&Int;</div>", // double int
+            formula: () => { 
+                return "strandR"; 
+            }, 
+            range: 17, 
+            decay: 3200,
             dformula: []
         },
 
@@ -968,105 +922,159 @@ const lfcore = {
                 strand.deactivate();
             }
             else {
-        
-                let spawned = false;
-                let combined = false
-        
-                let close = lf.query(strand);
-        
-                let membrane = null;
-                close.forEach((itm) => {
-                    let sums = groupObj(strand.dynamic["codes"],[lfcore.snip.snipEx.data]);
-                    if ((itm.core.subtype== "struckBrane" || itm.core.subtype == "struckBlip") && membrane == null) {
-                        membrane = itm;
-                    }
-                    if (itm.core.type == "snip") {
-                        if (itm.core.subtype == "snipGo" &&
-                            !strand.dynamic["codes"].includes(itm.dynamic["code"]) && 
-                            !(lf.behaviors.singles.includes(itm.dynamic["code"])))
-                        {
-                            let prevLen = strand.dynamic["codes"].length;
-                            strand.dynamic["codes"].push(itm.dynamic["code"]);
-                            strand.obj.classList.remove("sz-" + prevLen);
-                            let newLen = strand.dynamic["codes"].length;
-                            if (newLen >= gVars.minStrandLen) strand.obj.classList.add("sz-full"); 
-                            else strand.obj.classList.add("sz-" + newLen);
 
-                            let nX = (strand.pos.x + itm.pos.x) / 2;
-                            let nY = (strand.pos.y + itm.pos.y) / 2;
-                            let nRes = strand.pos.subtract(itm.pos);
-                            strand.pos.vel -= nRes.vel;
-                            strand.pos.dir = nRes.dir;
-                            itm.deactivate();
-                        }
-                    }
-                    else if (itm.core.type == "strand") {
-                        let nCodes = [];
-        
-                        let codeLen = strand.dynamic["codes"].length + itm.dynamic["codes"].length;
-                        let canComb = false;
-                        let sumB = groupObj(itm.dynamic["codes"],[lfcore.snip.snipEx.data]);
-                        let sumE = sums[lfcore.snip.snipEx.data] + sumB[lfcore.snip.snipEx.data];
-                        if (sumE / codeLen <= 0.25 && codeLen <= 48) { 
-                            canComb = true;
-                            nCodes = itm.dynamic["codes"];
-                        }
-        
-                        if (canComb) {
-                            let prevLen = strand.dynamic["codes"].length;
-                            strand.dynamic["codes"].push(...nCodes);
-                            strand.obj.classList.remove("sz-" + prevLen);
-                            let newLen = strand.dynamic["codes"].length;
-                            if (newLen >= gVars.minStrandLen) strand.obj.classList.add("sz-full"); 
-                            else strand.obj.classList.add("sz-" + newLen);
-                            
-                            let nX = (strand.pos.x + itm.pos.x) / 2;
-                            let nY = (strand.pos.y + itm.pos.y) / 2;
-                            let nRes = strand.pos.subtract(itm.pos);
-                            strand.pos.vel -= nRes.vel;
-                            strand.pos.dir = nRes.dir;
+                if (strand.core.subtype == "strandR") {
+                    if (strand.dynamic.codes.length < Math.floor(gVars.minStrandLen / 2)) {
+                        let combined = false;
 
-                            itm.deactivate();
-                            combined = true;
-                            let dspCode = strand.dynamic["codes"].join(":");
-                            let cLen = strand.dynamic["codes"].length;
-                            //console.log("s " + strand.id + " combined : " + dspCode + " [" + cLen + "]");
+                        let close = lf.query(strand,"snip");
+
+                        close.forEach((itm) => {
+                            if (itm.core.subtype == "snipGo" &&
+                                !strand.dynamic["codes"].includes(itm.dynamic["code"]) &&
+                                itm.dynamic.code.indexOf("u") >= 0 &&
+                                strand.dynamic.codes.length < Math.floor(gVars.minStrandLen / 2))
+                            {
+                                let prevLen = strand.dynamic["codes"].length;
+                                strand.dynamic["codes"].push(itm.dynamic["code"]);
+                                strand.dynamic["codes"].sort();
+                                let newLen = strand.dynamic["codes"].length;
+
+                                let nX = (strand.pos.x + itm.pos.x) / 2;
+                                let nY = (strand.pos.y + itm.pos.y) / 2;
+                                let nRes = strand.pos.subtract(itm.pos);
+                                strand.pos.vel -= nRes.vel;
+                                strand.pos.dir = nRes.dir;
+                                itm.deactivate();
+                                combined = true;
+                            }
+                        });
+
+                        if (combined) {
+                            let cStrP = strand.dynamic["codes"].join(":");
+                            strand.obj.setAttribute("code",cStrP);
                         }
                     }
-                });
-        
-                let cStrP = strand.dynamic["codes"].join(":");
-                strand.obj.setAttribute("code",cStrP);
-                if (strand.dynamic["codes"].length >= gVars.minStrandLen && membrane != null) {
-                    let ptDyn = {
-                        gen: lf.step,
-                        codes: strand.dynamic["codes"]
-                    };
-        
-                    let iOps = { init: true, complex: 2 };
-                    let protoType = "protoC";
-                    if (membrane.core.subtype == "struckBlip") {
-                        protoType = "protoS";
-                        iOps.complex = 1;
-                    }
-        
-                    let nDir = Math.floor(Math.random() * 360);
-                    let nVel = Math.floor(Math.random() * 9);
-                    let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, strand.genetic, iOps);
-                    lf.queueItem(nPro);
-        
-                    membrane.deactivate();
-                    strand.deactivate();
-                    spawned = true;
-                    console.log("s " + strand.id + " spawned");
-                }
-        
-                if (!spawned) {
+
                     lf.behaviors.run(strand, "reset");
                     strand.dynamic["codes"].forEach((cd) => {
                         lf.behaviors.run(strand, cd);
                     });
-                    strand.obj.innerHTML = lfcore.strand.strand.content.replace("<!--nm-->",strand.dynamic["codes"].length);
+                }
+                else if (strand.core.subtype == "strandD") {
+            
+                    let spawned = false;
+                    let combined = false;
+            
+                    let close = lf.query(strand, null, { range: strand.core.range + strand.dynamic["codes"].length });
+            
+                    let membrane = null;
+                    close.forEach((itm) => {
+                        let sums = groupObj(strand.dynamic["codes"],[lfcore.snip.snipEx.data]);
+                        if (itm.core.subtype== "struckBrane" && membrane == null) {
+                            membrane = itm;
+                        }
+                        else if (itm.core.type == "snip") {
+                            if (itm.core.subtype == "snipGo" &&
+                                !strand.dynamic["codes"].includes(itm.dynamic["code"]) && 
+                                !(lf.behaviors.singles.includes(itm.dynamic["code"])) &&
+                                itm.dynamic["code"].indexOf("u") < 0)
+                            {
+                                let prevLen = strand.dynamic["codes"].length;
+                                strand.dynamic["codes"].push(itm.dynamic["code"]);
+                                strand.dynamic["codes"].sort();
+                                let newLen = strand.dynamic["codes"].length;
+                                if (newLen >= gVars.minStrandLen) {
+                                    if (strand.obj.classList.contains("sz-mid")) strand.obj.classList.remove("sz-mid"); 
+                                    strand.obj.classList.add("sz-full"); 
+                                }
+                                else if (newLen >= Math.floor(gVars.minStrandLen / 2)) strand.obj.classList.add("sz-mid"); 
+
+                                let nX = (strand.pos.x + itm.pos.x) / 2;
+                                let nY = (strand.pos.y + itm.pos.y) / 2;
+                                let nRes = strand.pos.subtract(itm.pos);
+                                strand.pos.vel -= nRes.vel;
+                                strand.pos.dir = nRes.dir;
+                                strand.life += itm.core.decay;
+                                itm.deactivate();
+                            }
+                        }
+                        else if (itm.core.type == "strand" && itm.core.subtype == "strandD") {
+                            let nCodes = [];
+            
+                            let codeLen = strand.dynamic["codes"].length + itm.dynamic["codes"].length;
+                            let canComb = false;
+                            let sumB = groupObj(itm.dynamic["codes"],[lfcore.snip.snipEx.data]);
+                            let sumE = sums[lfcore.snip.snipEx.data] + sumB[lfcore.snip.snipEx.data];
+                            if (sumE / codeLen <= 0.25 && codeLen <= 48) { 
+                                canComb = true;
+                                nCodes = JSON.parse(JSON.stringify(itm.dynamic["codes"].sort()));
+                            }
+
+                            strand.dynamic["codes"].forEach((cd) => {
+                                if (lf.behaviors.activeCodes.includes(cd) && nCodes.includes(cd)) canComb = false;
+                            });
+            
+                            if (canComb) {
+                                let prevLen = strand.dynamic["codes"].length;
+                                strand.dynamic["codes"].push(...nCodes);
+                                strand.dynamic["codes"].sort();
+                                let newLen = strand.dynamic["codes"].length;
+                                if (newLen >= gVars.minStrandLen) {
+                                    if (strand.obj.classList.contains("sz-mid")) strand.obj.classList.remove("sz-mid"); 
+                                    strand.obj.classList.add("sz-full"); 
+                                }
+                                else if (newLen >= Math.floor(gVars.minStrandLen / 2)) strand.obj.classList.add("sz-mid"); 
+                                
+                                let nX = (strand.pos.x + itm.pos.x) / 2;
+                                let nY = (strand.pos.y + itm.pos.y) / 2;
+                                let nRes = strand.pos.subtract(itm.pos);
+                                strand.pos.vel -= nRes.vel;
+                                strand.pos.dir = nRes.dir;
+                                strand.life += itm.core.decay;
+
+                                itm.deactivate();
+                                combined = true;
+                                let dspCode = strand.dynamic["codes"].join(":");
+                                let cLen = strand.dynamic["codes"].length;
+                                //console.log("s " + strand.id + " combined : " + dspCode + " [" + cLen + "]");
+                            }
+                        }
+                    });
+            
+                    let cStrP = strand.dynamic["codes"].join(":");
+                    strand.obj.setAttribute("code",cStrP);
+                    if (strand.dynamic["codes"].length >= gVars.minStrandLen && membrane != null) {
+                        let ptDyn = {
+                            gen: lf.step,
+                            codes: JSON.parse(JSON.stringify(strand.dynamic["codes"]))
+                        };
+            
+                        let iOps = { init: true, complex: 1 };
+                        let protoType = "protoS";
+                        if ("mtype" in membrane.dynamic && membrane.dynamic.mtype == "C") {
+                            protoType = "protoC";
+                            iOps.complex = 2;
+                        }
+            
+                        let nDir = Math.floor(Math.random() * 360);
+                        let nVel = Math.floor(Math.random() * 9);
+                        let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, new LFGenetic(strand.genetic.vals), iOps);
+                        lf.queueItem(nPro);
+            
+                        membrane.deactivate();
+                        strand.deactivate();
+                        spawned = true;
+                        console.log("s " + strand.id + " spawned");
+                    }
+            
+                    if (!spawned) {
+                        lf.behaviors.run(strand, "reset");
+                        strand.dynamic["codes"].forEach((cd) => {
+                            lf.behaviors.run(strand, cd);
+                        });
+                        strand.obj.innerHTML = lfcore.strand.strandD.content.replace("<!--nm-->",strand.dynamic["codes"].length);
+                    }
                 }
             }
         
@@ -1095,6 +1103,8 @@ const lfcore = {
             }
         
             let oA = Math.floor(Math.random() * 360);
+            let strandType = "strandD";
+            if (strandCodes.length > 0 && strandCodes[0].indexOf("u") >= 0) strandType = "strandR";
             if (rCodes.length > 0) {
                 if (rCodes.length == 1) {
                     let nDir = oA;
@@ -1112,8 +1122,8 @@ const lfcore = {
                     let nDir = oA;
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
-                    let nVel = Math.floor(Math.random() * 5) + 10;
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand.strand, {gen:lf.step, codes: rCodes, len: rCodes.length});
+                    let nVel = Math.floor(Math.random() * 5) + 10;             
+                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], {gen:lf.step, codes: rCodes, len: rCodes.length});
                     lf.queueItem(nStd);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1137,7 +1147,7 @@ const lfcore = {
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand.strand, {gen:lf.step, codes: rCodes2, len: rCodes2.length});
+                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], {gen:lf.step, codes: rCodes2, len: rCodes2.length});
                     lf.queueItem(nStd);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1158,7 +1168,8 @@ const lfcore = {
         protoC: {
             type: "proto",
             subtype: "protoC",
-            class: "proto-1a", 
+            class: "proto-1a",
+            weight: 2, 
             data: "proto",
             content: "<html>", 
             formula: () => { 
@@ -1173,7 +1184,8 @@ const lfcore = {
         protoS: {
             type: "proto",
             subtype: "protoS",
-            class: "proto-1b", 
+            class: "proto-1b",
+            weight: 1.75,
             data: "proto",
             content: "<html>", 
             formula: () => { 
@@ -1205,25 +1217,6 @@ const lfcore = {
                     proto.obj.style.opacity = 0.9;
                 }
         
-                /* 
-                if (proto.life >= 80) {
-                    let nDir = (proto.pos.dir + 180) % 360;
-                    let nVel = proto.pos.vel;
-                    if (nVel < 1) nVel = Math.floor(Math.random() * 11) + 5;
-                    let iOps = {
-                        init: true,
-                        complex: proto.complex
-                    }
-                    let dX = nVel - Math.floor(Math.random() * ((nVel * 2) + 1));
-                    let dY = nVel - Math.floor(Math.random() * ((nVel * 2) + 1));
-                    let nProto = new LFItem(new LFVector(proto.pos.x + dX, proto.pos.y + dY, nDir, nVel), lfcore.proto[proto.core.subtype], {gen: lf.step, codes: proto.dynamic["codes"].splice()}, JSON.parse(JSON.stringify(proto.genetic)), iOps);
-                    nProto.life = 40;
-                    proto.life = 40;
-                    lf.queueItem(nProto);
-                    console.log("divided!!!");
-                }
-                */
-        
                 let preX = proto.pos.x;
                 let preY = proto.pos.y;
                 
@@ -1231,6 +1224,68 @@ const lfcore = {
                 proto.dynamic["codes"].forEach((cd) => {
                     lf.behaviors.run(proto, cd);
                 });
+
+                // enable division (based on spekV or ortI from membrane formation)
+                if (!("division" in proto.genetic)) proto.genetic["division"] = { counter: 0, actCount: 0, ran: false }; 
+
+                // if healthy enough starting activating division
+                if (proto.life >= 80) proto.genetic.division.counter++;
+                else proto.genetic.division.counter = 0;
+
+                proto.obj.setAttribute("d-count",proto.genetic.division.counter);
+
+                // has been healthy long enough to divide
+                if (proto.genetic.division.counter >= 50) {
+                    proto.genetic.division.counter = 50;
+
+                    // has enough spekV to trigger division
+                    if (proto.genetic.division.actCount > 5) {
+                        // divide
+                        let mutateOps = "abcd";
+                        let nCodes = JSON.parse(JSON.stringify(proto.dynamic.codes));
+                        for (let m = 0; m < nCodes.length; m++) {
+                            let mutate = Math.random() > 0.98 ? true : false;
+                            if (mutate) {
+                                let rIdx = Math.floor(Math.random() * nCodes[m].length);
+                                let rIdx2 = Math.floor(Math.random() * mutateOps.length);
+                                nCodes[m][rIdx] = mutateOps[rIdx2];
+                            }
+                        }
+
+                        let nDir = proto.pos.dir;
+                        let nVel = proto.pos.vel;
+
+                        let nDirCp = nDir;
+
+                        nOVel = Math.floor(Math.random() * 2) + 1;
+
+
+                        let cpGen = new LFGenetic(proto.genetic.vals);
+
+                        let copy = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDirCp, nVel), lfcore.proto[proto.core.subtype], { gen: lf.step, codes: nCodes }, cpGen, { init: true, complex: proto.complex });
+                        let nLife = Math.floor(proto.life * 0.6);
+                        copy.life = nLife;
+                        proto.life = nLife;
+                        copy.pos.push(nDir - 90, nOVel);
+                        proto.pos.push(nDir + 90, nOVel);
+                        lf.queueItem(copy);
+
+                        proto.genetic.division.actCount = 0;
+                        proto.genetic.division.counter = 0;
+                    }
+                    else {
+                        // check for spekV to trigger activation
+                        let closeV = lf.haze.query(proto, "spekV");
+                        shuffleArray(closeV);
+                        if (closeV.length > 0) {
+                            proto.genetic.division.actCount++;
+                            lf.haze.transact(closeV[0].table,"spekV",-1);
+                        }
+                        proto.obj.setAttribute("act-count",proto.genetic.division.actCount);
+                    }
+                }
+                
+                proto.pos.move();
         
                 if(preX == proto.pos.x && preY == proto.pos.y) {
                     proto.pos.x += Math.random() > 0.5 ? -1 : 1;
@@ -1259,23 +1314,16 @@ const lfcore = {
         
         // proto decay
         decay: function(proto) {
-            let blkCount = 3;
-            if (proto.core.subtype == "protoS") blkCount = 0;
+            let huskType = "huskC";
+            if (proto.core.subtype == "protoS") huskType = "huskS";
+
+            let nVel = proto.pos.vel;
+            let nDir = proto.pos.dir;
+
+            if (nVel < 1) nVel = 1;
         
-            let itemCount = blkCount;
-        
-            let oA = Math.floor(Math.random() * 360);
-            for (let m = 0; m < blkCount; m++) {
-                let dX = 12 * Math.cos(oA);
-                let dY = 12 * Math.cos(oA);
-                let nVel = Math.floor(Math.random() * 5) + 5;
-                let nBlk = new LFItem(new LFVector(proto.pos.x + dX, proto.pos.y + dY, oA, nVel), lfcore.snip.snipBlk, { gen: lf.step, code: "ppp"});
-                lf.queueItem(nBlk);
-                oA += 360 / blkCount;
-                oA = oA % 360;
-            }
-        
-            lfcore.strand.decay(proto.dynamic["codes"], proto.pos);
+            let nHusk = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDir, nVel), lfcore.struck.struckHusk, { gen: lf.step, parent: proto.id, type: huskType });
+            lf.queueItem(nHusk);
 
             console.log("proto " + proto.id + " died.");
         }
@@ -1289,7 +1337,7 @@ const lfcore = {
             type: "struck",
             subtype: "struckBrane",
             class: "brane", 
-            weight: 2.5,
+            weight: 1.6,
             data: "brane", 
             content: "&compfn;",
             formula: () => { 
@@ -1305,7 +1353,7 @@ const lfcore = {
             type: "struck",
             subtype: "struckBlip",
             class: "blip", 
-            weight: 2,
+            weight: 1.4,
             data: "blip", 
             content: "&compfn;",
             formula: () => { 
@@ -1321,7 +1369,7 @@ const lfcore = {
             type: "struck",
             subtype: "struckSeed",
             class: "seed", 
-            weight: 1.8,
+            weight: 1.5,
             data: "seed", 
             content: "&sect;",
             formula: () => { 
@@ -1329,6 +1377,22 @@ const lfcore = {
             }, 
             range: 20, 
             decay: 800,
+            dformula: []
+        },
+
+        // struckHusk
+        struckHusk: {
+            type: "struck",
+            subtype: "struckHusk",
+            class: "husk", 
+            weight: 1.1,
+            data: "husk", 
+            content: "<html>",
+            formula: () => { 
+                return "husk"; 
+            }, 
+            range: 0, 
+            decay: 3000,
             dformula: []
         },
 
@@ -1341,39 +1405,63 @@ const lfcore = {
                 struck.life--;
             
             if (struck.life != null && struck.life <= 0 && struck.active) {
-                lfcore.struck.decay(struck);
+                lfcore.struck.decay(struck.core.subtype, struck.pos);
                 struck.deactivate();
             }
         
             if (struck.active) {
-                struck.pos.move(struck.core.weight);
-                struck.obj.style.left = struck.pos.x + "px";
-                struck.obj.style.top = struck.pos.y + "px";
-                struck.obj.style.rotate = "z " + struck.pos.dir + "deg";
         
                 if (struck.core.subtype == "struckBlip") {
-                    if (struck.life < 40) struck.obj.style.opacity = struck.life / 100;
+
+                    let closeOrts = lf.query(struck, "ort");
+
+                    let iTrig = [];
+
+                    closeOrts.forEach((ort) => {
+                        if (iTrig.length < 3 && ort.core.subtype == "ortI") iTrig.push(ort);
+                    });
+                    
+                    if (iTrig.length == 3) {
+                        let nX = struck.pos.x;
+                        let nY = struck.pos.y;
+                        let nDir = struck.pos.dir;
+                        let nVel = struck.pos.vel;
+
+                        let nBrane = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.struck.struckBrane, { gen: lf.step, mtype: "S" });
+                        nBrane.life = lfcore.struck.struckBrane.decay * 0.5;
+                        nBrane.obj.classList.add("b2");
+                        lf.queueItem(nBrane);
+
+                        iTrig.forEach(t => t.deactivate());
+                        struck.deactivate();
+                    }
+                    else if (struck.life < 40) struck.obj.style.opacity = struck.life / 100;
                 }
         
             }
-            else {
-                struck.obj.style.display = "none";
+
+            if (struck.active) {
+                struck.pos.move(struck.core.weight);
+                struck.obj.style.left = struck.pos.x + "px";
+                struck.obj.style.top = struck.pos.y + "px";
+                struck.obj.style.rotate = struck.transformFill.replace("***",struck.pos.dir); //"z " + struck.pos.dir + "deg";
             }
+            else struck.obj.style.display = "none";
         },
         
         // decay
-        decay: function(struckName, pos) {
+        decay: function(struckSubtype, pos) {
             let nDir = Math.floor(Math.random() * 360);
-            switch (struckName) {
-                case "brane":
-                    let degradeCount = 2;
-                    let snipCount = lf.braneCount - degradeCount;
+            switch (struckSubtype) {
+                case "struckBrane":
+                    let degradeCount = 1;
+                    let snipCount = gVars.braneCount - degradeCount;
                     let oA = Math.floor(Math.random() * 360);
-                    for (let b = 0; b < lf.braneCount - degradeCount; b++) {
-                        let nDir = oA;
-                        let dX = 15 * Math.cos(nDir * Math.PI / 180);
-                        let dY = 15 * Math.sin(nDir * Math.PI / 180);
-                        let nVel = Math.floor(Math.random() * 10) + 5;
+                    for (let b = 0; b < gVars.braneCount - degradeCount; b++) {
+                        let nDir = oA; 
+                        let dX = 0;
+                        let dY = 0;
+                        let nVel = 1;
                         let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip.snipBlk, {gen: lf.step,code:"ppp",len: 3});
                         lf.queueItem(nDobj);
                         oA += 360 / snipCount;
@@ -1382,34 +1470,16 @@ const lfcore = {
                     oA = Math.floor(Math.random() * 360);
                     let oCount = degradeCount * 3;
                     for (let pp = 0; pp < oCount; pp++) {
-                        let dForm = lfcore.ort["ortP"].core.dformula;
-                        dForm.array.forEach((spOps) => {
-                            switch (lf.formation) {
-                                case "haze":
-
-                                    lf.haze.add(pos.x, pos.y, spOps.subType, 1);
-                                
-                                    break;
-                                default:
-                                    
-                                        let nDir = oA;
-                                        let dX = 8 * Math.cos(nDir * Math.PI / 180);
-                                        let dY = 8 * Math.sin(nDir * Math.PI / 180);
-                                        let nVel = Math.floor(Math.random() * 9) + 4;
-                                        let nSobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.spek[spOps.subtype], {gen: lf.step});
-                                        lf.queueItem(nSobj);
-                                        oA += 360 / oCount;
-                                        oA = oA % 360;
-                                    
-                                    break;
-                            }
+                        let dForm = lfcore.ort["ortP"].dformula;
+                        dForm.forEach((spOps) => {
+                            lf.haze.add(pos.x, pos.y, spOps.subType, 1);
                         });
                     }
                     break;
-                case "blip":
+                case "struckBlip":
                     // dissolves into nothing since it came from nothing
                     break;
-                case "seed":
+                case "struckSeed":
                     let degradeCount2 = 2;
                     let snipCount2 = lf.seedCount - degradeCount2;
                     let oA2 = Math.floor(Math.random() * 360);
@@ -1427,6 +1497,26 @@ const lfcore = {
                     let oCount2 = degradeCount2;
                     for (let ss = 0; ss < oCount2; ss++) {
                         lfcore.snip.decay("snipEx","e--", pos);
+                    }
+                    break;
+                case "struckHusk":
+                    let orts = ["ortP","ortP","ortE","ortE","ortI"];
+                    let oA3 = Math.floor(Math.random() * 360);
+                    let oAdd = 360 / orts.length;
+                    for (let o = 0; o < orts.length; o++) {
+                        let nDir = oA3;
+                        let dX = 15 * Math.cos(nDir * Math.PI / 180);
+                        let dY = 15 * Math.sin(nDir * Math.PI / 180);
+                        let nVel = Math.floor(Math.random() * 10) + 5;
+                        let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort[orts[o]], {gen: lf.step});
+                        lf.queueItem(nOrt);
+                        oA3 += oAdd;
+                        oA3 = oA3 % 360;
+                    }
+                    let speks = ["spekA1", "spekB2", "spekC1", "spekD2"];
+                    if (Math.random() > 0.5) speks = ["spekA2", "spekB1", "spekC2", "spekD1"];
+                    for (let s = 0; s < speks.length; s++) {
+                        lf.haze.add(pos.x,pos.y,speks[s],1);
                     }
                     break;
             }
@@ -1449,8 +1539,14 @@ const lfcore = {
                 "spekC2",
                 "spekD1",
                 "spekD2",
+                "spekU1",
+                "spekU2",
                 "spekX",
-                "spekX"
+                "spekX",
+                "spekV",
+                "spekG1",
+                "spekG2",
+                "spekG3"
             ];
     
             let r = Math.floor(Math.random() * 150) + 75;
@@ -1463,43 +1559,17 @@ const lfcore = {
                 mY = Math.floor(Math.random() * (lf.h - (r * 2))) + r;
             }
     
-            switch (lf.formation) {
-                case "haze":
+            let count = Math.floor(Math.random() * 60) + 10;
+            
+            for (let j = 0; j < count; j++) {
+                let r1 = Math.floor(Math.random() * r);
+                let ix1 = Math.floor(Math.random() * validSpeks.length);
+                let k1 = validSpeks[ix1];
 
-                    let count = Math.floor(Math.random() * 60) + 10;
-                    
-                    for (let j = 0; j < count; j++) {
-                        let r1 = Math.floor(Math.random() * r);
-                        let ix1 = Math.floor(Math.random() * validSpeks.length);
-                        let k1 = validSpeks[ix1];
-
-                        lf.haze.add(mX, mY, k1, 1);
-                    }
-
-                    lf.haze.effect(new LFVector(mX, mY, 0, (Math.random() * 11) + 10 ));
-
-                    break;
-                default:
-                    let addR = Math.floor(Math.random() * 15) + 5;
-                    for (let a = 0; a < 360; a+=addR) {
-                        let count = Math.floor(Math.random() * 3) + 1;
-                        for (let j = 0; j < count; j++) {
-                            let r1 = Math.floor(Math.random() * r);
-                            let ix1 = Math.floor(Math.random() * validSpeks.length);
-                            let k1 = validSpeks[ix1];
-                            let nD = Math.floor(Math.random() * (r - 20)) + 20;
-                            let nX = mX + (nD * Math.cos(a * Math.PI / 180));
-                            let nY = mY + (nD * Math.sin(a * Math.PI / 180));
-                            let nDir = a;
-                            let nVel = Math.floor(Math.random() * 11) + 10;
-                            let nItem = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.spek[k1], {gen:lf.step});
-                            lf.addItem(nItem);
-                        }
-                        addR += Math.floor(Math.random() * 15) + 5;
-                    }
-
-                    break;
+                lf.haze.add(mX, mY, k1, 1);
             }
+
+            lf.haze.effect(new LFVector(mX, mY, 0, (Math.random() * 11) + 10 ));
     
             let bID = "bomb-" + lf.step;
     
@@ -1547,8 +1617,14 @@ const lfcore = {
                 "spekC2",
                 "spekD1",
                 "spekD2",
+                "spekU1",
+                "spekU2",
                 "spekX",
-                "spekX"
+                "spekX",
+                "spekV",
+                "spekG1",
+                "spekG2",
+                "spekG3"
             ];
         
             let r = Math.floor(Math.random() * 25) + 15;
@@ -1561,42 +1637,18 @@ const lfcore = {
                 mY = Math.floor(Math.random() * lf.h);
             }
     
-            switch (lf.formation) {
-                case "haze":
+            let count = Math.floor(Math.random() * 7) + 6;
+                
+            for (let j = 0; j < count; j++) {
+                let r1 = Math.floor(Math.random() * r);
+                let ix1 = Math.floor(Math.random() * validSpeks.length);
+                let k1 = validSpeks[ix1];
 
-                    let count = Math.floor(Math.random() * 7) + 6;
-                        
-                    for (let j = 0; j < count; j++) {
-                        let r1 = Math.floor(Math.random() * r);
-                        let ix1 = Math.floor(Math.random() * validSpeks.length);
-                        let k1 = validSpeks[ix1];
-
-                        lf.haze.add(mX, mY, k1, 1);
-                    }
-
-                    lf.haze.effect(new LFVector(mX, mY, 0, (Math.random() * 6) + 5 ));
-
-                    break;
-                default:
-                    let addR = Math.floor(Math.random() * 30);
-                    for (let a = 0; a < 360; a+=addR) {
-                        let r1 = Math.floor(Math.random() * r);
-                        let ix1 = Math.floor(Math.random() * validSpeks.length);
-                        let k1 = validSpeks[ix1];
-                        let nDir = a;
-                        let nVel = Math.floor(Math.random() * 5) + 5;
-                        let nD = Math.floor(Math.random() * (r - 15)) + 15;
-                        let nX = mX + (nD * Math.cos(a * Math.PI / 180));
-                        let nY = mY + (nD * Math.sin(a * Math.PI / 180));
-                        if (nX > 0 && nX < lf.w && nY > 0 && nY < lf.h) {
-                            let nItem = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.spek[k1], {gen:lf.step});
-                            lf.addItem(nItem);
-                        }
-                        addR += Math.floor(Math.random() * 20) + 10;
-                    }
-
-                    break;
+                lf.haze.add(mX, mY, k1, 1);
             }
+
+            lf.haze.effect(new LFVector(mX, mY, 0, (Math.random() * 6) + 5 ));
+
             //console.log("puff - made");
     
             let pID = "puff-" + lf.step;
@@ -1653,38 +1705,17 @@ const lfcore = {
                 core: { range: r, type: "drip" }
             };
 
-    
+            if (mX > 0 && mX < lf.w && mY > 0 && mY < lf.h) {
+                lf.haze.add(mX, mY, "spekG1", 1 + Math.floor(Math.random() * 6));
+                lf.haze.add(mX, mY, "spekG2", 1 + Math.floor(Math.random() * 6));
+            }
+
             if (lf.items.length < gVars.maxItems) {
-                if (Math.random() > 0.5) {
+                if (Math.random() > 0.75) {
                     let nDir = Math.floor(Math.random() * 360);
                     let nBlip = new LFItem(new LFVector(mX, mY, 0, nDir), lfcore.struck.struckBlip, { gen: lf.step });
                     nBlip.obj.style.opacity = 0.4;
                     lf.queueItem(nBlip);
-                }
-        
-                switch (lf.formation) {
-                    case "haze":
-                        if (mX > 0 && mX < lf.w && mY > 0 && mY < lf.h) {
-                            lf.haze.add(mX, mY, "spekG1", 1);
-                            lf.haze.add(mX, mY, "spekG2", 1);
-                        }
-
-                        break;
-                    default:
-                        let gs = [ "spekG1", "spekG2" ];
-                        let gCount = Math.floor(Math.random() * 4) + 3;
-                        let gA = Math.floor(Math.random() * 360);
-                        let addA = 360 / gCount;
-                        for (let g = 0; g < gCount; g++) {
-                            let nVel = Math.floor(Math.random() * 10) + 10;
-                            let gName = gs[Math.floor(Math.random() * gs.length)];
-                            let nGas = new LFItem(new LFVector(mX, mY, nVel,gA), lfcore.spek[gName], { gen: lf.step });
-                            lf.queueItem(nGas);
-                            gA += addA;
-                            gA = gA % 360;
-                        }
-
-                        break;
                 }
         
             }
@@ -1738,6 +1769,51 @@ const lfcore = {
                     }
                 }, true)
             );
+        },
+        
+        // vent
+        vent: function (mX = null, mY = null) {
+
+            let vX = mX != null ? mX : Math.floor(Math.random() * (lf.w - 200)) + 100;
+            let vY = mY != null ? mY : Math.floor(Math.random() * (lf.h - 200)) + 100;
+
+            let gPos = lf.haze.getGridPos(vX, vY);
+            vX = gPos.x;
+            vY = gPos.y;
+
+            if (!("vents" in lf.extras)) lf.extras["vents"] = [];
+            lf.extras["vents"].push(
+                new LFXtra(new LFVector(vX, vY, 0, 0), {
+                    init: function(vent) {
+                        let nObj = document.createElement("div");
+                        nObj.id = "vent-" + lf.step + "-" + Math.floor(Math.random() * 10000);
+                        nObj.classList.add("xtra");
+                        nObj.classList.add("vent");
+                        nObj.style.left = vent.pos.x + "px";
+                        nObj.style.top = vent.pos.y + "px";
+                        nObj.style.transform = "translateX(-50%) translateY(-50%) rotate(" + (Math.floor(Math.random() * 360)) + "deg)";
+                        nObj.innerHTML = "&#x1F5F2;";
+                        vent.obj = nObj;
+                        vent.nX = Math.random() / 10;
+                        vent.nY = Math.random() / 10;
+                        vent.cSum = 0;
+                        lf.obj.append(nObj);
+                    },
+                    update: function(vent) {
+                        vent.nX += 0.01;
+                        vent.nY += 0.01;
+                        if (vent.nX >= 1) vent.nX = 0.01;
+                        if (vent.nY >= 1) vent.nY = 0.01;
+                        let cVal = (lf.engine.noise.get(vent.nX, vent.nY) * 0.5) + 0.5;
+                        vent.cSum += cVal;
+                        let cAvg = vent.cSum / lf.step;
+                        if (lf.step % 2 == 0 && cVal > cAvg) {
+                            let add = Math.floor(Math.random() * 7) + 1;
+                            lf.haze.add(vent.pos.x, vent.pos.y, "spekG3", add);
+                        }
+                    }
+                }, true)
+            );
         }
     }
 };
@@ -1751,6 +1827,8 @@ function LFHaze(w, h, sub) {
     me.sH = Math.ceil(me.h / me.sub);
     me.table = new Array(me.sW * me.sH);
     me.dispInit = false;
+    me.disp = false;
+    me.obj = null;
     me.contents = [
         "spekA1", 
         "spekA2",
@@ -1760,18 +1838,23 @@ function LFHaze(w, h, sub) {
         "spekC2",
         "spekD1", 
         "spekD2",
+        "spekU1", 
+        "spekU2",
         "spekX", 
         "spekG1",
         "spekG2", 
-        "spekG3"
+        "spekG3",
+        "spekV"
     ];
-    me.checkupdate = ["ortA","ortB","ortC","ortD","ortP","ortE"];
+    me.checkupdate = ["ortA","ortB","ortC","ortD","ortU","ortP","ortE","ortI"];
     for (let i = 0; i < me.table.length; i++) {
         me.table[i] = {};
         me.contents.forEach((oo) => { me.table[i][oo] = 0; });
     }
+    me.spekSize = 5;
+    me.saturation = (me.sub * me.sub) /  (me.spekSize * me.spekSize);
 
-    me.query = (item, type = null, options = {}) => {
+    me.query = (item, type, options = {}) => {
         let res = [];
         if (type != null) {
             let qRange = item.core.range;
@@ -1794,6 +1877,61 @@ function LFHaze(w, h, sub) {
                         if (qIdx >= 0 && qIdx < me.table.length) {
                             if (type in me.table[qIdx] && me.table[qIdx][type] > 0)
                                 res.push({tableIndex: qIdx, count: me.table[qIdx][type]});
+                        }
+                    }
+                }
+            }
+        }
+        return res;
+    };
+
+    me.getGridPos = (x,y) => {
+        let cX = x < 0 ? 0 : x;
+        let cY = y < 0 ? 0 : y;
+        if (cX > lf.w) cX = lf.w;
+        if (cY > lf.h) cY = lf.h;
+        let hX = Math.floor(cX / me.sub);
+        let hY = Math.floor(cY / me.sub);
+        return { x: (hX * me.sub) + Math.floor(me.sub / 2), y: (hY * me.sub) + Math.floor(me.sub / 2) };
+    };
+
+    me.getCellPos = (tbIndex) => {
+        if (tbIndex > 0 && tbIndex < me.table.length) {
+            return { x: ((tbIndex % me.sub) * me.sub) + Math.floor(me.sub / 2), y: (Math.floor(tbIndex / me.sub) * me.sub) + Math.floor(me.sub / 2) };
+        }
+        else return null;
+    };
+
+    me.queryM = (item, types = [], options = {}) => {
+        let res = [];
+        if (types.length > 0) {
+            let qRange = item.core.range;
+
+            if ("range" in options) qRange = options["range"];
+
+            if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
+                let x = item.pos.x;
+                let y = item.pos.y;
+                let r = qRange;
+                let qX = Math.floor(x / me.sub);
+                let qY = Math.floor(y / me.sub);
+                let qSpanX = 1;
+                let qSpanY = 1;
+                while (r > me.sub * (qSpanX + 1)) qSpanX++;
+                while (r > me.sub * (qSpanY + 1)) qSpanY++;
+                for (let i = qX - qSpanX; i <= qX + qSpanX; i++) {
+                    for (let j = qY - qSpanY; j <= qY + qSpanY; j++) {
+                        let qIdx = (j * me.sW) + i;
+                        if (qIdx >= 0 && qIdx < me.table.length) {
+                            let tCount = 0;
+                            let foundTB = { tableIndex: qIdx };
+                            types.forEach((ty) => {
+                                if (ty in me.table[qIdx] && me.table[qIdx][ty] > 0) {
+                                    tCount += me.table[qIdx][ty];
+                                }
+                                foundTB[ty] = me.table[qIdx][ty];
+                            });
+                            if (tCount > 0) res.push(foundTB);
                         }
                     }
                 }
@@ -1873,20 +2011,23 @@ function LFHaze(w, h, sub) {
     };
 
     me.update = () => {
-        if (me.dispInit) {
+        if (me.disp) {
             for (let ti = 0; ti < lf.haze.table.length; ti++) {
                 let tbid = "haze-disp-" + ti;
                 let tbObj = document.getElementById(tbid);
                 if (tbObj) {
-                    let tbHTML = "";
-
                     me.contents.forEach((ky) => {
+                        let kyO = tbObj.querySelector("." + ky);
                         if (lf.haze.table[ti][ky] > 0) {
-                            tbHTML += "<div>" + ky + ": " + lf.haze.table[ti][ky] + "</div>";
+                            if (kyO == undefined && kyO == null) {
+                                tbObj.innerHTML += "<div>" + ky + ": <span class=\"" + ky + "\">" + lf.haze.table[ti][ky] + "</span></div>";
+                            }
+                            else {
+                                kyO.innerHTML = lf.haze.table[ti][ky];
+                            }
                         }
+                        else if (kyO != undefined && kyO != null) { kyO.innerHTML = lf.haze.table[ti][ky]; }
                     });
-
-                    tbObj.innerHTML = tbHTML;
                 }
             }
         }
@@ -1909,28 +2050,80 @@ function LFHaze(w, h, sub) {
                     lf.queueItem(nOrt);
                 }
             });
+            me.contents.forEach((el) => {
+                if (me.table[ti][el] >= me.saturation) {
+                    me.disperse(ti,el);
+                }
+            });
         }
     };
 
-    me.show = () => {
+    me.disperse = (idx, elem) => {
+        let dCount = 8;
+        let xMin = -1;
+        let xMax = 1;
+        let yMin = -1;
+        let yMax = 1;
+        if (idx % me.sW == 0) { xMin = 0; dCount--; }
+        else if ((idx + 1) / me.sW == 1) { xMax = 0; dCount--; }
+        if (idx < me.sW) { yMin = 0; dCount--; }
+        else if (idx >= me.table.length - me.sW) { yMax = 0;  dCount--; }
+        dCount *= 2;
+        if (me.table[idx][elem] >= dCount) {
+            let inc = Math.floor(me.table[idx][elem] / dCount);
+            let oInc = inc;
+            for (let j = yMin; j <= yMax; j++) {
+                for (let i = xMin; i <= xMax; i++) {
+                    let dIdx = (idx + i) + (j * me.sW);
+                    if (dIdx != idx && dIdx >=0 && dIdx < me.table.length) {
+                        if (me.table[dIdx][elem] + inc >= lf.saturation) {
+                            inc *= 2;
+                        }
+                        else if (me.table[idx][elem] -= inc >= 0) {
+                            me.table[dIdx][elem] += inc;
+                            me.table[idx][elem] -= inc;
+                            inc = oInc;
+                        }
+                    }
+                }
+            }
+            if (me.table[idx][elem] >= lf.saturation) {
+                // TODO: add new super-ort
+            }
+        }
+    };
+
+    me.init = () => {
         if (!me.dispInit) {
+            let grid = document.createElement("div");
+            grid.id = "haze-grid";
+            grid.classList.add("haze-grid");
             for (let ti = 0; ti < lf.haze.table.length; ti++) {
                 let tbObj = document.createElement("div");
                 tbObj.id = "haze-disp-" + ti;
                 tbObj.classList.add("haze-disp");
-                tbObj.style.border = "1px solid white";
-                tbObj.style.opacity = 0.4;
                 tbObj.style.width = lf.haze.sub + "px";
                 tbObj.style.height = lf.haze.sub + "px";
                 tbObj.style.left = (lf.haze.sub * (ti % lf.haze.sW)) + "px";
                 tbObj.style.top = (lf.haze.sub * (Math.floor(ti / lf.haze.sW))) + "px";
-                tbObj.style.position = "absolute";
-                tbObj.style.color = "#666666";
-                tbObj.style.fontSize = "0.4rem";
-                tbObj.style.zIndex = 999999;
-                lf.obj.appendChild(tbObj);
+                grid.appendChild(tbObj);
             }
+            lf.obj.appendChild(grid);
+            me.obj = grid;
             me.dispInit = true;
+            me.disp = true;
+        }
+    }
+
+    me.flip = () => {
+        if (me.disp) {
+            me.obj.style.display = "none";
+            me.disp = false;
+        }
+        else {
+            if (!me.dispInit) me.init();
+            me.obj.style.display = "block";
+            me.disp = true;
         }
     }
 

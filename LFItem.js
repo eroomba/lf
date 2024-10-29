@@ -1,4 +1,4 @@
-function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
+function LFItem(pos, core, dynamic = {}, genetic = null, initOps = {init: true}) {
     let me = this;
     me.id = lf.generateID();
     me.gen = -1;
@@ -9,8 +9,9 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
     me.hash = "";
     me.core = core;
     me.dynamic = dynamic;
-    me.genetic = genetic;
+    me.genetic = genetic == null ? new LFGenetic : genetic;
     me.complex = 0;
+    me.parent = "parent" in dynamic ? dynamic["parent"] : null;
     if ("complex" in initOps) me.complex = initOps["complex"];
     me.transformFill = "translateX(-50%) translateY(-50%) rotate(***deg)";
     me.update = () => {
@@ -62,11 +63,18 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
                     nObj.setAttribute("code",cStrS);
                     nCont = me.core.content;
                     let cLen = me.dynamic["codes"].length;
-                    if (cLen >= gVars.minStrandLen) nObj.classList.add("sz-full");
-                    else nObj.classList.add("sz-" + me.dynamic["codes"].length);
+                    if (cLen >= gVars.minStrandLen) {  nObj.classList.add("sz-full"); }
+                    else if (cLen >= Math.floor(gVars.minStrandLen / 2)) {nObj.classList.add("sz-mid"); }
                     break;
                 case 'struck':
-                    nCont = me.core.content;
+                    if (me.core.subtype == "struckHusk") {
+                        let hHTML = "<div class=\"mid\">";
+                        hHTML += "<div class=\"main\"><div class=\"core\">&nbsp;</div></div>";
+                        hHTML += "</div>";
+                        nCont = hHTML;
+                        nObj.classList.add(me.dynamic["type"]);
+                    }
+                    else nCont = me.core.content;
                     break;
                 case 'proto':
                     let cStrP = ":" + me.dynamic["codes"].join(":") + ":";
@@ -83,12 +91,6 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
 
                     if (cStrP.indexOf(":bab:") >= 0 && cStrP.indexOf(":bac:") >= 0) {
                         nObj.classList.add("chem");
-                        if (me.complex >= 2) {
-                            midCont += "<div class=\"core chem-pip\">&divonx;</div>";
-                        }
-                        else if (me.complex == 1) {
-                            mainClasses.push("chem-pip");
-                        }
                     }
 
                     if (cStrP.indexOf(":bba:") >= 0 && cStrP.indexOf(":bbc:") >= 0) {
@@ -98,14 +100,15 @@ function LFItem(pos, core, dynamic = {}, genetic = {}, initOps = {init: true}) {
 
                     if (cStrP.indexOf(":aad:") >= 0 && (cStrP.indexOf(":aab:") >= 0 || cStrP.indexOf(":aac:") >= 0)) {
                         nObj.classList.add("breather");
-                        midCont += "<div class=\"core breath-pip\">&Colon;</div>"
+                        if (cStrP.indexOf(":aab:") >= 0) midCont += "&mDDot;"
+                        else midCont += "&divide;"; //"&Colon;"
                     }
 
-                    if (midCont.length == 0) midCont = "<div class=\"core " + mainClasses.join(" ") + "\">&horbar;</div>";
+                    if (midCont.length == 0) midCont = "&minus;";
 
                     pHTML = "<div class=\"back\">" + backCont + "</div>";
                     pHTML += "<div class=\"mid\">";
-                    pHTML += "<div class=\"main\">" + midCont + "</div>";
+                    pHTML += "<div class=\"main chem-pip\"><div class=\"core breath-pip\">" + midCont + "</div></div>";
                     pHTML += "</div>";
                     pHTML += "<div class=\"front\">" + frontCont + "</div>";
 

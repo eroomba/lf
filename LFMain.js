@@ -3,11 +3,12 @@ let mousePosX = 0;
 let mousePosY = 0;
 
 const gVars = {
-    braneCount: 3,
+    braneCount: 2,
     seedCount: 3,
     spekColl: false,
-    minStrandLen: 14,
-    maxItems: 5000
+    minStrandLen: 18,
+    maxItems: 5000,
+    huskDecay: 3000
 }
 
 function PNoise()  {
@@ -80,32 +81,20 @@ const LFEngine = {
         init: function() {
             let jj = 0;
             let spks = [];
-            switch (lf.formation) {
-                case "haze":
-                    Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
 
-                    for (let ii = 0; ii < 500; ii++) {
-                        let nX = Math.floor(Math.random() * lf.w);
-                        let nY = Math.floor(Math.random() * lf.h);
-                        lf.haze.add(nX, nY, spks[jj], 1);
+            Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
 
-                        jj = jj + 1 < spks.length ? jj + 1 : 0;
-                    }
+            for (let ii = 0; ii < 500; ii++) {
+                let nX = Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h);
+                lf.haze.add(nX, nY, spks[jj], 1);
 
-                    break;
-                default:
-                    Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
-                    for (let ii = 0; ii < 500; ii++) {
-                        let nX = Math.floor(Math.random() * lf.w);
-                        let nY = Math.floor(Math.random() * lf.h);
-                        let nDir = Math.floor(Math.random() * 360);
-                        let nSpek = new LFItem(new LFVector(nX, nY, nDir, 0), lfcore.spek[spks[jj]], {gen: lf.step});
-                        lf.addItem(nSpek);
+                jj = jj + 1 < spks.length ? jj + 1 : 0;
+            }
 
-                        jj = jj + 1 < spks.length ? jj + 1 : 0;
-                    }
-
-                    break;
+            let vCount = Math.floor(Math.random() * 2) + 1;
+            for (let v = 0; v < vCount; v++) {
+                lfcore.xtra.vent();
             }
         },
         run: function() {
@@ -137,7 +126,7 @@ const LFEngine = {
                 let nVel = 0;
                 let nDir = Math.floor(Math.random() * 360);
 
-                let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfcore.proto.protoS, mvDynamic, {}, { init: true, complex: 1 });
+                let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfcore.proto.protoS, mvDynamic, new LFGenetic(), { init: true, complex: 1 });
                 lf.queueItem(mvPro);
             }
         }
@@ -147,19 +136,14 @@ const LFEngine = {
             let jj = 0;
             let spks = [];
             
-            switch (lf.formation) {
-                case "haze":
-                    Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
+            Object.keys(lfcore.spek).forEach((ky) => { if (ky.indexOf("spek") == 0) spks.push(ky); });
 
-                    for (let ii = 0; ii < 500; ii++) {
-                        let nX = Math.floor(Math.random() * lf.w);
-                        let nY = Math.floor(Math.random() * lf.h);
-                        lf.haze.add(nX, nY, spks[jj], 1);
+            for (let ii = 0; ii < 500; ii++) {
+                let nX = Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h);
+                lf.haze.add(nX, nY, spks[jj], 1);
 
-                        jj = jj + 1 < spks.length ? jj + 1 : 0;
-                    }
-
-                    break;
+                jj = jj + 1 < spks.length ? jj + 1 : 0;
             }
 
         },
@@ -171,44 +155,66 @@ const LFEngine = {
             }
         }
     },
-    piptest: {
+    codetest: {
         init: function() {
-            switch (lf.formation) {
-                case "haze":
 
-                    for (let ii = 0; ii < 100; ii++) {
-                        let nX = lf.w / 2; //Math.floor(Math.random() * lf.w);
-                        let nY = lf.h / 2; //Math.floor(Math.random() * lf.h);
-                        lf.haze.add(nX, nY, "spekG1", 1);
-                    }
+            for (let ii = 0; ii < 200; ii++) {
+                let nX = Math.floor(Math.random() * lf.w); //lf.w / 2; //Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h); //lf.h / 2; //Math.floor(Math.random() * lf.h);
+                lf.haze.add(nX, nY, "spekG1", 1);
+            }
 
-                    for (let ii = 0; ii < 100; ii++) {
-                        let nX = lf.w / 2; //Math.floor(Math.random() * lf.w);
-                        let nY = lf.h / 2; //Math.floor(Math.random() * lf.h);
-                        lf.haze.add(nX, nY, "spekG2", 1);
-                    }
+            for (let ii = 0; ii < 200; ii++) {
+                let nX = Math.floor(Math.random() * lf.w); //lf.w / 2; //Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h); //lf.h / 2; //Math.floor(Math.random() * lf.h);
+                lf.haze.add(nX, nY, "spekG2", 1);
+            }
 
-                    for (let ii = 0; ii < 100; ii++) {
-                        let nX = lf.w / 2; //Math.floor(Math.random() * lf.w);
-                        let nY = lf.h / 2; //Math.floor(Math.random() * lf.h);
-                        lf.haze.add(nX, nY, "spekG3", 1);
-                    }
+            for (let ii = 0; ii < 1000; ii++) {
+                let nX = Math.floor(Math.random() * lf.w); //lf.w / 2; //Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h); //lf.h / 2; //Math.floor(Math.random() * lf.h);
+                lf.haze.add(nX, nY, "spekG3", 1);
+            }
 
-                    break;
+            for (let ii = 0; ii < 100; ii++) {
+                let nX = Math.floor(Math.random() * lf.w); //lf.w / 2; //Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h); //lf.h / 2; //Math.floor(Math.random() * lf.h);
+                lf.haze.add(nX, nY, "spekV", 1);
+            }
+
+            for (let ii = 0; ii < 50; ii++) {
+                let nX = Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h);
+                let nFood = new LFItem(new LFVector(nX, nY, Math.floor(Math.random() * 360), 0), lfcore.snip["snipEx"], { gen: 0, code: "e--"});
+                lf.addItem(nFood);
+            }
+
+            let vCount = Math.floor(Math.random() * 2) + 1;
+            for (let v = 0; v < vCount; v++) {
+                lfcore.xtra.vent(lf.w / 2, lf.h / 2);
             }
         },
         run: function() {
-            if (document.querySelectorAll(".proto").length == 0) {
-                let codes = ["aab","aad"]; // ["aab","aad","aaa","bbb"]; // aab, aad = resp, aaa, bbb = move, bac, bab = chem
-                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes }, {}, { init: true, complex: 1});
+            if (document.querySelectorAll(".proto").length < 3) {
+                // move: "aaa", "bbb"
+                // chem: "bac", "bab"
+                // eat: "bba", "bbc"
+                // percept: "cba", "cbb"
+                // seek: "cbc", "cbd"
+
+                let codes = ["aab","aad", "aaa","bbb", "bab","bac"]; 
+                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes }, new LFGenetic(), { init: true, complex: 1});
+                nPro.genetic["speed"] = 1;
                 lf.addItem(nPro);
 
-                let codes3 = ["aac","aad"]; // ["aab","aad","aaa","bbb"]; // aab, aad = resp, aaa, bbb = move, bac, bab = chem
-                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes3 }, {}, { init: true, complex: 1});
+                let codes3 = ["aac","aad", "aaa","bbb"]; 
+                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes3 }, new LFGenetic(), { init: true, complex: 1});
+                nPro.genetic["speed"] = 1;
                 lf.addItem(nPro3);
 
-                let codes2 = ["aaa","bbb","bab","bac","bba","bbc"]; // ["aab","aad","aaa","bbb"]; // aab, aad = resp, aaa, bbb = move, bac, bab = chem
-                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto["protoC"], { gen: 0, codes: codes2 }, {}, { init: true, complex: 2});
+                let codes2 = ["bba","bbc","aaa","bbb", "cba", "cbb", "cbc", "cbd"]; 
+                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto["protoC"], { gen: 0, codes: codes2 }, new LFGenetic(), { init: true, complex: 2});
+                nPro.genetic["speed"] = 1;
                 lf.addItem(nPro2);
             }
         }
@@ -227,7 +233,6 @@ function LF() {
     me.w = window.innerWidth;
     me.h = window.innerHeight;
     me.idc = 0;
-    me.initMode = "chaos";
     me.marker = {
         obj: document.getElementById("marker"),
         track: null
@@ -246,8 +251,7 @@ function LF() {
     me.behaviors = new LFCodedBehaviors();
     me.hash = new LFHash(me.w,me.h,50);
     me.haze = new LFHaze(me.w, me.h, 100);
-    me.formation = "haze"; //"spek";
-    me.runmode = "piptest";
+    me.runmode = "codetest";
     me.engine = LFEngine;
     me.remEncode = (itemID) => {
         if (itemID in me.items) {
@@ -347,7 +351,7 @@ function LF() {
         me.additems.length = 0;
 
         me.roll();
-        if (me.formation == "haze") me.haze.update();
+        me.haze.update();
 
         for (let ev = me.events.length - 1; ev >= 0; ev--) {
             if (typeof me.events[ev].run === 'function') me.events[ev].run(me.events[ev].params);
@@ -453,8 +457,8 @@ addEventListener("keyup", (event) => {
         }, params: { x: lf.w / 2, y: lf.h / 2 }});
     }
     else if (event.key.toLowerCase() == "h") {
-        console.log("haze on");
-        lf.haze.show();
+        console.log("haze toggle");
+        lf.haze.flip();
     }
     
     if (event.key.toLocaleLowerCase() == "u") {

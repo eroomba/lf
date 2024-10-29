@@ -116,7 +116,7 @@ body {
 
 .ort {
     font-size: 0.6rem;
-    opacity: 0.35;
+    opacity: 0.25;
     font-weight: bold;
 }
 
@@ -131,17 +131,22 @@ body {
 }
 
 .ort.ort-c {
-    color: #000099;
+    color: #993399;
     font-size: 0.5rem;
 }
 
 .ort.ort-d {
-    color: #990099;
+    color: #000099;
+}
+
+.ort.ort-u {
+    color: #3399ff;
 }
 
 .ort.ort-p {
     color: #FFAA00;
     opacity: 0.3;
+    font-size: 0.6rem;
 }
 
 .ort.ort-e {
@@ -149,9 +154,13 @@ body {
     font-size: 0.8em;
 }
 
+.ort.ort-i {
+    color: #ff6666;
+}
+
 .snip {
     font-size: 1.1rem;
-    opacity: 0.6;
+    opacity: 0.5;
     color: #666666;
 }
 
@@ -162,6 +171,7 @@ body {
 
 .snip.snip-go {
     color: #9933CC;
+    opacity: 0.6;
 }
 
 .snip.snip-blk {
@@ -174,23 +184,14 @@ body {
     font-size: 1rem;
 }
 
-.snip.snip-ddd {
-    color: #FF0000;
-    font-size: 0.9rem;
-}
-
-.snip.snip-daa,
-.snip.snip-dab,
-.snip.snip-dac,
-.snip.snip-dad,
-.snip.snip-dbb,
-.snip.snip-dba,
-.snip.snip-dbc,
-.snip.snip-dbd,
-.snip.snip-dcc,
-.snip.snip-dca,
-.snip.snip-dcb,
-.snip.snip-dcd {
+.snip.snip-uua,
+.snip.snip-uub,
+.snip.snip-uuc,
+.snip.snip-uud,
+.snip.snip-uau,
+.snip.snip-ubu,
+.snip.snip-ucu,
+.snip.snip-udu {
     color: #FFAA00;
     font-size: 0.9rem;
 }
@@ -207,52 +208,36 @@ body {
 
 .strand {
     font-size: 1.7rem;
-    opacity: 0.8;
+    opacity: 0.7;
+    color: #CCCCCC;
+}
+
+.strand.strand-r {
+    color: #FF9900;
+    font-size: 0.55rem;
+    opacity: 0.5;
+}
+
+.strand.strand-d {
     color: #CC99CC;
 }
 
-.strand.sz-6,
-.strand.sz-7,
-.strand.sz-8,
-.strand.sz-9 {
-    font-size: 1.8rem;
-}
-
-.strand.sz-10,
-.strand.sz-11,
-.strand.sz-12,
-.strand.sz-13 {
-    font-size: 1.9rem;
-}
-
-.strand.sz-14,
-.strand.sz-15,
-.strand.sz-16,
-.strand.sz-17 {
-    font-size: 2rem;
-}
-
-.strand.sz-18,
-.strand.sz-19,
-.strand.sz-20,
-.strand.sz-21,
-.strand.sz-22,
-.strand.sz-23 {
+.strand.strand-d.sz-mid{
     font-size: 2.1em;
-    color: #9966FF;
+    color: #9978D8;
 }
 
-.strand.sz-full {
+.strand.strand-d.sz-full {
     font-size: 2.1em;
-    color: #3333FF;
+    color: #6666FF;
 }
 
-.strand .st-ct {
+.strand.strand-d .st-ct {
     text-align: center;
     line-height: 0.5rem;
 }
 
-.strand .st-cn {
+.strand.strand-d .st-cn {
     text-align: right;
     font-size: 0.5rem;
     line-height: 0.5rem;
@@ -267,7 +252,12 @@ body {
 
 .struck.brane {
     font-size: 2rem;
-    color: #FFAA00;
+    opacity: 0.5;
+    color: #FFCC00;
+}
+
+.struck.brane.b2 {
+    color: #66cc33;
 }
 
 .struck.blip {
@@ -281,7 +271,6 @@ body {
     color: #336600;
     opacity: 0.3;
 }
-
 
 .proto {
     opacity: 0.8;
@@ -310,7 +299,6 @@ body {
     width: 1rem;
     height: 1rem;
     font-size: 0.65rem;
-    line-height: 0.65rem;
     vertical-align: middle;
     border-width: 0.15rem;
     border-style: solid;
@@ -333,21 +321,10 @@ body {
     height: 1rem;
 }
 
-@keyframes breath-a-1 {
-    0% { color: #2bb; scale: 100%; }
-    25% { color: #9FF; scale: 110%; }
-    50% { color: #2bb; scale: 100%; }
-    75% { color: #9ff; scale: 110%; }
-    100% { color: #2bb; scale: 100%; }
-}
-
 .breath-pip.breathing {
-    animation: breath-a-1;
-    animation-duration: 3s;
-    animation-iteration-count: infinite;
-    animation-fill-mode: forwards;
+    color: #8dd; 
+    scale: 120%;
 }
-
 
 .proto.complex-1.chem .mid .main,
 .proto.complex-2.chem .mid .main {
@@ -356,31 +333,21 @@ body {
     color: #5b5;
 }
 
-@keyframes chem-a-1 {
-    0% { color: #5b5; rotate: 0deg; }
-    25% { color: #ff3; rotate: 90deg; }
-    50% { color: #5b5; rotate: 180deg; }
-    75% { color: #ff3; rotate: 270deg;}
-    100% { color: #5b5; rotate: 359deg; }
-}
-
-.chem-pip.cheming-a {
-    animation: chem-a-1;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    animation-fill-mode: forwards;
-}
-
 .chem-pip.cheming {
-    color: #ff3; rotate: 90deg;
+    border-color: #5e5 !important; 
 }
-
 
 .proto.complex-2 .back,
 .proto.complex-2 .front {
     min-width: 1rem;
     color: #3bb;
 }
+
+.proto.chem.complex-2 .back,
+.proto.chem.complex-2 .front {
+    color: #6c6;
+}
+
 
 .proto.complex-2 .back .tail {
     min-width: 1rem;
@@ -463,9 +430,62 @@ body {
     transform-origin: center right;
 }
 
+.husk {
+    opacity: 0.4;
+    transform-origin: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.husk.huskS .mid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+.husk.huskC .mid .main,
+.husk.huskS .mid .main {
+    border-width: 0.2rem;
+    border-style: solid;
+    border-radius: 100%;
+    border-color: #ffe;
+    color: #eee;
+    font-weight: bold;
+    text-align: center;
+}
+
+.husk.huskS .mid .main {
+    width: 0.75rem;
+    height: 0.75rem;
+    font-size: 0.5rem;
+    vertical-align: middle;
+}
+
+.husk.huskC .mid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+}
+
+.husk.huskC .mid .main {
+    width: 1.1rem;
+    height: 0.8rem;
+    font-size: 0.6rem;
+    line-height: 0.6rem;
+    vertical-align: middle;
+}
+
 .xtra {
     position: absolute;
     transform-origin: center;
+    user-select: none;
 }
 
 .xtra.drip {
@@ -506,9 +526,33 @@ body {
 
 .xtra.vent {
     transform-origin: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: #20d6b2;
     opacity: 0.4;
     z-index: 90;
+}
+
+.haze-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.haze-disp {
+    border: 1px solid white;
+    opacity: 0.2;
+    position: absolute;
+    color: #CCCCCC;
+    font-size: 0.4rem;
+    z-index: 999999;
+    cursor: default;
+}
+
+.haze-disp:hover {
+    color: #333;
+    font-size: 0.5rem;
+    opacity: 0.4;
 }
 
