@@ -1,3 +1,19 @@
+function LFDynamic(initParams) {
+    let me = this;
+    me.codes = [];
+    me.mem = {};
+
+    if (initParams != null) {
+        Object.keys(initParams).forEach((ky) => {
+            if (ky == "code") me.codes.push(initParams[ky]);
+            else if (ky == "codes") me.codes = JSON.parse(JSON.stringify(initParams[ky]));
+            else {
+                me.mem[ky] = initParams[ky];
+            }
+        });
+    }
+}
+
 const lfcore = {
     curr: this,
     cache: {},
@@ -472,7 +488,7 @@ const lfcore = {
                         let nY = ort.pos.y;
                         let nVel = ort.pos.vel;
                         let nDir = ort.pos.dir;
-                        let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip.snipEx, { gen: lf.step, code: "e--", len: 3 });
+                        let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip.snipEx, { code: "e--" });
                         lf.queueItem(nSnip);
         
                         ort.deactivate();
@@ -529,10 +545,10 @@ const lfcore = {
                         nY /= (snipC.length + 1);
                         for (let sc = snipC.length - 1; sc >= 0; sc--) snipC[sc].deactivate();
         
-                        let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip[snipType], { gen: lf.step, code: snipVal, len: snipVal.length });
+                        let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip[snipType], { code: snipVal });
                         if (snipVal.indexOf("u") == 0 && lf.behaviors.singles.includes(snipVal)) {
                             nSnip.life *= 4;
-                            nSnip.dynamic["proc"] = 1;
+                            nSnip.dynamic.mem["proc"] = 1;
                         }
                         lf.queueItem(nSnip);
                         
@@ -647,9 +663,9 @@ const lfcore = {
                 snip.life--;
             
             if (snip.life != null && snip.life <= 0 && snip.active) {
-                if ("parts" in snip.dynamic && "p" in snip.dynamic["parts"] && snip.dynamic["parts"]["p"] > 0) snip.life = snip.core.decay;
+                if ("parts" in snip.dynamic && "p" in snip.dynamic.mem["buildparts"] && snip.dynamic.mem["buildparts"]["p"] > 0) snip.life = snip.core.decay;
                 else {
-                    lfcore.snip.decay(snip.core.subtype, snip.dynamic["code"], snip.pos);
+                    lfcore.snip.decay(snip.core.subtype, snip.dynamic.codes[0], snip.pos);
                     snip.deactivate();
                 }
             }
@@ -661,7 +677,7 @@ const lfcore = {
                     let closeOrts = lf.query(snip, "ort");
         
                     if (closeOrts.length > 0) {
-                        let myVal = snip.dynamic["code"];
+                        let myVal = snip.dynamic.codes[0];
         
                         let addOrt = closeOrts[Math.floor(Math.random() * closeOrts.length)];
                         let newVal = myVal + addOrt.core.data;
@@ -685,7 +701,7 @@ const lfcore = {
                         if (validSnip) {
                             let nDir = Math.floor(Math.random() * 360);
                             let velAdd = Math.floor(Math.random() * 5) + 3;
-                            let nSnip = new LFItem(new LFVector(snip.pos.x, snip.pos.y, nDir, snip.pos.vel + velAdd), lfcore.snip[snipType], { gen: lf.step, code: newVal, len: newVal.length });
+                            let nSnip = new LFItem(new LFVector(snip.pos.x, snip.pos.y, nDir, snip.pos.vel + velAdd), lfcore.snip[snipType], { code: newVal });
                             lf.queueItem(nSnip);
                             
                             addOrt.deactivate();
@@ -729,7 +745,7 @@ const lfcore = {
                         iTrig.deactivate();
                         snip.deactivate();
         
-                        let nBrane = new LFItem(new LFVector(Math.floor(mxSum / mCount), Math.floor(mySum / mCount), 0, 0), lfcore.struck.struckBrane, { gen: lf.step, mtype: "C" });
+                        let nBrane = new LFItem(new LFVector(Math.floor(mxSum / mCount), Math.floor(mySum / mCount), 0, 0), lfcore.struck.struckBrane, { mtype: "C" });
                         lf.queueItem(nBrane);
                     }
                     else if (closest != undefined && closest != null) {
@@ -762,28 +778,28 @@ const lfcore = {
                             s.deactivate(); 
                         });
         
-                        let nSeed = new LFItem(new LFVector(Math.floor(sxSum / sCount), Math.floor(sySum / sCount), 0, 0), lfcore.struck.struckSeed, { gen: lf.step });
+                        let nSeed = new LFItem(new LFVector(Math.floor(sxSum / sCount), Math.floor(sySum / sCount), 0, 0), lfcore.struck.struckSeed, null);
                         lf.queueItem(nSeed);
                     }
                 }
                 else {
                             
-                    if (snip.dynamic["code"].indexOf("p") < 0 && snip.dynamic["code"].indexOf("e") < 0) {
+                    if (snip.dynamic.codes[0].indexOf("p") < 0 && snip.dynamic.codes[0].indexOf("e") < 0) {
                         let closeSnips = lf.query(snip, "snip");
                         
                         for (let sn = closeSnips.length - 1; sn >= 0; sn--) {
-                            if (closeSnips[sn].core.subtype == "snipGo" && closeSnips[sn].dynamic["code"] != snip.dynamic["code"]) {
+                            if (closeSnips[sn].core.subtype == "snipGo" && closeSnips[sn].dynamic.codes[0] != snip.dynamic.codes[0]) {
                                 
-                                if (snip.dynamic.code.indexOf("u") >=0 && closeSnips[sn].dynamic.code.indexOf("u") >=0) {
-                                    if (!(("parts" in snip.dynamic && "p" in snip.dynamic["parts"] && snip.dynamic["parts"]["p"] > 0) ||
-                                        ("parts" in closeSnips[sn].dynamic && "p" in closeSnips[sn].dynamic["parts"] && closeSnips[sn].dynamic["parts"]["p"] > 0))) 
+                                if (snip.dynamic.codes[0].indexOf("u") >=0 && closeSnips[sn].dynamic.codes[0].indexOf("u") >=0) {
+                                    if (!(("parts" in snip.dynamic && "p" in snip.dynamic.mem["buildparts"]["p"] && snip.dynamic.mem["buildparts"]["p"] > 0) ||
+                                        ("parts" in closeSnips[sn].dynamic && "p" in closeSnips[sn].dynamic.mem["buildparts"] && closeSnips[sn].dynamic.mem["buildparts"]["p"] > 0))) 
                                     {
                                         addTo = closeSnips[sn];
                                         break;
                                     }
                                 }
-                                else if (snip.dynamic.code.indexOf("u") < 0 && closeSnips[sn].dynamic.code.indexOf("u") < 0 && 
-                                        !(lf.behaviors.singles.includes(closeSnips[sn].dynamic["code"]))) 
+                                else if (snip.dynamic.codes[0].indexOf("u") < 0 && closeSnips[sn].dynamic.codes[0].indexOf("u") < 0 && 
+                                        !(lf.behaviors.singles.includes(closeSnips[sn].dynamic.codes[0]))) 
                                 {
                                         addTo = closeSnips[sn];
                                         break;
@@ -793,8 +809,7 @@ const lfcore = {
                     }
         
                     if (addTo == null) {
-                        lf.behaviors.run(snip, "reset");
-                        lf.behaviors.run(snip, snip.dynamic["code"]);
+                        lf.behaviors.run(snip, [snip.dynamic.codes[0]]);
                     }
                     else {
                         let mX = (snip.pos.x + addTo.pos.x) / 2;
@@ -802,10 +817,10 @@ const lfcore = {
                         let nRes = snip.pos.subtract(addTo.pos);
                         let nDir = nRes.dir;
                         let nVel = snip.pos.vel - nRes.vel;
-                        let codes = [ snip.dynamic["code"], addTo.dynamic["code"] ]; 
+                        let codes = [ snip.dynamic.codes[0], addTo.dynamic.codes[0] ]; 
                         let strandType = "strandD";
-                        if (snip.dynamic["code"].indexOf("u") >= 0) strandType = "strandR";
-                        let nStrand = new LFItem(new LFVector(mX, mY, nDir, nVel), lfcore.strand[strandType], { gen: lf.step, codes: codes });
+                        if (snip.dynamic.codes[0].indexOf("u") >= 0) strandType = "strandR";
+                        let nStrand = new LFItem(new LFVector(mX, mY, nDir, nVel), lfcore.strand[strandType], { codes: codes });
                         lf.queueItem(nStrand);
         
                         addTo.deactivate();
@@ -835,7 +850,7 @@ const lfcore = {
                 comps.forEach((orta) => {
                     let xDir = 12 * Math.cos(nDir * Math.PI / 180);
                     let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta], {gen:lf.step});
+                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta], null);
                     lf.queueItem(nOrt);
                     nDir += (360 / comps.length);
                     nDir = nDir % 360;
@@ -847,7 +862,7 @@ const lfcore = {
                 let nVel = Math.floor(Math.random() * 5) + 10;
                 let dX = 12 * Math.cos(nDir * Math.PI / 180);
                 let dY = 12 * Math.sin(nDir * Math.PI / 180);
-                let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort.ortP, {gen:lf.step});
+                let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort.ortP, null);
                 lf.queueItem(nOrt);
                 nDir = pos.dir - 60;
                 nDir = nDir % 360;
@@ -861,7 +876,7 @@ const lfcore = {
                 comps.forEach((orta) => {
                     let xDir = 12 * Math.cos(nDir * Math.PI / 180);
                     let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta.toUpperCase()], {gen:lf.step});
+                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta.toUpperCase()], null);
                     lf.queueItem(nOrt);
                     nDir += (360 / comps.length);
                     nDir = nDir % 360;
@@ -918,7 +933,7 @@ const lfcore = {
                 strand.life--;
             
             if (strand.life != null && strand.life <= 0 && strand.active) {
-                lfcore.strand.decay(strand.dynamic["codes"], strand.pos);
+                lfcore.strand.decay(strand.dynamic.codes, strand.pos);
                 strand.deactivate();
             }
             else {
@@ -931,14 +946,14 @@ const lfcore = {
 
                         close.forEach((itm) => {
                             if (itm.core.subtype == "snipGo" &&
-                                !strand.dynamic["codes"].includes(itm.dynamic["code"]) &&
-                                itm.dynamic.code.indexOf("u") >= 0 &&
+                                !strand.dynamic.codes.includes(itm.dynamic.codes[0]) &&
+                                itm.dynamic.codes[0].indexOf("u") >= 0 &&
                                 strand.dynamic.codes.length < Math.floor(gVars.minStrandLen / 2))
                             {
-                                let prevLen = strand.dynamic["codes"].length;
-                                strand.dynamic["codes"].push(itm.dynamic["code"]);
-                                strand.dynamic["codes"].sort();
-                                let newLen = strand.dynamic["codes"].length;
+                                let prevLen = strand.dynamic.codes.length;
+                                strand.dynamic.codes.push(itm.dynamic.codes[0]);
+                                strand.dynamic.codes.sort();
+                                let newLen = strand.dynamic.codes.length;
 
                                 let nX = (strand.pos.x + itm.pos.x) / 2;
                                 let nY = (strand.pos.y + itm.pos.y) / 2;
@@ -951,39 +966,36 @@ const lfcore = {
                         });
 
                         if (combined) {
-                            let cStrP = strand.dynamic["codes"].join(":");
+                            let cStrP = strand.dynamic.codes.join(":");
                             strand.obj.setAttribute("code",cStrP);
                         }
                     }
 
-                    lf.behaviors.run(strand, "reset");
-                    strand.dynamic["codes"].forEach((cd) => {
-                        lf.behaviors.run(strand, cd);
-                    });
+                    lf.behaviors.run(strand, strand.dynamic.codes);
                 }
                 else if (strand.core.subtype == "strandD") {
             
                     let spawned = false;
                     let combined = false;
             
-                    let close = lf.query(strand, null, { range: strand.core.range + strand.dynamic["codes"].length });
+                    let close = lf.query(strand, null, { range: strand.core.range + strand.dynamic.codes.length });
             
                     let membrane = null;
                     close.forEach((itm) => {
-                        let sums = groupObj(strand.dynamic["codes"],[lfcore.snip.snipEx.data]);
+                        let sums = groupObj(strand.dynamic.codes,[lfcore.snip.snipEx.data]);
                         if (itm.core.subtype== "struckBrane" && membrane == null) {
                             membrane = itm;
                         }
                         else if (itm.core.type == "snip") {
                             if (itm.core.subtype == "snipGo" &&
-                                !strand.dynamic["codes"].includes(itm.dynamic["code"]) && 
-                                !(lf.behaviors.singles.includes(itm.dynamic["code"])) &&
-                                itm.dynamic["code"].indexOf("u") < 0)
+                                !strand.dynamic.codes.includes(itm.dynamic.codes[0]) && 
+                                !(lf.behaviors.singles.includes(itm.dynamic.codes[0])) &&
+                                itm.dynamic.codes[0].indexOf("u") < 0)
                             {
-                                let prevLen = strand.dynamic["codes"].length;
-                                strand.dynamic["codes"].push(itm.dynamic["code"]);
-                                strand.dynamic["codes"].sort();
-                                let newLen = strand.dynamic["codes"].length;
+                                let prevLen = strand.dynamic.codes.length;
+                                strand.dynamic.codes.push(itm.dynamic.codes[0]);
+                                strand.dynamic.codes.sort();
+                                let newLen = strand.dynamic.codes.length;
                                 if (newLen >= gVars.minStrandLen) {
                                     if (strand.obj.classList.contains("sz-mid")) strand.obj.classList.remove("sz-mid"); 
                                     strand.obj.classList.add("sz-full"); 
@@ -1002,24 +1014,24 @@ const lfcore = {
                         else if (itm.core.type == "strand" && itm.core.subtype == "strandD") {
                             let nCodes = [];
             
-                            let codeLen = strand.dynamic["codes"].length + itm.dynamic["codes"].length;
+                            let codeLen = strand.dynamic.codes.length + itm.dynamic.codes.length;
                             let canComb = false;
-                            let sumB = groupObj(itm.dynamic["codes"],[lfcore.snip.snipEx.data]);
+                            let sumB = groupObj(itm.dynamic.codes,[lfcore.snip.snipEx.data]);
                             let sumE = sums[lfcore.snip.snipEx.data] + sumB[lfcore.snip.snipEx.data];
                             if (sumE / codeLen <= 0.25 && codeLen <= 48) { 
                                 canComb = true;
-                                nCodes = JSON.parse(JSON.stringify(itm.dynamic["codes"].sort()));
+                                nCodes = JSON.parse(JSON.stringify(itm.dynamic.codes.sort()));
                             }
 
-                            strand.dynamic["codes"].forEach((cd) => {
+                            strand.dynamic.codes.forEach((cd) => {
                                 if (lf.behaviors.activeCodes.includes(cd) && nCodes.includes(cd)) canComb = false;
                             });
             
                             if (canComb) {
-                                let prevLen = strand.dynamic["codes"].length;
-                                strand.dynamic["codes"].push(...nCodes);
-                                strand.dynamic["codes"].sort();
-                                let newLen = strand.dynamic["codes"].length;
+                                let prevLen = strand.dynamic.codes.length;
+                                strand.dynamic.codes.push(...nCodes);
+                                strand.dynamic.codes.sort();
+                                let newLen = strand.dynamic.codes.length;
                                 if (newLen >= gVars.minStrandLen) {
                                     if (strand.obj.classList.contains("sz-mid")) strand.obj.classList.remove("sz-mid"); 
                                     strand.obj.classList.add("sz-full"); 
@@ -1035,19 +1047,18 @@ const lfcore = {
 
                                 itm.deactivate();
                                 combined = true;
-                                let dspCode = strand.dynamic["codes"].join(":");
-                                let cLen = strand.dynamic["codes"].length;
+                                let dspCode = strand.dynamic.codes.join(":");
+                                let cLen = strand.dynamic.codes.length;
                                 //console.log("s " + strand.id + " combined : " + dspCode + " [" + cLen + "]");
                             }
                         }
                     });
             
-                    let cStrP = strand.dynamic["codes"].join(":");
+                    let cStrP = strand.dynamic.codes.join(":");
                     strand.obj.setAttribute("code",cStrP);
-                    if (strand.dynamic["codes"].length >= gVars.minStrandLen && membrane != null) {
+                    if (strand.dynamic.codes.length >= gVars.minStrandLen && membrane != null) {
                         let ptDyn = {
-                            gen: lf.step,
-                            codes: JSON.parse(JSON.stringify(strand.dynamic["codes"]))
+                            codes: JSON.parse(JSON.stringify(strand.dynamic.codes))
                         };
             
                         let iOps = { init: true, complex: 1 };
@@ -1059,7 +1070,7 @@ const lfcore = {
             
                         let nDir = Math.floor(Math.random() * 360);
                         let nVel = Math.floor(Math.random() * 9);
-                        let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, new LFGenetic(strand.genetic.vals), iOps);
+                        let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, iOps);
                         lf.queueItem(nPro);
             
                         membrane.deactivate();
@@ -1069,11 +1080,8 @@ const lfcore = {
                     }
             
                     if (!spawned) {
-                        lf.behaviors.run(strand, "reset");
-                        strand.dynamic["codes"].forEach((cd) => {
-                            lf.behaviors.run(strand, cd);
-                        });
-                        strand.obj.innerHTML = lfcore.strand.strandD.content.replace("<!--nm-->",strand.dynamic["codes"].length);
+                        lf.behaviors.run(strand, strand.dynamic.codes);
+                        strand.obj.innerHTML = lfcore.strand.strandD.content.replace("<!--nm-->",strand.dynamic.codes.length);
                     }
                 }
             }
@@ -1113,7 +1121,7 @@ const lfcore = {
                     let nVel = Math.floor(Math.random() * 5) + 10;
                     let sType = "snipGo";
                     if (rCodes[0] == lfcore.snip.snipEx.data) sType = "snipEx"
-                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], {gen:lf.step, code: rCodes[0]});
+                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], { code: rCodes[0] });
                     lf.queueItem(nSnp);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1123,7 +1131,7 @@ const lfcore = {
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;             
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], {gen:lf.step, codes: rCodes, len: rCodes.length});
+                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], { codes: rCodes });
                     lf.queueItem(nStd);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1137,7 +1145,7 @@ const lfcore = {
                     let nVel = Math.floor(Math.random() * 5) + 10;
                     let sType = "snipGo";
                     if (rCodes2[0] == lfcore.snip.snipEx.data) sType = "snipEx";
-                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], {gen:lf.step, code: rCodes2[0]});
+                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], { code: rCodes2[0] });
                     lf.queueItem(nSnp);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1147,7 +1155,7 @@ const lfcore = {
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], {gen:lf.step, codes: rCodes2, len: rCodes2.length});
+                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], { codes: rCodes2 });
                     lf.queueItem(nStd);
                     oA += 360 / sCount;
                     oA = oA % 360;
@@ -1216,98 +1224,112 @@ const lfcore = {
                 else {
                     proto.obj.style.opacity = 0.9;
                 }
-        
-                let preX = proto.pos.x;
-                let preY = proto.pos.y;
-                
-                lf.behaviors.run(proto, "reset");
-                proto.dynamic["codes"].forEach((cd) => {
-                    lf.behaviors.run(proto, cd);
-                });
 
-                // enable division (based on spekV or ortI from membrane formation)
-                if (!("division" in proto.genetic)) proto.genetic["division"] = { counter: 0, actCount: 0, ran: false }; 
-
-                // if healthy enough starting activating division
-                if (proto.life >= 80) proto.genetic.division.counter++;
-                else proto.genetic.division.counter = 0;
-
-                proto.obj.setAttribute("d-count",proto.genetic.division.counter);
-
-                // has been healthy long enough to divide
-                if (proto.genetic.division.counter >= 50) {
-                    proto.genetic.division.counter = 50;
-
-                    // has enough spekV to trigger division
-                    if (proto.genetic.division.actCount > 5) {
-                        // divide
-                        let mutateOps = "abcd";
-                        let nCodes = JSON.parse(JSON.stringify(proto.dynamic.codes));
-                        for (let m = 0; m < nCodes.length; m++) {
-                            let mutate = Math.random() > 0.98 ? true : false;
-                            if (mutate) {
-                                let rIdx = Math.floor(Math.random() * nCodes[m].length);
-                                let rIdx2 = Math.floor(Math.random() * mutateOps.length);
-                                nCodes[m][rIdx] = mutateOps[rIdx2];
-                            }
+                let upgrade = false;
+                if (proto.complex == 1 && Math.random() > 0.9) {
+                    let branes = lf.query(proto,"struck");
+                    let addBrane = null;
+                    branes.forEach((mb) => {
+                        if (addBrane == null && mb.core.subtype == "struckBrane") {
+                            addBrane = mb;
                         }
+                    });
+                    if (addBrane != null) {
+                        let uProto = new LFItem(new LFVector(proto.pos.x, proto.pos.y, proto.pos.dir, proto.pos.vel), lfcore.proto.protoC, { codes: JSON.parse(JSON.stringify(proto.dynamic.codes))}, { init: true, complex: 2});
+                        lf.queueItem(uProto);
+                        addBrane.deactivate();
+                        proto.deactivate();
+                        upgrade = true;
+                    }
+                }
+        
+                if (!upgrade) {
+                    let preX = proto.pos.x;
+                    let preY = proto.pos.y;
+                    
+                    lf.behaviors.run(proto, proto.dynamic.codes);
 
-                        let nDir = proto.pos.dir;
-                        let nVel = proto.pos.vel;
+                    // if healthy enough starting activating division
+                    if (!("divCounter" in proto.dynamic.mem)) proto.dynamic.mem["divCounter"] = 0;
+                    if (!("actCount" in proto.dynamic.mem)) proto.dynamic.mem["actCount"] = 0;
 
-                        let nDirCp = nDir;
+                    if (proto.life >= 80) proto.dynamic.mem["divCounter"]++;
+                    else proto.dynamic.mem["divCounter"] = 0;
 
-                        nOVel = Math.floor(Math.random() * 2) + 1;
+                    proto.obj.setAttribute("d-count",proto.dynamic.mem["divCounter"]);
 
+                    // has been healthy long enough to divide
+                    if (proto.dynamic.mem["divCounter"] >= 50) {
+                        proto.dynamic.mem["divCounter"] = 50;
 
-                        let cpGen = new LFGenetic(proto.genetic.vals);
+                        // has enough spekV to trigger division
+                        if (proto.dynamic.mem["actCount"] > 5) {
+                            // divide
+                            let mutateOps = "abcd";
+                            let nCodes = JSON.parse(JSON.stringify(proto.dynamic.codes));
+                            for (let m = 0; m < nCodes.length; m++) {
+                                let mutate = Math.random() > 0.98 ? true : false;
+                                if (mutate) {
+                                    let rIdx = Math.floor(Math.random() * nCodes[m].length);
+                                    let rIdx2 = Math.floor(Math.random() * mutateOps.length);
+                                    nCodes[m][rIdx] = mutateOps[rIdx2];
+                                }
+                            }
 
-                        let copy = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDirCp, nVel), lfcore.proto[proto.core.subtype], { gen: lf.step, codes: nCodes }, cpGen, { init: true, complex: proto.complex });
-                        let nLife = Math.floor(proto.life * 0.6);
-                        copy.life = nLife;
-                        proto.life = nLife;
-                        copy.pos.push(nDir - 90, nOVel);
-                        proto.pos.push(nDir + 90, nOVel);
-                        lf.queueItem(copy);
+                            let nDir = proto.pos.dir;
+                            let nVel = proto.pos.vel;
 
-                        proto.genetic.division.actCount = 0;
-                        proto.genetic.division.counter = 0;
+                            let nDirCp = nDir;
+
+                            nOVel = Math.floor(Math.random() * 3) + 1;
+
+                            let copy = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDirCp, nVel), lfcore.proto[proto.core.subtype], { codes: nCodes, parent: proto.id }, { init: true, complex: proto.complex });
+                            let nLife = Math.floor(proto.life * 0.6);
+                            copy.life = nLife;
+                            proto.life = nLife;
+                            copy.pos.push(nDir - 90, nOVel);
+                            proto.pos.push(nDir + 90, nOVel);
+                            lf.queueItem(copy);
+
+                            proto.dynamic.mem["actCount"] = 0;
+                            proto.dynamic.mem["divCounter"] = 0;
+                        }
+                        else {
+                            // check for spekV to trigger activation
+                            let closeV = lf.haze.query(proto, "spekV");
+                            shuffleArray(closeV);
+                            if (closeV.length > 0) {
+                                proto.dynamic.mem["actCount"]++;
+                                lf.haze.transact(closeV[0].table,"spekV",-1);
+                            }
+                            proto.obj.setAttribute("act-count",proto.dynamic.mem["actCount"]);
+                        }
+                    }
+                    
+                    proto.pos.move();
+            
+                    if(preX == proto.pos.x && preY == proto.pos.y) {
+                        proto.pos.x += Math.random() > 0.5 ? -1 : 1;
+                        proto.pos.y += Math.random() > 0.5 ? -1 : 1;
+                        proto.pos.dir += Math.random() > 0.5 ? -5 : 5;
+                    }
+            
+                    proto.obj.setAttribute("life", proto.life);
+            
+                    if (proto.active) {
+                        proto.obj.style.left = proto.pos.x + "px";
+                        proto.obj.style.top = proto.pos.y + "px";
+                        proto.obj.style.transform = proto.transformFill.replace("***",proto.pos.dir); //"z " + proto.pos.dir + "deg";
+            
+                        let tail = proto.obj.querySelector(".mid .back .mv-tail");
+                        let tRot = (proto.pos.prevDir - proto.pos.dir) * 2;
+                        if (Math.abs(tRot > 45)) tRot = 45 * (Math.abs(tRot)/tRot);
+                        if (tail) tail.style.rotate = "z " + tRot + "deg";
+            
                     }
                     else {
-                        // check for spekV to trigger activation
-                        let closeV = lf.haze.query(proto, "spekV");
-                        shuffleArray(closeV);
-                        if (closeV.length > 0) {
-                            proto.genetic.division.actCount++;
-                            lf.haze.transact(closeV[0].table,"spekV",-1);
-                        }
-                        proto.obj.setAttribute("act-count",proto.genetic.division.actCount);
+                        proto.obj.style.display = "none";
                     }
-                }
-                
-                proto.pos.move();
-        
-                if(preX == proto.pos.x && preY == proto.pos.y) {
-                    proto.pos.x += Math.random() > 0.5 ? -1 : 1;
-                    proto.pos.y += Math.random() > 0.5 ? -1 : 1;
-                    proto.pos.dir += Math.random() > 0.5 ? -5 : 5;
-                }
-        
-                proto.obj.setAttribute("life", proto.life);
-        
-                if (proto.active) {
-                    proto.obj.style.left = proto.pos.x + "px";
-                    proto.obj.style.top = proto.pos.y + "px";
-                    proto.obj.style.transform = proto.transformFill.replace("***",proto.pos.dir); //"z " + proto.pos.dir + "deg";
-        
-                    let tail = proto.obj.querySelector(".mid .back .mv-tail");
-                    let tRot = (proto.pos.prevDir - proto.pos.dir) * 2;
-                    if (Math.abs(tRot > 45)) tRot = 45 * (Math.abs(tRot)/tRot);
-                    if (tail) tail.style.rotate = "z " + tRot + "deg";
-        
-                }
-                else {
-                    proto.obj.style.display = "none";
                 }
             }
         },
@@ -1322,7 +1344,7 @@ const lfcore = {
 
             if (nVel < 1) nVel = 1;
         
-            let nHusk = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDir, nVel), lfcore.struck.struckHusk, { gen: lf.step, parent: proto.id, type: huskType });
+            let nHusk = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDir, nVel), lfcore.struck.struckHusk, { parent: proto.id, type: huskType });
             lf.queueItem(nHusk);
 
             console.log("proto " + proto.id + " died.");
@@ -1344,7 +1366,7 @@ const lfcore = {
                 return "brane"; 
             }, 
             range: 25, 
-            decay: 400,
+            decay: 1000,
             dformula: []
         },
 
@@ -1427,7 +1449,7 @@ const lfcore = {
                         let nDir = struck.pos.dir;
                         let nVel = struck.pos.vel;
 
-                        let nBrane = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.struck.struckBrane, { gen: lf.step, mtype: "S" });
+                        let nBrane = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.struck.struckBrane, {  mtype: "S" });
                         nBrane.life = lfcore.struck.struckBrane.decay * 0.5;
                         nBrane.obj.classList.add("b2");
                         lf.queueItem(nBrane);
@@ -1462,7 +1484,7 @@ const lfcore = {
                         let dX = 0;
                         let dY = 0;
                         let nVel = 1;
-                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip.snipBlk, {gen: lf.step,code:"ppp",len: 3});
+                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip.snipBlk, { code:"ppp" });
                         lf.queueItem(nDobj);
                         oA += 360 / snipCount;
                         oA = oA % 360;
@@ -1488,7 +1510,7 @@ const lfcore = {
                         let dX = 15 * Math.cos(nDir * Math.PI / 180);
                         let dY = 15 * Math.sin(nDir * Math.PI / 180);
                         let nVel = Math.floor(Math.random() * 10) + 5;
-                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip.snipEx, {gen: lf.step,code:"e--",len: 3});
+                        let nDobj = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip.snipEx, { code:"e--" });
                         lf.queueItem(nDobj);
                         oA2 += 360 / snipCount2;
                         oA2 = oA2 % 360;
@@ -1508,7 +1530,7 @@ const lfcore = {
                         let dX = 15 * Math.cos(nDir * Math.PI / 180);
                         let dY = 15 * Math.sin(nDir * Math.PI / 180);
                         let nVel = Math.floor(Math.random() * 10) + 5;
-                        let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort[orts[o]], {gen: lf.step});
+                        let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort[orts[o]], null);
                         lf.queueItem(nOrt);
                         oA3 += oAdd;
                         oA3 = oA3 % 360;
@@ -1544,6 +1566,8 @@ const lfcore = {
                 "spekX",
                 "spekX",
                 "spekV",
+                "spekG1",
+                "spekG2",
                 "spekG1",
                 "spekG2",
                 "spekG3"
@@ -1624,6 +1648,8 @@ const lfcore = {
                 "spekV",
                 "spekG1",
                 "spekG2",
+                "spekG1",
+                "spekG2",
                 "spekG3"
             ];
         
@@ -1637,7 +1663,7 @@ const lfcore = {
                 mY = Math.floor(Math.random() * lf.h);
             }
     
-            let count = Math.floor(Math.random() * 7) + 6;
+            let count = Math.floor(Math.random() * 16) + 8;
                 
             for (let j = 0; j < count; j++) {
                 let r1 = Math.floor(Math.random() * r);
@@ -1706,14 +1732,14 @@ const lfcore = {
             };
 
             if (mX > 0 && mX < lf.w && mY > 0 && mY < lf.h) {
-                lf.haze.add(mX, mY, "spekG1", 1 + Math.floor(Math.random() * 6));
-                lf.haze.add(mX, mY, "spekG2", 1 + Math.floor(Math.random() * 6));
+                lf.haze.add(mX, mY, "spekG1", 1 + Math.floor(Math.random() * 10));
+                lf.haze.add(mX, mY, "spekG2", 1 + Math.floor(Math.random() * 10));
             }
 
             if (lf.items.length < gVars.maxItems) {
                 if (Math.random() > 0.75) {
                     let nDir = Math.floor(Math.random() * 360);
-                    let nBlip = new LFItem(new LFVector(mX, mY, 0, nDir), lfcore.struck.struckBlip, { gen: lf.step });
+                    let nBlip = new LFItem(new LFVector(mX, mY, 0, nDir), lfcore.struck.struckBlip, null);
                     nBlip.obj.style.opacity = 0.4;
                     lf.queueItem(nBlip);
                 }
@@ -1770,9 +1796,69 @@ const lfcore = {
                 }, true)
             );
         },
+
+        // splash
+        splash: function(mX, mY, strength = 100) {
+            let r = strength;
+
+            let sID = "splash-" + lf.step + "-" + Math.floor(Math.random() * 100000);
+            let splash = {
+                id: sID,
+                pos: new LFVector(mX, mY, 0, r),
+                core: { range: r, type: "splash" }
+            };
+
+            let close = lf.query(splash);
+            close.forEach((elem) => {
+                if (elem.active) {
+                    let dRes = elem.pos.add(splash.pos);
+                    let dA = dRes.dir % 360;
+                    let dVel = dRes.vel * ((r - dRes.magnitude()) / r);
+                    elem.pos.dir = dA;
+                    elem.pos.vel += dVel;
+                }
+            });
+
+            if (!("splashes" in lf.extras)) lf.extras["splashes"] = [];
+            lf.extras["splashes"].push(
+                new LFXtra(new LFVector(mX, mY, 0, 0), {
+                    width: r * 2,
+                    init: function(splash) {
+                        let nObj = document.createElement("div");
+                        nObj.id = sID;
+                        nObj.classList.add("xtra");
+                        nObj.classList.add("splash");
+                        nObj.style.left = splash.pos.x + "px";
+                        nObj.style.top = splash.pos.y + "px";
+                        nObj.style.width = splash.core.width + "px";
+                        nObj.style.height = splash.core.width + "px";
+                        nObj.style.opacity = 1;
+                        lf.obj.append(nObj);
+                        splash.obj = nObj;
+                    },
+                    update: function(splash) {
+                        let cOp = splash.obj.style.opacity;
+                        let cW = splash.obj.offsetWidth;
+                        cOp -= 0.1;
+                        if (cOp <= 0) {
+                            splash.active = false;
+                            splash.obj.style.display = "none";
+                        }
+                        else {
+                            splash.obj.style.opacity = cOp;
+                            cW += (splash.core.width / 20);
+                            if (cW <= splash.core.width * 2) {
+                                splash.obj.style.width = cW + "px";
+                                splash.obj.style.height = cW + "px";
+                            }
+                        }
+                    }
+                }, true)
+            );
+        },
         
         // vent
-        vent: function (mX = null, mY = null) {
+        vent: function(mX = null, mY = null) {
 
             let vX = mX != null ? mX : Math.floor(Math.random() * (lf.w - 200)) + 100;
             let vY = mY != null ? mY : Math.floor(Math.random() * (lf.h - 200)) + 100;
@@ -1807,7 +1893,7 @@ const lfcore = {
                         let cVal = (lf.engine.noise.get(vent.nX, vent.nY) * 0.5) + 0.5;
                         vent.cSum += cVal;
                         let cAvg = vent.cSum / lf.step;
-                        if (lf.step % 2 == 0 && cVal > cAvg) {
+                        if (cVal > cAvg) {
                             let add = Math.floor(Math.random() * 7) + 1;
                             lf.haze.add(vent.pos.x, vent.pos.y, "spekG3", add);
                         }
@@ -1852,7 +1938,7 @@ function LFHaze(w, h, sub) {
         me.contents.forEach((oo) => { me.table[i][oo] = 0; });
     }
     me.spekSize = 5;
-    me.saturation = (me.sub * me.sub) /  (me.spekSize * me.spekSize);
+    me.saturation = (me.sub * me.sub) /  (me.spekSize);
 
     me.query = (item, type, options = {}) => {
         let res = [];
@@ -2046,7 +2132,7 @@ function LFHaze(w, h, sub) {
                     let nDir = Math.floor(Math.random() * 360);
                     let nVel = Math.floor(Math.random() * 4) + 3;
 
-                    let nOrt = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.ort[ort], {gen: lf.step});
+                    let nOrt = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.ort[ort], null);
                     lf.queueItem(nOrt);
                 }
             });

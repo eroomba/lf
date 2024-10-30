@@ -1,17 +1,16 @@
-function LFItem(pos, core, dynamic = {}, genetic = null, initOps = {init: true}) {
+function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
     let me = this;
     me.id = lf.generateID();
-    me.gen = -1;
+    me.gen = lf.step;
     me.active = true;
     me.obj = null;
     me.pos = pos;
     me.life = 0;
     me.hash = "";
     me.core = core;
-    me.dynamic = dynamic;
-    me.genetic = genetic == null ? new LFGenetic : genetic;
+    me.dynamic = new LFDynamic(dynamicInit);
     me.complex = 0;
-    me.parent = "parent" in dynamic ? dynamic["parent"] : null;
+    me.parent = dynamicInit != null && "parent" in dynamicInit ? dynamicInit["parent"] : null;
     if ("complex" in initOps) me.complex = initOps["complex"];
     me.transformFill = "translateX(-50%) translateY(-50%) rotate(***deg)";
     me.update = () => {
@@ -36,8 +35,6 @@ function LFItem(pos, core, dynamic = {}, genetic = null, initOps = {init: true})
             me.deactivate();
         }
         else {
-            if (dynamic["gen"] != undefined && dynamic["gen"] != null)
-                me.gen = dynamic["gen"];
             let nObj = document.createElement("div");
             nObj.id = me.id;
             nObj.style.left = me.pos.x + "px";
@@ -54,15 +51,15 @@ function LFItem(pos, core, dynamic = {}, genetic = null, initOps = {init: true})
                     break;
                 case 'snip':
                     nCont =  me.core.content;
-                    let sCode = me.dynamic["code"];
+                    let sCode = me.dynamic.codes[0];
                     nObj.setAttribute("scode", sCode);
                     nObj.classList.add("snip-" + sCode);
                     break;
                 case 'strand':
-                    let cStrS = me.dynamic["codes"].join(":");
+                    let cStrS = me.dynamic.codes.join(":");
                     nObj.setAttribute("code",cStrS);
                     nCont = me.core.content;
-                    let cLen = me.dynamic["codes"].length;
+                    let cLen = me.dynamic.codes.length;
                     if (cLen >= gVars.minStrandLen) {  nObj.classList.add("sz-full"); }
                     else if (cLen >= Math.floor(gVars.minStrandLen / 2)) {nObj.classList.add("sz-mid"); }
                     break;
@@ -72,33 +69,35 @@ function LFItem(pos, core, dynamic = {}, genetic = null, initOps = {init: true})
                         hHTML += "<div class=\"main\"><div class=\"core\">&nbsp;</div></div>";
                         hHTML += "</div>";
                         nCont = hHTML;
-                        nObj.classList.add(me.dynamic["type"]);
+                        nObj.classList.add(me.dynamic.mem["type"]);
                     }
                     else nCont = me.core.content;
                     break;
                 case 'proto':
-                    let cStrP = ":" + me.dynamic["codes"].join(":") + ":";
+                    let cStrP = ":" + me.dynamic.codes.join(":") + ":";
                     nObj.setAttribute("code",cStrP);
                     let midCont = "";
                     let backCont = "";
                     let frontCont = "";
                     let mainClasses = [];
 
-                    if (cStrP.indexOf(":aaa:") >= 0 && cStrP.indexOf(":bbb:") >= 0) {
+                    let pTypes = lf.behaviors.getTypes(me.dynamic.codes);
+
+                    if (pTypes.includes("move")) {
                         nObj.classList.add("mover");
                         backCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>";
                     }
 
-                    if (cStrP.indexOf(":bab:") >= 0 && cStrP.indexOf(":bac:") >= 0) {
+                    if (pTypes.includes("chem")) {
                         nObj.classList.add("chem");
                     }
 
-                    if (cStrP.indexOf(":bba:") >= 0 && cStrP.indexOf(":bbc:") >= 0) {
+                    if (pTypes.includes("eat")) {
                         nObj.classList.add("eater");
                         frontCont = "<div class=\"mouth\"><span class=\"open\">&sum;</span><span class=\"closed\">O</span><div>";
                     }
 
-                    if (cStrP.indexOf(":aad:") >= 0 && (cStrP.indexOf(":aab:") >= 0 || cStrP.indexOf(":aac:") >= 0)) {
+                    if (pTypes.includes("breathe")) {
                         nObj.classList.add("breather");
                         if (cStrP.indexOf(":aab:") >= 0) midCont += "&mDDot;"
                         else midCont += "&divide;"; //"&Colon;"

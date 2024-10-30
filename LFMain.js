@@ -6,9 +6,11 @@ const gVars = {
     braneCount: 2,
     seedCount: 3,
     spekColl: false,
-    minStrandLen: 18,
+    minStrandLen: 21,
     maxItems: 5000,
-    huskDecay: 3000
+    huskDecay: 3000,
+    chemAmt: 2,
+    chemTime: 5
 }
 
 function PNoise()  {
@@ -87,7 +89,7 @@ const LFEngine = {
             for (let ii = 0; ii < 500; ii++) {
                 let nX = Math.floor(Math.random() * lf.w);
                 let nY = Math.floor(Math.random() * lf.h);
-                lf.haze.add(nX, nY, spks[jj], 1);
+                lf.haze.add(nX, nY, spks[jj], 2);
 
                 jj = jj + 1 < spks.length ? jj + 1 : 0;
             }
@@ -126,7 +128,7 @@ const LFEngine = {
                 let nVel = 0;
                 let nDir = Math.floor(Math.random() * 360);
 
-                let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfcore.proto.protoS, mvDynamic, new LFGenetic(), { init: true, complex: 1 });
+                let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfcore.proto.protoS, mvDynamic, { init: true, complex: 1 });
                 lf.queueItem(mvPro);
             }
         }
@@ -185,8 +187,15 @@ const LFEngine = {
             for (let ii = 0; ii < 50; ii++) {
                 let nX = Math.floor(Math.random() * lf.w);
                 let nY = Math.floor(Math.random() * lf.h);
-                let nFood = new LFItem(new LFVector(nX, nY, Math.floor(Math.random() * 360), 0), lfcore.snip["snipEx"], { gen: 0, code: "e--"});
+                let nFood = new LFItem(new LFVector(nX, nY, Math.floor(Math.random() * 360), 0), lfcore.snip["snipEx"], { code: "e--" });
                 lf.addItem(nFood);
+            }
+
+            for (let ii = 0; ii < 10; ii++) {
+                let nX = Math.floor(lf.w / 2) + (100 - Math.floor(Math.random() * 201));
+                let nY = Math.floor(lf.h / 2) + (100 - Math.floor(Math.random() * 201));
+                let nBrane = new LFItem(new LFVector(nX, nY, Math.floor(Math.random() * 360), 0), lfcore.struck.struckBrane, { type: "S"});
+                lf.addItem(nBrane);
             }
 
             let vCount = Math.floor(Math.random() * 2) + 1;
@@ -196,25 +205,24 @@ const LFEngine = {
         },
         run: function() {
             if (document.querySelectorAll(".proto").length < 3) {
-                // move: "aaa", "bbb"
-                // chem: "bac", "bab"
-                // eat: "bba", "bbc"
-                // percept: "cba", "cbb"
-                // seek: "cbc", "cbd"
 
-                let codes = ["aab","aad", "aaa","bbb", "bab","bac"]; 
-                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes }, new LFGenetic(), { init: true, complex: 1});
-                nPro.genetic["speed"] = 1;
+                let codes = [];
+                codes.push(...lf.behaviors.presets["move1"]);
+                codes.push(...lf.behaviors.presets["chem"]);
+                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { codes: codes }, { init: true, complex: 1});
                 lf.addItem(nPro);
 
-                let codes3 = ["aac","aad", "aaa","bbb"]; 
-                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { gen: 0, codes: codes3 }, new LFGenetic(), { init: true, complex: 1});
-                nPro.genetic["speed"] = 1;
+                let codes3 = [];
+                codes3.push(...lf.behaviors.presets["move1"]);
+                codes3.push(...lf.behaviors.presets["breathe2"]);
+                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { codes: codes3 }, { init: true, complex: 1});
                 lf.addItem(nPro3);
 
-                let codes2 = ["bba","bbc","aaa","bbb", "cba", "cbb", "cbc", "cbd"]; 
-                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto["protoC"], { gen: 0, codes: codes2 }, new LFGenetic(), { init: true, complex: 2});
-                nPro.genetic["speed"] = 1;
+                let codes2 = [];
+                codes2.push(...lf.behaviors.presets["move4"]);
+                codes2.push(...lf.behaviors.presets["seek"]);
+                codes2.push(...lf.behaviors.presets["eat1"]);
+                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto["protoC"], { codes: codes2 }, { init: true, complex: 2});
                 lf.addItem(nPro2);
             }
         }
@@ -251,7 +259,7 @@ function LF() {
     me.behaviors = new LFCodedBehaviors();
     me.hash = new LFHash(me.w,me.h,50);
     me.haze = new LFHaze(me.w, me.h, 100);
-    me.runmode = "codetest";
+    me.runmode = "chaos";
     me.engine = LFEngine;
     me.remEncode = (itemID) => {
         if (itemID in me.items) {
@@ -397,6 +405,7 @@ function LF() {
 let rt = null;
 let running = false;
 let lastClick = new Date();
+let downKeys = [];
 
 function run() {
     clearTimeout(rt);
@@ -414,7 +423,17 @@ addEventListener("DOMContentLoaded", () => {
 addEventListener("mouseup", (event) => {
     let thisClick = new Date();
     if (event.button == 0 && thisClick - lastClick <= 300) {
-        if (lf.runmode == "chaos" || lf.runmode == "hazetest") {
+        if (lf.runmode == "chaos") {
+            let strength = 75;
+            if (downKeys.includes("4")) strength += 125;
+            else if (downKeys.includes("3")) strength += 75;
+            else if (downKeys.includes("2")) strength += 50;
+
+            lf.events.push({run: function(params) {
+                lfcore.xtra.splash(params.x, params.y, params.strength);
+            }, params: { x: event.clientX, y: event.clientY, strength: strength }});
+        }
+        if (lf.runmode == "hazetest") {
             lf.events.push({run: function(params) {
                 lfcore.xtra.drip(params.x, params.y);
             }, params: { x: event.clientX, y: event.clientY }});
@@ -427,7 +446,14 @@ addEventListener("mouseup", (event) => {
     lastClick = thisClick;
 });
 
+addEventListener("keydown", (event) => {
+    if (!downKeys.includes(event.key.toLowerCase())) downKeys.push(event.key.toLowerCase());
+});
+
 addEventListener("keyup", (event) => {
+    const keyIndex = downKeys.indexOf(event.key.toLowerCase());
+    if (keyIndex >= 0) downKeys.splice(keyIndex, 1);
+
     //if (event.code.toLowerCase() == 'space') lf.update();
     if (event.code.toLowerCase() == 'space') {
         if (running) {

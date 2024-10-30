@@ -498,6 +498,16 @@ body {
     z-index: 88888;
 }
 
+.xtra.splash {
+    border: 1px solid white;
+    opacity: 1;
+    border-radius: 100%;
+    width: 10;
+    height: 10;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: 88888;
+}
+
 .xtra.puff {
     font-size: 0.9rem;
     color: White;

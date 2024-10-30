@@ -1,7 +1,7 @@
 function LFXtra(pos, core = {}, init = false) {
     let me = this;
     me.id = lf.generateID();
-    me.gen = -1;
+    me.gen = lf.step;
     me.active = true;
     me.obj = null;
     me.pos = pos;
