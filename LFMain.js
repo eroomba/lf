@@ -1,6 +1,7 @@
 let lf;
 let mousePosX = 0;
 let mousePosY = 0;
+let helpOn = false;
 
 const gVars = {
     braneCount: 2,
@@ -416,6 +417,7 @@ function run() {
 }
 
 addEventListener("DOMContentLoaded", () => {
+    fillDocs();
     lf = new LF();
     lf.init();
 });
@@ -456,14 +458,7 @@ addEventListener("keyup", (event) => {
 
     //if (event.code.toLowerCase() == 'space') lf.update();
     if (event.code.toLowerCase() == 'space') {
-        if (running) {
-            lf.stop();
-        }
-        else {
-            console.log("running step " + lf.step);
-            running = true;
-            run();
-        }
+        toggleRun();
     }
     else if (event.code.toLowerCase() == "arrowright") {
         lf.update();
@@ -482,9 +477,12 @@ addEventListener("keyup", (event) => {
             lfcore.xtra.drip(params.x, params.y);
         }, params: { x: lf.w / 2, y: lf.h / 2 }});
     }
-    else if (event.key.toLowerCase() == "h") {
-        console.log("haze toggle");
+    else if (event.key.toLowerCase() == "z") {
+        //console.log("haze toggle");
         lf.haze.flip();
+    }
+    else if (event.key.toLowerCase() == "h") {
+        toggleHelp();
     }
     
     if (event.key.toLocaleLowerCase() == "u") {
@@ -495,3 +493,77 @@ addEventListener("keyup", (event) => {
 addEventListener("mousemove", (event) => {
     document.getElementById("mouseDisp").innerHTML = event.clientX + "," + event.clientY;
 });
+
+function toggleRun() {
+    if (running) {
+        lf.stop();
+    }
+    else {
+        console.log("running step " + lf.step);
+        running = true;
+        run();
+    }
+}
+
+function toggleHelp() {
+    if (running) {
+        lf.stop();
+    }
+    helpOn = !helpOn;
+    if (helpOn) document.getElementById("doc").style.display = "block";
+    else document.getElementById("doc").style.display = "none";
+}
+
+function fillDocs() {
+    let spekKeys = Object.keys(lfcore.spek);
+    let spekCount = 0;
+    let spekList = "";
+    for (let k = 0; k < spekKeys.length - 2; k++) {
+        if (spekKeys[k].indexOf("spek") == 0) {
+            if (k > 0 && k < spekKeys.length - 1) spekList += ", ";
+            else if (k == spekKeys.length - 2) spekList += ", and ";
+            spekList += lfcore.spek[spekKeys[k]].subtype.replace("spek","");
+            spekCount++;
+        }
+    }
+    document.getElementById("doc-spek-count").innerHTML = spekCount;
+    document.getElementById("doc-spek-list").innerHTML = spekList;
+
+    let ortKeys = Object.keys(lfcore.ort);
+    let ortCount = 0;
+    let ortList = "";
+    for (let k = 0; k < ortKeys.length - 2; k++) {
+        if (ortKeys[k].indexOf("ort") == 0) {
+            if (k > 0 && k < ortKeys.length - 2) ortList += ", ";
+            else if (k == ortKeys.length - 2) ortList += ", and ";
+            ortList += lfcore.ort[ortKeys[k]].subtype.replace("ort","");
+            ortList += " [<span class=\"doc-item-display ort-disp " + lfcore.ort[ortKeys[k]].class + "\" style=\"opacity:1;\">" + lfcore.ort[ortKeys[k]].content + "</span>]"
+            ortCount++;
+        }
+    }
+    document.getElementById("doc-ort-count").innerHTML = ortCount;
+    document.getElementById("doc-ort-list").innerHTML = ortList;
+
+    let snipKeys = Object.keys(lfcore.snip);
+    let snipCount = 0;
+    let snipList = "";
+    for (let k = 0; k < snipKeys.length - 2; k++) {
+        if (snipKeys[k].indexOf("snip") == 0) {
+            if (k > 0 && k < snipKeys.length - 2) snipList += ", ";
+            else if (k == snipKeys.length - 2) snipList += ", and ";
+            snipList += "<span class=\"doc-item-display snip-disp " + lfcore.snip[snipKeys[k]].class + "\" style=\"opacity:1;\">" + lfcore.snip[snipKeys[k]].content + "</span>"
+            snipCount++;
+        }
+    }
+    //document.getElementById("doc-snip-count").innerHTML = ortCount;
+    document.getElementById("doc-snip-list").innerHTML = snipList;
+
+    let strandDisp = "<span class=\"doc-item-display strand-disp\" style=\"opacity:1;\">&infin;</span>"
+    document.getElementById("doc-strand-list").innerHTML = strandDisp;
+
+    let struckList = "";
+    struckList += "<span class=\"doc-item-display struck-disp " + lfcore.struck.struckBrane.class + "\" style=\"opacity:1;\">" + lfcore.struck.struckBrane.content + "</span>";
+    struckList +=", ";
+    struckList += "<span class=\"doc-item-display struck-disp " + lfcore.struck.struckSeed.class + "\" style=\"opacity:1;\">" + lfcore.struck.struckSeed.content + "</span>";
+    document.getElementById("doc-struck-list").innerHTML = struckList;
+}

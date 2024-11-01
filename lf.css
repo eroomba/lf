@@ -120,41 +120,49 @@ body {
     font-weight: bold;
 }
 
-.ort.ort-a {
+.ort.ort-a,
+.ort-disp.ort-a {
     color: #CC0000;
     font-size: 0.9em;
 }
 
-.ort.ort-b {
+.ort.ort-b,
+.ort-disp.ort-b  {
     color: #009900;
     font-size: 1.1em;
 }
 
-.ort.ort-c {
+.ort.ort-c,
+.ort-disp.ort-c {
     color: #993399;
     font-size: 0.5rem;
 }
 
-.ort.ort-d {
+.ort.ort-d,
+.ort-disp.ort-d {
     color: #000099;
 }
 
-.ort.ort-u {
+.ort.ort-u,
+.ort-disp.ort-u  {
     color: #3399ff;
 }
 
-.ort.ort-p {
+.ort.ort-p,
+.ort-disp.ort-p {
     color: #FFAA00;
     opacity: 0.3;
     font-size: 0.6rem;
 }
 
-.ort.ort-e {
+.ort.ort-e,
+.ort-disp.ort-e {
     color: #666666;
     font-size: 0.8em;
 }
 
-.ort.ort-i {
+.ort.ort-i,
+.ort-disp.ort-i {
     color: #ff6666;
 }
 
@@ -164,22 +172,26 @@ body {
     color: #666666;
 }
 
-.snip.snip-pre {
+.snip.snip-pre,
+.snip-disp.snip-pre {
     color: #3399CC;
     font-size: 0.8rem;
 }
 
-.snip.snip-go {
+.snip.snip-go,
+.snip-disp.snip-g {
     color: #9933CC;
     opacity: 0.6;
 }
 
-.snip.snip-blk {
+.snip.snip-blk,
+.snip-disp.snip-blk {
     color: #FF9900;
     font-size: 0.75rem;
 }
 
-.snip.snip-ex {
+.snip.snip-ex,
+.snip-disp.snip-ex {
     color: #669900;
     font-size: 1rem;
 }
@@ -218,7 +230,8 @@ body {
     opacity: 0.5;
 }
 
-.strand.strand-d {
+.strand.strand-d,
+.strand-disp {
     color: #CC99CC;
 }
 
@@ -250,23 +263,36 @@ body {
     transform-origin: center;
 }
 
-.struck.brane {
+.struck-disp {
+    opacity: 1;
+}
+
+.struck.brane,
+.struck-disp.brane {
     font-size: 2rem;
     opacity: 0.5;
     color: #FFCC00;
 }
 
-.struck.brane.b2 {
+.struck-disp.brane {
+    font-size: 1.5rem;
+    line-height: 1rem;
+}
+
+.struck.brane.b2,
+.struck-disp.brane.b2 {
     color: #66cc33;
 }
 
-.struck.blip {
+.struck.blip,
+.struck-disp.blip {
     font-size: 1.5rem;
     color: #33CCFF;
     opacity: 0.2;
 }
 
-.struck.seed {
+.struck.seed,
+.struck-disp.seed {
     font-size: 1rem;
     color: #336600;
     opacity: 0.3;
