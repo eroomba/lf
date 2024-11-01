@@ -143,7 +143,7 @@ const LFBehavior = {
                                 let iWeight = dWeights[fItem.core.subtype];
                                 item.dynamic.mem["digCount"] = iWeight;
                                 item.dynamic.mem["digEnergy"] = 3; 
-                                if (params.offing > 0 && item.dynamic.mem["gut"][0].parentid == item.id) {
+                                if (params.offing > 0 && fItem.parentid == item.id) {
                                     item.dynamic.mem["digEnergy"] = 1;
                                     item.dynamic.mem["digCount"] = Math.floor(iWeight / 2);
                                 }
