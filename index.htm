@@ -3,6 +3,7 @@
     <head>
     <title>lf</title>
     <link href="lf.css" rel="stylesheet" />
+    <link href="doc.css" rel="stylesheet" />
     </head>
 <body>
 <div id="console" style="position:fixed;top:0;left:0;background: white;z-index:99999;color:#666666;opacity: 0.7;">
@@ -10,18 +11,39 @@
     <div id="lfDisp" style="padding:0.2rem; border-top: 1px solid #DDDDDD;"><span id="statusIcon" style="color: silver;">&#9679;</span>&nbsp;<span id="statusDisp">N/A</span>&nbsp;</div>
     <div id="outDisp" style="padding:0.2rem; border-top: 1px solid #DDDDDD;">&nbsp;</div>
 </div>
+<div id="doc" style="display: none;">
+    <div class="doc-title"><span class="main-title">Lf</span> - a (very, <i>very</i> simple abiogenesis sim)</div>
+    <div class="doc-top">
+        This is an incredibly oversimplified and not at all accurate simulation of abiogenesis. There are a few too many rules to list them all so here are the basics:
+    </div>
+    <div class="doc-items">
+        <div class="doc-line-item"><div class="doc-line-subject">speks</div> speks are too small to see. They are the building blocks of everything else. They come in <span id="doc-spek-count">multiple</span> "flavors": <span id="doc-spek-list"></span></div>
+        <div class="doc-line-item"><div class="doc-line-subject">orts</div> orts are formed from speks. They come in <span id="doc-ort-count">multiple</span> classes: <span id="doc-ort-list"></span></div>
+        <div class="doc-line-item"><div class="doc-line-subject">snips</div> snips are formed from orts, a combinations of orts and speks, or are built by other snips. Most are active and the orts they contain define a code that can be run.  Examples: <span id="doc-snip-list"></span></div>
+        <div class="doc-line-item"><div class="doc-line-subject">strands</div> snips combine into strands. Strands can bring in other snips or combine with other strands depending on certain rules. <span id="doc-strand-list"></div>
+        <div class="doc-line-item"><div class="doc-line-subject">strucks</div> strucks is a sort of catch-all for extra things. They include things like branes, blips, seeds, and husks. Examples: <span id="doc-struck-list"></span></div>
+        <div class="doc-line-item"><div class="doc-line-subject">protos</div> when a strand gets long enough it can be captured by an activated brane and become a proto. Being inside a proto unlocks many codes in the strands that couldn't run before. They come in various forms.</div>
+        <div class="doc-line-item"><div class="doc-line-subject">decaying</div>All items eventually "decay" after a certain amount of time into various smaller parts.</div>
+    </div>
+    <div class="doc-key">
+        <div>Interactions:</div>
+        <ul class="doc-key-list">
+            <li>Press <b>Space</b> - Start/Stop</li>
+            <li>Press <b>&rarr;</b> - Step forward after stopping</li>
+            <li>Press <b>z</b> - Show/Hide the grid of speks (mouse over grid space to see larger details)</li>
+            <li>Press <b>u</b> - Increase the maximum number of items by 500</li>
+            <li>Press <b>h</b> - Show/Hide this help window</li>
+            <li><b>Double click</b> - Create a "splash" (you can hold down 2, 3, or 4 to make it bigger)</li>
+        </ul>
+    </div>
+</div>
+<div id="marker"></div>
 <div id="main"></div>
-<script src="req.js"></script>
-<script src="LItem.js"></script>
-<script src="spek.js"></script>
-<script src="ort.js"></script>
-<script src="codes.js"></script>
-<script src="snip.js"></script>
-<script src="strand.js"></script>
-<script src="struck.js"></script>
-<script src="proto.js"></script>
-<script src="LXtra.js"></script>
-<script src="qtree.js"></script>
-<script src="shash.js"></script>
-<script src="lf.js"></script>
+<script src="LFCore.js"></script>
+<script src="LFVector.js"></script>
+<script src="LFItem.js"></script>
+<script src="LFCodes.js"></script>
+<script src="LFXtra.js"></script>
+<script src="LFHash.js"></script>
+<script src="LFMain.js"></script>
 </body></html>

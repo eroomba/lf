@@ -1,0 +1,60 @@
+#doc {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: 9999999;
+    background: White;
+    border: 1px solid silver;
+    padding: 1rem;
+    color: #333;
+    font-size: 0.9rem;
+    font-family: Tahoma, Arial, Sans-Serif;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: auto;
+}
+
+#doc .doc-title {
+    font-size: 1.1rem;
+    text-align: left;
+}
+
+#doc .doc-title .main-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+#doc .doc-top {
+    padding: 1rem;
+}
+
+#doc .doc-items {
+    padding: 0 0 1rem 0rem;
+} 
+
+#doc .doc-items .doc-line-item {
+    padding: 0.25rem;
+}
+
+#doc .doc-items .doc-line-item .doc-line-subject {
+    font-weight: bold;
+}
+
+#doc .doc-key {
+    padding: 0 0.5rem;
+}
+
+.doc-item-display {
+    font-size: 1rem;
+    font-family: Courier, Serif;
+}
+
+.doc-item-display.ort-disp {
+    font-size: 0.7rem;
+}
+
+.doc-item-display.strand-disp {
+    font-size: 1.5rem;
+    line-height: 1rem;
+}
