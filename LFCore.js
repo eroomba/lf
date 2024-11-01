@@ -1283,7 +1283,11 @@ const lfcore = {
 
                             nOVel = Math.floor(Math.random() * 3) + 1;
 
-                            let copy = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDirCp, nVel), lfcore.proto[proto.core.subtype], { codes: nCodes, parent: proto.id }, { init: true, complex: proto.complex });
+                            let cpSubtype = proto.core.subtype;
+                            let cpParentID = proto.id;
+                            let cpComplex = proto.complex;
+
+                            let copy = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDirCp, nVel), lfcore.proto[cpSubtype], { codes: nCodes, parent: cpParentID }, { init: true, complex: cpComplex });
                             let nLife = Math.floor(proto.life * 0.6);
                             copy.life = nLife;
                             proto.life = nLife;
