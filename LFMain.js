@@ -9,9 +9,7 @@ const gVars = {
     spekColl: false,
     minStrandLen: 21,
     maxItems: 5000,
-    huskDecay: 3000,
-    chemAmt: 2,
-    chemTime: 5
+    huskDecay: 3000
 }
 
 function PNoise()  {
@@ -188,7 +186,7 @@ const LFEngine = {
             for (let ii = 0; ii < 50; ii++) {
                 let nX = Math.floor(Math.random() * lf.w);
                 let nY = Math.floor(Math.random() * lf.h);
-                let nFood = new LFItem(new LFVector(nX, nY, Math.floor(Math.random() * 360), 0), lfcore.snip["snipEx"], { code: "e--" });
+                let nFood = new LFItem(new LFVector(nX, nY, Math.floor(Math.random() * 360), 0), lfcore.snip.snipEx, { code: "e--" });
                 lf.addItem(nFood);
             }
 
@@ -210,20 +208,20 @@ const LFEngine = {
                 let codes = [];
                 codes.push(...lf.behaviors.presets["move1"]);
                 codes.push(...lf.behaviors.presets["chem"]);
-                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { codes: codes }, { init: true, complex: 1});
+                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes }, { init: true, complex: 1});
                 lf.addItem(nPro);
 
                 let codes3 = [];
                 codes3.push(...lf.behaviors.presets["move1"]);
                 codes3.push(...lf.behaviors.presets["breathe2"]);
-                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto["protoS"], { codes: codes3 }, { init: true, complex: 1});
+                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes3 }, { init: true, complex: 1});
                 lf.addItem(nPro3);
 
                 let codes2 = [];
                 codes2.push(...lf.behaviors.presets["move4"]);
                 codes2.push(...lf.behaviors.presets["seek"]);
                 codes2.push(...lf.behaviors.presets["eat1"]);
-                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto["protoC"], { codes: codes2 }, { init: true, complex: 2});
+                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto.protoC, { codes: codes2 }, { init: true, complex: 2});
                 lf.addItem(nPro2);
             }
         }
@@ -262,6 +260,18 @@ function LF() {
     me.haze = new LFHaze(me.w, me.h, 100);
     me.runmode = "chaos";
     me.engine = LFEngine;
+    me.logging = {
+        log: [],
+        protos: {
+            unknown: ""
+        },
+        other: {},
+    };
+    me.logAction = (id,msg) => {
+        if (id == undefined || id == null || id.length == 0) me.logging.protos["uknown"] += msg;
+        if (id in me.logging.protos) me.logging.protos[id] += msg + ";";
+        else me.logging.protos[id] = msg + ";";
+    };
     me.remEncode = (itemID) => {
         if (itemID in me.items) {
             me.hash.remove(itemID, me.items[itemID].pos.x, me.items[itemID].pos.y);
@@ -325,6 +335,7 @@ function LF() {
         let rmItem = document.getElementById(itemID);
         if (rmItem) rmItem.remove();
         if (itemID in me.iHash) {
+            if (me.items[me.iHash[itemID]].core.type == "proto") me.logAction(itemID, "deactivated (" + me.items[me.iHash[itemID]].life + ") [" + me.items[me.iHash[itemID]].debug + "]");
             me.items.splice(me.iHash[itemID],1);
             delete me.iHash[itemID];
         }
@@ -351,6 +362,9 @@ function LF() {
         let pip = document.getElementById("pip-" + id);
         if (pip != undefined && pip != null) pip.remove();
     }
+    me.writelog = () => {
+        console.log(me.logging);
+    };
     me.init = () => {
         if (me.runmode in me.engine) me.engine[me.runmode].init();
         else me.engine.default.init();
@@ -400,6 +414,13 @@ function LF() {
         let cOut = "s:" + me.step + "<br/>i:" + iCount + " (" + aiCount + ") / " + gVars.maxItems;
         me.consoleset.out.innerHTML = cOut;
         me.step++;
+
+        me.items.forEach((itm) => {
+            let chkItm = document.querySelectorAll("#" + itm.id);
+            if (chkItm.length > 1) {
+                me.logging.multipleids.push(itm.id + "::" + itm.core.subtype + "::" + chkItm.length);
+            }
+        });
     };
 }
 
@@ -440,10 +461,6 @@ addEventListener("mouseup", (event) => {
                 lfcore.xtra.drip(params.x, params.y);
             }, params: { x: event.clientX, y: event.clientY }});
         }
-        if (lf.runmode == "piptest") {
-            console.log("pip test!");
-            lf.pip(event.clientX, event.clientY, "test-pip", "&curren;", "zap");
-        }
     }
     lastClick = thisClick;
 });
@@ -483,6 +500,9 @@ addEventListener("keyup", (event) => {
     }
     else if (event.key.toLowerCase() == "h") {
         toggleHelp();
+    }
+    else if (event.key.toLowerCase() == "l") {
+        lf.writelog();
     }
     
     if (event.key.toLocaleLowerCase() == "u") {

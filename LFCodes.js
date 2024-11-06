@@ -8,6 +8,7 @@ const LFBehavior = {
         newParams["found"] = [];
         newParams["seektarget"] = null;
         newParams["respiration"] = null;
+        newParams["chem"] = null;
         newParams["digestion"] = {
             "snipEx": 3,
             "struckSeed": 6,
@@ -151,6 +152,7 @@ const LFBehavior = {
                                 if (fItem.core.type == "snip") fCode = fItem.dynamic.codes[0];
                                 item.dynamic.mem["gut"].push({type:fItem.core.type, subtype: fItem.core.subtype, parentid: fItem.parent, code: fCode });
                                 item.life += 2;
+                                fItem.debug += "da-eat;";
                                 fItem.deactivate();
                                 item.obj.classList.add("eating");
                             }
@@ -163,7 +165,7 @@ const LFBehavior = {
         return params;
     },
     chem: function(item, params) {
-        if (item.complex >= 1) {
+        if (item.complex >= 1 && params.chem != null) {
             params.actions.push("chem");
 
             if (!("chemCap" in item.dynamic.mem)) item.dynamic.mem["chemCap"] = 0;
@@ -172,30 +174,40 @@ const LFBehavior = {
             if (!("chemCounter" in item.dynamic.mem)) item.dynamic.mem["chemCounter"] = 0;
 
             let hasChem = false;
+            let chemType = params.chem.type
+            let chemTime = params.chem.time;
+            let chemEnergy = params.chem.energy;
+            let chemAmount = params.chem.amount;
+
+            if (item.complex == 2) {
+                chemTime *= 2;
+                chemEnergy *= 2;
+                chemAmount *= 2;
+            }
             
-            let found = lf.haze.query(item,"spekG3");
+            let found = lf.haze.query(item,chemType);
             if (found.length > 0) {
                 shuffleArray(found);
                 found.forEach((tb) => {
-                    if (tb.count > 0 && item.dynamic.mem["chemCap"] < gVars.chemAmt) {
+                    if (tb.count > 0 && item.dynamic.mem["chemCap"] < chemAmount) {
                         item.dynamic.mem["chemCap"]++;
-                        lf.haze.transact(tb.tableIndex,"spekG3",-1);
+                        lf.haze.transact(tb.tableIndex,chemType,-1);
                     }
                 });
 
-                if (item.dynamic.mem["chemCap"] >= gVars.chemAmt) {
+                if (item.dynamic.mem["chemCap"] >= chemAmount) {
                     hasChem = true;
-                    if (item.dynamic.mem["chemStep"] >= gVars.chemTime) {
+                    if (item.dynamic.mem["chemStep"] >= chemTime) {
                         item.dynamic.mem["chemCounter"] = 0;
                         item.dynamic.mem["chemCap"] -= 3;
                         item.dynamic.mem["chemStep"] = 0;
                         item.dynamic.mem["chemEmit"]++;
-                        item.life = item.life + 10 > 100 ? 100 : item.life + 10;
+                        item.life = item.life + chemEnergy > 100 ? 100 : item.life + chemEnergy;
                         lf.haze.add(item.x, item.y, "spekX", 1);
-                        if (item.dynamic.mem["chemEmit"] >= 24) {
+                        if (item.dynamic.mem["chemEmit"] >= params.chem.emit) {
                             let nDir = (item.pos.dir + 180) % 360;
                             let nVel = 2;
-                            let nEx = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip["snipEx"], { parent: item.id, code: lfcore.snip["snipEx"].data });
+                            let nEx = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip.snipEx, { parent: item.id, code: lfcore.snip["snipEx"].data });
                             lf.queueItem(nEx);
                             item.dynamic.mem["chemEmit"] = 0;
                         }
@@ -246,19 +258,21 @@ const LFBehavior = {
 
             let target = null;
 
-            if (params.actions.includes("breathe")) {
+            if (params.actions.includes("breathe") && params.respiration != null && params.respiration.length == 2 && params.respiration[0] != null) {
                 let rsp = lf.haze.query(item, params.respiration[0]);
                 let minD = null;
                 rsp.forEach((tb) => {
                     let tbC = lf.haze.getCellPos(tb.tableIndex);
-                    let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
-                    if (params.seektarget == null) { 
-                        minD = dD;
-                        target = new LFVector(tbC.x,tbC.y,0,0);
-                    }
-                    else if (dD < minD) { 
-                        minD = dD;
-                        target = new LFVector(tbC.x,tbC.y,0,0);
+                    if (tbC != null) {
+                        let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                        if (params.seektarget == null) { 
+                            minD = dD;
+                            target = new LFVector(tbC.x,tbC.y,0,0);
+                        }
+                        else if (dD < minD) { 
+                            minD = dD;
+                            target = new LFVector(tbC.x,tbC.y,0,0);
+                        }
                     }
                 });
             }
@@ -269,14 +283,16 @@ const LFBehavior = {
                         let minD = null;
                         fG3.forEach((tb) => {
                             let tbC = lf.haze.getCellPos(tb.tableIndex);
-                            let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
-                            if (params.seektarget == null) { 
-                                minD = dD; 
-                                target = new LFVector(tbC.x,tbC.y,0,0);
-                            }
-                            else if (minD == null || dD < minD) { 
-                                minD = dD; 
-                                target = new LFVector(tbC.x,tbC.y,0,0); 
+                            if (tbC != null) {
+                                let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                                if (params.seektarget == null) { 
+                                    minD = dD; 
+                                    target = new LFVector(tbC.x,tbC.y,0,0);
+                                }
+                                else if (minD == null || dD < minD) { 
+                                    minD = dD; 
+                                    target = new LFVector(tbC.x,tbC.y,0,0); 
+                                }
                             }
                         });
                     }
@@ -309,16 +325,16 @@ const LFBehavior = {
 
         if (!("buildparts" in item.dynamic.mem)) item.dynamic.mem["buildparts"] = { "p": 0 };
 
-        let parts = lf.query(item);
+        let parts = lf.query(item, "ort");
         for (let p = 0; p < parts.length; p++) {
             if (parts[p].core.type == "ort" && parts[p].core.data == "p" && item.dynamic.mem["buildparts"]["p"] < 3) {
                 item.dynamic.mem["buildparts"]["p"]++;
+                parts[p].debug += "da-build;";
                 parts[p].deactivate();
             }
         }
         if (item.dynamic.mem["buildparts"]["p"] == 3) {
             let snipVal = "ppp";
-            parts.forEach((pt) => { pt.deactivate(); });
             let nDir = Math.floor(Math.random() * 360);
             let nVel = Math.floor(Math.random() * 10) + 5;
             let nsnip = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip.snipBlk, { code: snipVal });
@@ -395,8 +411,58 @@ function LFCodedBehaviors() {
             return LFBehavior.breathe(item,params);
         },
 
-
+        "baa": function(item,params) {
+            // enable chem v1
+            if (params.chem == null) {
+                params.chem = {
+                    type: "spekG3",
+                    energy: 7,
+                    amount: 2,
+                    time: 5,
+                    emit: 18
+                };
+            }
+            return params;
+        },
+        "bab": function(item,params) {
+            // enable chem v2
+            if (params.chem == null) {
+                params.chem = {
+                    type: "spekG3",
+                    energy: 7,
+                    amount: 2,
+                    time: 5,
+                    emit: 18
+                };
+            }
+            else {
+                params.chem.energy += 4;
+                params.chem.amount += 1;
+                params.chem.time += 2;
+                params.chem.emit += 3;
+            }
+            return params;
+        },
         "bac": function(item,params) {
+            // enable chem v3
+            if (params.chem == null) {
+                params.chem = {
+                    type: "spekG3",
+                    energy: 7,
+                    amount: 2,
+                    time: 5,
+                    emit: 18
+                };
+            }
+            else {
+                params.chem.energy += 4;
+                params.chem.amount += 1;
+                params.chem.time += 2;
+                params.chem.emit += 3;
+            }
+            return params;
+        },
+        "bad": function(item,params) {
             // chem 
             return LFBehavior.chem(item,params);
         },
@@ -474,7 +540,10 @@ function LFCodedBehaviors() {
         "aca", // flip respiration
         "acb", // respirate
 
-        "bac", // chem
+        "baa", // enable chem process v1
+        "bab", // enable chem process v2
+        "bac", // enable chem process v3
+        "bad", // chem
 
         "bba", // set Ex digestion
         "bbb", // increase Ex digestion
@@ -513,7 +582,7 @@ function LFCodedBehaviors() {
         "eat1": ["bba","bcd"],
         "eat2": ["bbc","bcd"],
         "eat3": ["bba","bbc","bcd"],
-        "chem": ["bac"],
+        "chem1": ["baa","bad"],
         "breathe1": ["acb"],
         "breathe2": ["aca", "acb"]
     };
@@ -521,7 +590,7 @@ function LFCodedBehaviors() {
     me.getTypes = function(codes) {
         let types = [];
         if (codes.includes("abd")) types.push("move");
-        if (codes.includes("bac")) types.push("chem");
+        if ((codes.includes("baa") || codes.includes("bab") || codes.includes("bac")) && codes.includes("bad")) types.push("chem");
         if (codes.includes("acb")) types.push("breathe");
         if (codes.includes("bcd")) types.push("eat");
         return types;
