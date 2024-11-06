@@ -10,10 +10,16 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
     me.core = core;
     me.dynamic = new LFDynamic(dynamicInit);
     me.complex = 0;
+    me.age = 0;
+    me.debug = "type=" + me.core.type + ",subtype=" + me.core.subtype + ";";
     me.parent = dynamicInit != null && "parent" in dynamicInit ? dynamicInit["parent"] : null;
     if ("complex" in initOps) me.complex = initOps["complex"];
     me.transformFill = "translateX(-50%) translateY(-50%) rotate(***deg)";
+
+    if (me.core != undefined) me.id += "-" + me.core.type;
+
     me.update = () => {
+        me.age++;
         if (me.active) {
             lfcore[me.core.type].update(me);
         }
@@ -32,6 +38,7 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
         }
 
         if (me.pos == null || me.core == undefined || me.core == null) {
+            me.debug += "da-no-core;";
             me.deactivate();
         }
         else {

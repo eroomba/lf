@@ -466,6 +466,7 @@ const lfcore = {
             
             if (ort.life != null && ort.life <= 0 && ort.active) {
                 lfcore.ort.decay(ort.core.subtype, ort.pos);
+                ort.debug += "deactivated-ort-die;";
                 ort.deactivate();
             }
             else {
@@ -491,6 +492,7 @@ const lfcore = {
                         let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip.snipEx, { code: "e--" });
                         lf.queueItem(nSnip);
         
+                        ort.debug += "da-newe;";
                         ort.deactivate();
                     }
 
@@ -540,10 +542,10 @@ const lfcore = {
                         });
                     }
         
-                    if (validSnip) {
+                    if (validSnip && snipType != null) {
                         nX /= (snipC.length + 1);
                         nY /= (snipC.length + 1);
-                        for (let sc = snipC.length - 1; sc >= 0; sc--) snipC[sc].deactivate();
+                        for (let sc = snipC.length - 1; sc >= 0; sc--) { snipC[sc].debug += "da-snipb;"; snipC[sc].deactivate(); }
         
                         let nSnip = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.snip[snipType], { code: snipVal });
                         if (snipVal.indexOf("u") == 0 && lf.behaviors.singles.includes(snipVal)) {
@@ -552,6 +554,7 @@ const lfcore = {
                         }
                         lf.queueItem(nSnip);
                         
+                        ort.debug += "da-snipb2;";
                         ort.deactivate();
                     }
                 }
@@ -666,6 +669,7 @@ const lfcore = {
                 if ("parts" in snip.dynamic && "p" in snip.dynamic.mem["buildparts"] && snip.dynamic.mem["buildparts"]["p"] > 0) snip.life = snip.core.decay;
                 else {
                     lfcore.snip.decay(snip.core.subtype, snip.dynamic.codes[0], snip.pos);
+                    snip.debug += "da-snip-die;";
                     snip.deactivate();
                 }
             }
@@ -698,12 +702,14 @@ const lfcore = {
                             }
                         });
         
-                        if (validSnip) {
+                        if (validSnip && snipType != null) {
                             let nDir = Math.floor(Math.random() * 360);
                             let velAdd = Math.floor(Math.random() * 5) + 3;
                             let nSnip = new LFItem(new LFVector(snip.pos.x, snip.pos.y, nDir, snip.pos.vel + velAdd), lfcore.snip[snipType], { code: newVal });
                             lf.queueItem(nSnip);
                             
+                            addOrt.debug += "da-snipb3;";
+                            snip.debug += "da-snipb4;";
                             addOrt.deactivate();
                             snip.deactivate();
                         }
@@ -740,8 +746,11 @@ const lfcore = {
                             mxSum += b.pos.x;
                             mySum += b.pos.y;
                             mCount++;
+                            b.debug += "da-brane1";
                             b.deactivate(); 
                         });
+                        iTrig.debug += "da-brane2";
+                        snip.debug += "da-brane3";
                         iTrig.deactivate();
                         snip.deactivate();
         
@@ -775,6 +784,7 @@ const lfcore = {
                             sxSum += s.pos.x;
                             sySum += s.pos.y;
                             sCount++;
+                            s.debug += "da-seed1";
                             s.deactivate(); 
                         });
         
@@ -823,6 +833,8 @@ const lfcore = {
                         let nStrand = new LFItem(new LFVector(mX, mY, nDir, nVel), lfcore.strand[strandType], { codes: codes });
                         lf.queueItem(nStrand);
         
+                        addTo.debug += "da-strand11";
+                        snip.debug += "da-strand12";
                         addTo.deactivate();
                         snip.deactivate();
                     }
@@ -850,10 +862,16 @@ const lfcore = {
                 comps.forEach((orta) => {
                     let xDir = 12 * Math.cos(nDir * Math.PI / 180);
                     let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta], null);
-                    lf.queueItem(nOrt);
-                    nDir += (360 / comps.length);
-                    nDir = nDir % 360;
+                    let ortID = "ort" + orta.toUpperCase();
+                    if (lfcore.ort[ortID] != undefined) {
+                        let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort[ortID], null);
+                        lf.queueItem(nOrt);
+                        nDir += (360 / comps.length);
+                        nDir = nDir % 360;
+                    }
+                    else {
+                        lf.logging.log.push("bad ort type '" + orta + "' [snip-decay]");
+                    }
                 });
             }
             else if (lfcore.snip[snipName].subtype == "snipEx" || snipCode == "e--") {
@@ -876,10 +894,15 @@ const lfcore = {
                 comps.forEach((orta) => {
                     let xDir = 12 * Math.cos(nDir * Math.PI / 180);
                     let yDir = 12 * Math.sin(nDir * Math.PI / 180);
-                    let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta.toUpperCase()], null);
-                    lf.queueItem(nOrt);
-                    nDir += (360 / comps.length);
-                    nDir = nDir % 360;
+                    if (lfcore.ort["ort" + orta.toUpperCase()] != undefined) {
+                        let nOrt = new LFItem(new LFVector(pos.x + xDir, pos.y + yDir, nDir, nVel), lfcore.ort["ort" + orta.toUpperCase()], null);
+                        lf.queueItem(nOrt);
+                        nDir += (360 / comps.length);
+                        nDir = nDir % 360;
+                    }
+                    else {
+                        lf.logging.log.push("bad ort type 'ort" + orta.toUpperCase() + "' [snip-decay-2]"); 
+                    }
                 });
                 let dCmpX = lfcore.ort["ort" + dComp.toUpperCase()].dformula;
                 let oA = Math.floor(Math.random() * 360);
@@ -934,6 +957,7 @@ const lfcore = {
             
             if (strand.life != null && strand.life <= 0 && strand.active) {
                 lfcore.strand.decay(strand.dynamic.codes, strand.pos);
+                strand.debug += "da-strand-die;";
                 strand.deactivate();
             }
             else {
@@ -960,6 +984,7 @@ const lfcore = {
                                 let nRes = strand.pos.subtract(itm.pos);
                                 strand.pos.vel -= nRes.vel;
                                 strand.pos.dir = nRes.dir;
+                                itm.debug += "da-strandgo1";
                                 itm.deactivate();
                                 combined = true;
                             }
@@ -1008,6 +1033,7 @@ const lfcore = {
                                 strand.pos.vel -= nRes.vel;
                                 strand.pos.dir = nRes.dir;
                                 strand.life += itm.core.decay;
+                                itm.debug += "da-strand12";
                                 itm.deactivate();
                             }
                         }
@@ -1045,6 +1071,7 @@ const lfcore = {
                                 strand.pos.dir = nRes.dir;
                                 strand.life += itm.core.decay;
 
+                                itm.debug += "da-strand13";
                                 itm.deactivate();
                                 combined = true;
                                 let dspCode = strand.dynamic.codes.join(":");
@@ -1072,11 +1099,15 @@ const lfcore = {
                         let nVel = Math.floor(Math.random() * 9);
                         let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, iOps);
                         lf.queueItem(nPro);
+
+                        lf.logAction(nPro.id,"created-str");
             
+                        membrane.debug += "da-proto1";
+                        strand.debug += "da-proto2";
                         membrane.deactivate();
                         strand.deactivate();
                         spawned = true;
-                        console.log("s " + strand.id + " spawned");
+                        //console.log("s " + strand.id + " spawned");
                     }
             
                     if (!spawned) {
@@ -1121,20 +1152,30 @@ const lfcore = {
                     let nVel = Math.floor(Math.random() * 5) + 10;
                     let sType = "snipGo";
                     if (rCodes[0] == lfcore.snip.snipEx.data) sType = "snipEx"
-                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], { code: rCodes[0] });
-                    lf.queueItem(nSnp);
-                    oA += 360 / sCount;
-                    oA = oA % 360;
+                    if (lfcore.snip[sType] != undefined) {
+                        let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], { code: rCodes[0] });
+                        lf.queueItem(nSnp);
+                        oA += 360 / sCount;
+                        oA = oA % 360;
+                    }
+                    else {
+                        lf.logging.log.push("bad snip type '" + sType + "' [strand-decay-1]");
+                    }
                 }
                 else {
                     let nDir = oA;
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
-                    let nVel = Math.floor(Math.random() * 5) + 10;             
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], { codes: rCodes });
-                    lf.queueItem(nStd);
-                    oA += 360 / sCount;
-                    oA = oA % 360;
+                    let nVel = Math.floor(Math.random() * 5) + 10;    
+                    if (lfcore.strand[strandType] != undefined) {         
+                        let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], { codes: rCodes });
+                        lf.queueItem(nStd);
+                        oA += 360 / sCount;
+                        oA = oA % 360;
+                    }
+                    else {
+                        lf.logging.log.push("bad strand type '" + strandType + "' [strand-decay-2]");
+                    }
                 }
             }
             if (rCodes2.length > 0) {
@@ -1145,20 +1186,30 @@ const lfcore = {
                     let nVel = Math.floor(Math.random() * 5) + 10;
                     let sType = "snipGo";
                     if (rCodes2[0] == lfcore.snip.snipEx.data) sType = "snipEx";
-                    let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], { code: rCodes2[0] });
-                    lf.queueItem(nSnp);
-                    oA += 360 / sCount;
-                    oA = oA % 360;
+                    if (lfcore.snip[sType] != undefined) { 
+                        let nSnp = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.snip[sType], { code: rCodes2[0] });
+                        lf.queueItem(nSnp);
+                        oA += 360 / sCount;
+                        oA = oA % 360;
+                    }
+                    else {
+                        lf.logging.log.push("bad snip type '" + sType + "' [strand-decay-3]");
+                    }
                 }
                 else {
                     let nDir = oA;
                     let dX = 40 * Math.cos(nDir * Math.PI / 180);
                     let dY = 40 * Math.sin(nDir * Math.PI / 180);
                     let nVel = Math.floor(Math.random() * 5) + 10;
-                    let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], { codes: rCodes2 });
-                    lf.queueItem(nStd);
-                    oA += 360 / sCount;
-                    oA = oA % 360;
+                    if (lfcore.strand[strandType] != undefined) {
+                        let nStd = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.strand[strandType], { codes: rCodes2 });
+                        lf.queueItem(nStd);
+                        oA += 360 / sCount;
+                        oA = oA % 360;
+                    }
+                    else {
+                        lf.logging.log.push("bad strand type '" + strandType + "' [strand-decay-4]");
+                    }
                 }
             }
             let dType = "snipGo";
@@ -1214,6 +1265,8 @@ const lfcore = {
                 proto.life--;
             
             if (proto.life != null && proto.life <= 0 && proto.active) {
+                lf.logAction(proto.id,"died (" + proto.age + ")");
+                proto.debug += "da-proto-die;";
                 lfcore.proto.decay(proto);
                 proto.deactivate();
             }
@@ -1226,7 +1279,7 @@ const lfcore = {
                 }
 
                 let upgrade = false;
-                if (proto.complex == 1 && Math.random() > 0.9) {
+                if (proto.complex == 1 && Math.random() > 0.993) {
                     let branes = lf.query(proto,"struck");
                     let addBrane = null;
                     branes.forEach((mb) => {
@@ -1237,6 +1290,10 @@ const lfcore = {
                     if (addBrane != null) {
                         let uProto = new LFItem(new LFVector(proto.pos.x, proto.pos.y, proto.pos.dir, proto.pos.vel), lfcore.proto.protoC, { codes: JSON.parse(JSON.stringify(proto.dynamic.codes))}, { init: true, complex: 2});
                         lf.queueItem(uProto);
+                        lf.logAction(proto.id, "upgrade to " + uProto.id);
+                        lf.logAction(uProto.id, "upgrade from " + proto.id);
+                        addBrane.debug += "da-up1;";
+                        proto.debug += "da-up2;";
                         addBrane.deactivate();
                         proto.deactivate();
                         upgrade = true;
@@ -1253,17 +1310,17 @@ const lfcore = {
                     if (!("divCounter" in proto.dynamic.mem)) proto.dynamic.mem["divCounter"] = 0;
                     if (!("actCount" in proto.dynamic.mem)) proto.dynamic.mem["actCount"] = 0;
 
-                    if (proto.life >= 80) proto.dynamic.mem["divCounter"]++;
+                    if (proto.life >= 90) proto.dynamic.mem["divCounter"]++;
                     else proto.dynamic.mem["divCounter"] = 0;
 
                     proto.obj.setAttribute("d-count",proto.dynamic.mem["divCounter"]);
 
                     // has been healthy long enough to divide
-                    if (proto.dynamic.mem["divCounter"] >= 50) {
-                        proto.dynamic.mem["divCounter"] = 50;
+                    if (proto.dynamic.mem["divCounter"] >= 100) {
+                        proto.dynamic.mem["divCounter"] = 100;
 
                         // has enough spekV to trigger division
-                        if (proto.dynamic.mem["actCount"] > 5) {
+                        if (proto.dynamic.mem["actCount"] > 8) {
                             // divide
                             let mutateOps = "abcd";
                             let nCodes = JSON.parse(JSON.stringify(proto.dynamic.codes));
@@ -1287,16 +1344,22 @@ const lfcore = {
                             let cpParentID = proto.id;
                             let cpComplex = proto.complex;
 
-                            let copy = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDirCp, nVel), lfcore.proto[cpSubtype], { codes: nCodes, parent: cpParentID }, { init: true, complex: cpComplex });
-                            let nLife = Math.floor(proto.life * 0.6);
-                            copy.life = nLife;
-                            proto.life = nLife;
-                            copy.pos.push(nDir - 90, nOVel);
-                            proto.pos.push(nDir + 90, nOVel);
-                            lf.queueItem(copy);
+                            if (lfcore.proto[cpSubtype] != undefined) {
+                                let copy = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDirCp, nVel), lfcore.proto[cpSubtype], { codes: nCodes, parent: cpParentID }, { init: true, complex: cpComplex });
+                                let nLife = Math.floor(proto.life * 0.6);
+                                copy.life = nLife;
+                                proto.life = nLife;
+                                lf.logAction(copy.id, "created-div-" + proto.id);
+                                copy.pos.push(nDir - 90, nOVel);
+                                proto.pos.push(nDir + 90, nOVel);
+                                lf.queueItem(copy);
 
-                            proto.dynamic.mem["actCount"] = 0;
-                            proto.dynamic.mem["divCounter"] = 0;
+                                proto.dynamic.mem["actCount"] = 0;
+                                proto.dynamic.mem["divCounter"] = 0;
+                            }
+                            else {
+                                lf.logging.log.push("bad proto type '" + cpSubtype + "' [proto-clone]");
+                            }
                         }
                         else {
                             // check for spekV to trigger activation
@@ -1351,7 +1414,9 @@ const lfcore = {
             let nHusk = new LFItem(new LFVector(proto.pos.x, proto.pos.y, nDir, nVel), lfcore.struck.struckHusk, { parent: proto.id, type: huskType });
             lf.queueItem(nHusk);
 
-            console.log("proto " + proto.id + " died.");
+            lf.logAction(proto.id, "decay");
+
+            //console.log("proto " + proto.id + " died.");
         }
     },
 
@@ -1432,6 +1497,7 @@ const lfcore = {
             
             if (struck.life != null && struck.life <= 0 && struck.active) {
                 lfcore.struck.decay(struck.core.subtype, struck.pos);
+                struck.debug += "da-struck-die;";
                 struck.deactivate();
             }
         
@@ -1458,7 +1524,8 @@ const lfcore = {
                         nBrane.obj.classList.add("b2");
                         lf.queueItem(nBrane);
 
-                        iTrig.forEach(t => t.deactivate());
+                        iTrig.forEach((t) => { t.debug += "da-trig1;"; t.deactivate(); });
+                        struck.debug += "da-trig2";
                         struck.deactivate();
                     }
                     else if (struck.life < 40) struck.obj.style.opacity = struck.life / 100;
@@ -1534,10 +1601,15 @@ const lfcore = {
                         let dX = 15 * Math.cos(nDir * Math.PI / 180);
                         let dY = 15 * Math.sin(nDir * Math.PI / 180);
                         let nVel = Math.floor(Math.random() * 10) + 5;
-                        let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort[orts[o]], null);
-                        lf.queueItem(nOrt);
-                        oA3 += oAdd;
-                        oA3 = oA3 % 360;
+                        if (lfcore.ort[orts[o]] != undefined) {
+                            let nOrt = new LFItem(new LFVector(pos.x + dX, pos.y + dY, nDir, nVel), lfcore.ort[orts[o]], null);
+                            lf.queueItem(nOrt);
+                            oA3 += oAdd;
+                            oA3 = oA3 % 360;
+                        }
+                        else {
+                            lf.logging.log.push("bad ort type '" + orts[o] + "' [struck-decay-1]");
+                        }
                     }
                     let speks = ["spekA1", "spekB2", "spekC1", "spekD2"];
                     if (Math.random() > 0.5) speks = ["spekA2", "spekB1", "spekC2", "spekD1"];
@@ -2136,8 +2208,13 @@ function LFHaze(w, h, sub) {
                     let nDir = Math.floor(Math.random() * 360);
                     let nVel = Math.floor(Math.random() * 4) + 3;
 
-                    let nOrt = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.ort[ort], null);
-                    lf.queueItem(nOrt);
+                    if (lfcore.ort[ort] != undefined) {
+                        let nOrt = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.ort[ort], null);
+                        lf.queueItem(nOrt);
+                    }
+                    else {
+                        lf.logging.log.push("bad ort type '" + ort + "' [haze]");
+                    }
                 }
             });
             me.contents.forEach((el) => {
