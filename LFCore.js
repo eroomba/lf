@@ -1279,7 +1279,7 @@ const lfcore = {
                 }
 
                 let upgrade = false;
-                if (proto.complex == 1 && Math.random() > 0.993) {
+                if (proto.complex == 1 && Math.random() > 0.998) {
                     let branes = lf.query(proto,"struck");
                     let addBrane = null;
                     branes.forEach((mb) => {
@@ -1310,7 +1310,7 @@ const lfcore = {
                     if (!("divCounter" in proto.dynamic.mem)) proto.dynamic.mem["divCounter"] = 0;
                     if (!("actCount" in proto.dynamic.mem)) proto.dynamic.mem["actCount"] = 0;
 
-                    if (proto.life >= 90) proto.dynamic.mem["divCounter"]++;
+                    if (proto.life >= 95) proto.dynamic.mem["divCounter"]++;
                     else proto.dynamic.mem["divCounter"] = 0;
 
                     proto.obj.setAttribute("d-count",proto.dynamic.mem["divCounter"]);

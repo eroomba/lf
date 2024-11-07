@@ -36,6 +36,19 @@ body {
     display: none;
 }
 
+#dbhr {
+    width: 20px;
+    border: 1px solid red;
+    color: Red;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 9999999;
+    transform-origin: left center;
+    left: -2000px;
+    top: -2000px;
+}
+
 #marker,
 .spek,
 .ort,

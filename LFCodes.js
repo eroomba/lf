@@ -11,7 +11,7 @@ const LFBehavior = {
         newParams["chem"] = null;
         newParams["digestion"] = {
             "snipEx": 3,
-            "struckSeed": 6,
+            "struckSeed": 6
         };
         newParams["offing"] = 0;
         newParams["speed"] = 0;
@@ -69,6 +69,7 @@ const LFBehavior = {
             if (params.seektarget != null) { 
                 let target = params.seektarget;
                 let des = item.pos.subtract(target);
+                console.log(item.pos.x + "," + item.pos.y + "  " + target.x + "," + target.y + "  " + des.dir + "  " + des.magnitude());
                 let desDir = des.dir;
                 if (Math.abs(item.pos.dir - desDir) > 30) {
                     desDir = item.pos.dir + (30 * (Math.abs(desDir)/desDir));
@@ -76,7 +77,11 @@ const LFBehavior = {
                 item.pos.dir = desDir;
                 if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
                     item.pos.vel = iSpeed;
-                    if (des.magnitude() < iSpeed) item.pos.vel = des.magnitude();
+                    console.log("seek target dist: " + des.magnitude() + ", speed: " + iSpeed);
+                    if (des.magnitude() < iSpeed) {
+                        item.pos.vel = des.magnitude();
+                        console.log("shorter [" + item.pos.vel + "]");
+                    }
                 }
                 mvSet = true;
 
@@ -104,6 +109,8 @@ const LFBehavior = {
             if (!("digCount" in item.dynamic.mem)) { item.dynamic.mem["digCount"] = 0; }
             if (!("gut" in item.dynamic.mem)) { item.dynamic.mem["gut"] = []; }
             if (!("digEnergy" in item.dynamic.mem)) { item.dynamic.mem["digEnergy"] = 0; }
+            if (!("prey" in item.dynamic.mem)) { item.dynamic.mem["prey"] = null; }
+            if (!("preyCount" in item.dynamic.mem)) { item.dynamic.mem["preyCount"] = 0; }
                  
 
             let isDig = item.dynamic.mem["digCount"] > 0 ? true : false;
@@ -113,7 +120,38 @@ const LFBehavior = {
                 item.life += item.dynamic.mem["digEnergy"];
             }
             else {
-                if (item.dynamic.mem["gut"].length > 0) {
+                if (item.dynamic.mem["prey"] != null) {
+                    let tVec = item.dynamic.mem["prey"].pos.subtract(item.pos);
+
+                    if (tVec.magnitude < item.obj.clientWidth) {
+                        item.pos.dir = tVec.dir;
+                        console.log("preying...");
+
+                        item.dynamic.mem["preyCount"]--;
+
+                        if (item.dynamic.mem["preyCount"] <= 0) {
+                            item.dynamic.mem["preyCount"] = 5;
+                            if (item.obj.classList.contains("eating")) item.obj.classList.remove("eating");
+                            else item.obj.classList.add("eating");
+                        }
+
+                        let energy = item.dynamic.mem["prey"].life < 20 ? item.dynamic.mem["prey"].life : 20;
+                        item.dynamic.mem["prey"].life = item.dynamic.mem["prey"].life - energy < 0 ? 0 : item.dynamic.mem["prey"].life - energy;
+                        item.life = item.life + energy > 100 ? 100 : item.life + energy; 
+
+                        if (item.dynamic.mem["prey"].life <= 0) {
+                            item.dynamic.mem["prey"].deactivate();
+                            item.dynamic.mem["prey"] = null;
+                            item.dynamic.mem["preyCount"] = 0;
+                            item.obj.classList.remove("eating");
+                        }
+                    }
+                    else {
+                        console.log("following prey: " + item.dynamic.mem["prey"].pos.x + "," + item.dynamic.mem["prey"].pos.y);
+                        params.seektarget = new LFVector(item.dynamic.mem["prey"].pos.x,item.dynamic.mem["prey"].pos.y,0,0);
+                    }
+                }
+                else if (item.dynamic.mem["gut"].length > 0) {
                     switch (item.dynamic.mem["gut"][0].type) {
                         case "snip":
                             lfcore.snip.decay(item.dynamic.mem["gut"][0].subtype, item.dynamic.mem["gut"][0].code, item.pos);
@@ -141,20 +179,30 @@ const LFBehavior = {
                             let des = fItem.pos.subtract(item.pos);
 
                             if (Math.abs(des.dir) < 30 || des.magnitude() < item.core.range / 2) {
-                                let iWeight = dWeights[fItem.core.subtype];
-                                item.dynamic.mem["digCount"] = iWeight;
-                                item.dynamic.mem["digEnergy"] = 3; 
-                                if (params.offing > 0 && fItem.parentid == item.id) {
-                                    item.dynamic.mem["digEnergy"] = 1;
-                                    item.dynamic.mem["digCount"] = Math.floor(iWeight / 2);
+                                if (fItem.core.type == "proto") {
+                                    if (item.dynamic.mem["prey"] == null) {
+                                        item.dynamic.mem["prey"] = fItem;
+                                        item.dynamic.mem["preyCount"] = 5;
+                                        console.log("preying on item");
+                                    }
                                 }
-                                let fCode = "";
-                                if (fItem.core.type == "snip") fCode = fItem.dynamic.codes[0];
-                                item.dynamic.mem["gut"].push({type:fItem.core.type, subtype: fItem.core.subtype, parentid: fItem.parent, code: fCode });
-                                item.life += 2;
-                                fItem.debug += "da-eat;";
-                                fItem.deactivate();
-                                item.obj.classList.add("eating");
+                                
+                                if (item.dynamic.mem["prey"] == null && fItem.core.type != "proto") {
+                                    let iWeight = dWeights[fItem.core.subtype];
+                                    item.dynamic.mem["digCount"] = iWeight;
+                                    item.dynamic.mem["digEnergy"] = 3; 
+                                    if (params.offing > 0 && fItem.parentid == item.id) {
+                                        item.dynamic.mem["digEnergy"] = 1;
+                                        item.dynamic.mem["digCount"] = Math.floor(iWeight / 2);
+                                    }
+                                    let fCode = "";
+                                    if (fItem.core.type == "snip") fCode = fItem.dynamic.codes[0];
+                                    item.dynamic.mem["gut"].push({type:fItem.core.type, subtype: fItem.core.subtype, parentid: fItem.parent, code: fCode });
+                                    item.life += 2;
+                                    fItem.debug += "da-eat;";
+                                    fItem.deactivate();
+                                    item.obj.classList.add("eating");
+                                }
                             }
                         }
                     });
@@ -256,66 +304,70 @@ const LFBehavior = {
         if (item.complex >= 1 && params.found.length > 0) {
             params.actions.push("seek");
 
-            let target = null;
+            if (params.seektarget == null) {
+                let target = null;
 
-            if (params.actions.includes("breathe") && params.respiration != null && params.respiration.length == 2 && params.respiration[0] != null) {
-                let rsp = lf.haze.query(item, params.respiration[0]);
-                let minD = null;
-                rsp.forEach((tb) => {
-                    let tbC = lf.haze.getCellPos(tb.tableIndex);
-                    if (tbC != null) {
-                        let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
-                        if (params.seektarget == null) { 
-                            minD = dD;
-                            target = new LFVector(tbC.x,tbC.y,0,0);
-                        }
-                        else if (dD < minD) { 
-                            minD = dD;
-                            target = new LFVector(tbC.x,tbC.y,0,0);
-                        }
-                    }
-                });
-            }
-            if (params.actions.includes("chem")) {
-                if (item.dynamic.mem["chemCap"] < 3) {
-                    let fG3 = lf.haze.query(item, "spekG3");
-                    if (fG3.length > 0) {
-                        let minD = null;
-                        fG3.forEach((tb) => {
-                            let tbC = lf.haze.getCellPos(tb.tableIndex);
-                            if (tbC != null) {
-                                let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
-                                if (params.seektarget == null) { 
-                                    minD = dD; 
-                                    target = new LFVector(tbC.x,tbC.y,0,0);
-                                }
-                                else if (minD == null || dD < minD) { 
-                                    minD = dD; 
-                                    target = new LFVector(tbC.x,tbC.y,0,0); 
-                                }
+                if (params.actions.includes("breathe") && params.respiration != null && params.respiration.length == 2 && params.respiration[0] != null) {
+                    let rsp = lf.haze.query(item, params.respiration[0]);
+                    let minD = null;
+                    rsp.forEach((tb) => {
+                        let tbC = lf.haze.getCellPos(tb.tableIndex);
+                        if (tbC != null) {
+                            let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                            if (params.seektarget == null) { 
+                                minD = dD;
+                                target = new LFVector(tbC.x,tbC.y,0,0);
                             }
-                        });
+                            else if (dD < minD) { 
+                                minD = dD;
+                                target = new LFVector(tbC.x,tbC.y,0,0);
+                            }
+                        }
+                    });
+                }
+                if (params.actions.includes("chem")) {
+                    if (item.dynamic.mem["chemCap"] < 3) {
+                        let fG3 = lf.haze.query(item, "spekG3");
+                        if (fG3.length > 0) {
+                            let minD = null;
+                            fG3.forEach((tb) => {
+                                let tbC = lf.haze.getCellPos(tb.tableIndex);
+                                if (tbC != null) {
+                                    let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                                    if (params.seektarget == null) { 
+                                        minD = dD; 
+                                        target = new LFVector(tbC.x,tbC.y,0,0);
+                                    }
+                                    else if (minD == null || dD < minD) { 
+                                        minD = dD; 
+                                        target = new LFVector(tbC.x,tbC.y,0,0); 
+                                    }
+                                }
+                            });
+                        }
                     }
                 }
-            }
-            if (params.actions.includes("eat") && item.dynamic.mem["gut"].length == 0) {
-                let minD = null;
-                params.found.forEach((sk) => {
-                    if (sk.core.subtype in params.digestion) {
-                        let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
-                        if (params.seektarget == null) { 
-                            minD = dD; 
-                            target = new LFVector(sk.pos.x,sk.pos.y,0,0); 
+                if (params.actions.includes("eat") && item.dynamic.mem["gut"].length == 0 && item.dynamic.mem["prey"] == null) {
+                    let minD = null;
+                    params.found.forEach((sk) => {
+                        if (sk.core.subtype in params.digestion) {
+                            let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
+                            if (params.seektarget == null) { 
+                                minD = dD; 
+                                target = new LFVector(sk.pos.x,sk.pos.y,0,0); 
+                                console.log("locked onto " + sk.core.subtype);
+                            }
+                            else if (minD == null || dD < minD) { 
+                                minD = dD; 
+                                target = new LFVector(sk.pos.x,sk.pos.y,0,0);
+                                console.log("locked onto " + sk.core.subtype); 
+                            }
                         }
-                        else if (minD == null || dD < minD) { 
-                            minD = dD; 
-                            target = new LFVector(sk.pos.x,sk.pos.y,0,0); 
-                        }
-                    }
-                });
+                    });
+                }
+                
+                params.seektarget = target;
             }
-            
-            params.seektarget = target;
         }
 
         return params;
@@ -495,6 +547,12 @@ function LFCodedBehaviors() {
             params.offing = 0.25;
             return params;
         },
+        "bcb": function(item,params) {
+            // set offing
+            params.digestion["protoS"] = 20;
+            params.digestion["protoC"] = 20;
+            return params;
+        },
         "bcd": function(item,params) {
             // eat
             return LFBehavior.eat(item,params);
@@ -550,6 +608,7 @@ function LFCodedBehaviors() {
         "bbc", // set Husk digestion
         "bbd", // increase Husk digestion
         "bca", // offing
+        "bcb", // enable proto eating
         "bcd", // eat
 
         "aaa", // increase speed
@@ -582,6 +641,7 @@ function LFCodedBehaviors() {
         "eat1": ["bba","bcd"],
         "eat2": ["bbc","bcd"],
         "eat3": ["bba","bbc","bcd"],
+        "prey1": ["bcb"],
         "chem1": ["baa","bad"],
         "breathe1": ["acb"],
         "breathe2": ["aca", "acb"]

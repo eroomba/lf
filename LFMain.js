@@ -203,26 +203,41 @@ const LFEngine = {
             }
         },
         run: function() {
-            if (document.querySelectorAll(".proto").length < 3) {
+            if (document.querySelectorAll(".proto").length < 2) {
 
                 let codes = [];
                 codes.push(...lf.behaviors.presets["move1"]);
-                codes.push(...lf.behaviors.presets["chem"]);
+                codes.push(...lf.behaviors.presets["chem1"]);
                 let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes }, { init: true, complex: 1});
                 lf.addItem(nPro);
 
                 let codes3 = [];
                 codes3.push(...lf.behaviors.presets["move1"]);
                 codes3.push(...lf.behaviors.presets["breathe2"]);
-                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes3 }, { init: true, complex: 1});
-                lf.addItem(nPro3);
+                //let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes3 }, { init: true, complex: 1});
+                //lf.addItem(nPro3);
 
                 let codes2 = [];
                 codes2.push(...lf.behaviors.presets["move4"]);
                 codes2.push(...lf.behaviors.presets["seek"]);
                 codes2.push(...lf.behaviors.presets["eat1"]);
-                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto.protoC, { codes: codes2 }, { init: true, complex: 2});
-                lf.addItem(nPro2);
+                //let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto.protoC, { codes: codes2 }, { init: true, complex: 2});
+                //lf.addItem(nPro2);
+
+                let codes4= [];
+                codes4.push(...lf.behaviors.presets["move4"]);
+                codes4.push(...lf.behaviors.presets["seek"]);
+                codes4.push(...lf.behaviors.presets["eat1"]);
+                codes4.push(...lf.behaviors.presets["prey1"]);
+                let nPro4 = new LFItem(new LFVector((lf.w / 2) - 20, (lf.h / 2), Math.floor(Math.random() * 360), 0), lfcore.proto.protoC, { codes: codes4 }, { init: true, complex: 2});
+                nPro4.obj.classList.add("test-t");
+                lf.addItem(nPro4);
+            }
+
+            let tt = document.querySelectorAll(".test-t");
+            if (tt.length > 0) {
+                lf.dbhr.style.left = tt[0].style.left;
+                lf.dbhr.style.top = tt[0].style.top;
             }
         }
     }
@@ -244,6 +259,7 @@ function LF() {
         obj: document.getElementById("marker"),
         track: null
     };
+    me.dbhr = document.getElementById("dbhr");
     me.chaosOps = {
         dripRate: 0.4,
         puffRate: 0.5,
@@ -258,7 +274,7 @@ function LF() {
     me.behaviors = new LFCodedBehaviors();
     me.hash = new LFHash(me.w,me.h,50);
     me.haze = new LFHaze(me.w, me.h, 100);
-    me.runmode = "chaos";
+    me.runmode = "codetest";
     me.engine = LFEngine;
     me.logging = {
         log: [],
