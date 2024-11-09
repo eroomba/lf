@@ -6,6 +6,7 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
     me.obj = null;
     me.pos = pos;
     me.life = 0;
+    me.maxlife = 0;
     me.hash = "";
     me.core = core;
     me.dynamic = new LFDynamic(dynamicInit);
@@ -28,13 +29,23 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
         me.obj.setAttribute("y", me.pos.y);
         me.obj.setAttribute("dir", me.pos.dir);
         me.obj.setAttribute("vel", me.pos.vel);
+
+        if (lf.marker.track != null && lf.marker.track == me.id) {
+            lf.marker.obj.style.left = me.obj.style.left;
+            lf.marker.obj.style.top = me.obj.style.top;
+        }
+        if (lf.dbhr.track != null && lf.dbhr.track == me.id) {
+            lf.dbhr.obj.style.left = me.obj.style.left;
+            lf.dbhr.obj.style.top = me.obj.style.top;
+        }
     };
     me.deactivate = () => {
         me.active = false;
     };
     me.init = () => {
         if (me.core != undefined && me.core != null) {
-            me.life = me.core.decay;
+            me.maxlife = me.core.decay;
+            me.life = me.maxlife;
         }
 
         if (me.pos == null || me.core == undefined || me.core == null) {
@@ -61,14 +72,27 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
                     let sCode = me.dynamic.codes[0];
                     nObj.setAttribute("scode", sCode);
                     nObj.classList.add("snip-" + sCode);
+                    if (sCode.indexOf("u") >= 0) nObj.classList.add("snip-u");
                     break;
                 case 'strand':
                     let cStrS = me.dynamic.codes.join(":");
                     nObj.setAttribute("code",cStrS);
                     nCont = me.core.content;
                     let cLen = me.dynamic.codes.length;
-                    if (cLen >= gVars.minStrandLen) {  nObj.classList.add("sz-full"); }
-                    else if (cLen >= Math.floor(gVars.minStrandLen / 2)) {nObj.classList.add("sz-mid"); }
+
+                    if (me.core.subtype == "strandD") {
+                        if (cLen >= gVars.minStrandLen) {  nObj.classList.add("sz-full"); }
+                        else if (cLen >= Math.floor(gVars.minStrandLen / 2)) {nObj.classList.add("sz-mid"); }
+                    }
+                    else if (me.core.subtype == "strandV") {
+                        let vTypes = lf.behaviors.getTypes(me.dynamic.codes);
+                        if (vTypes.includes("v2")) me.dynamic.mem["v-type"] = "v2";
+                        else if (vTypes.includes("v3")) me.dynamic.mem["v-type"] = "v3";
+                        else if (vTypes.includes("v4")) me.dynamic.mem["v-type"] = "v4";
+                        else me.dynamic.mem["v-type"] = "v";
+
+                        if (!nObj.classList.contains("strand-" + me.dynamic.mem["v-type"])) nObj.classList.add("strand-" + me.dynamic.mem["v-type"]);
+                    }
                     break;
                 case 'struck':
                     if (me.core.subtype == "struckHusk") {
@@ -120,6 +144,15 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
 
                     nCont = pHTML;
 
+                    switch (me.core.subtype) {
+                        case "protoC":
+                            me.life = Math.floor(me.maxlife * 0.6);
+                            break;
+                        default:
+                            me.life = Math.floor(me.maxlife * 0.5);
+                            break;
+                    }
+
                     break;
             }
             nObj.innerHTML = nCont;
@@ -134,6 +167,9 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
 
             me.pos.pID = me.id;
             me.pos.pType = me.core.type;
+
+            if (me.obj.style.opacity != undefined && me.obj.style.opacity != null)
+                me.obj.setAttribute("oop", me.obj.style.opacity);
 
             if (me.active) {
                 me.obj.style.left = me.pos.x + "px";

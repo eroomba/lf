@@ -9,7 +9,8 @@ const gVars = {
     spekColl: false,
     minStrandLen: 21,
     maxItems: 5000,
-    huskDecay: 3000
+    huskDecay: 3000,
+    vactCount: 8
 }
 
 function PNoise()  {
@@ -132,6 +133,102 @@ const LFEngine = {
             }
         }
     },
+    vtest: {
+        init: function() {
+            let vCodes = [
+                "uca", // pseudo-v marker
+                "ucb", // pseudo-v marker
+                "ucc", // pseudo-v marker
+                "ucu", // pseudo-v marker
+                "uua", // pseudo-v marker
+                "ucb", // pseudo-v marker
+                "uuc",  // pseudo-v marker
+                "uuu"
+            ];
+
+            let vCodes2 = [
+                "uca", // pseudo-v marker
+                "ucb", // pseudo-v marker
+                "uca", // pseudo-v marker
+                "ucb", // pseudo-v marker
+                "ucc", // pseudo-v marker
+                "ucu", // pseudo-v marker
+                "uua", // pseudo-v marker
+            ];
+
+            let vCodes3 = [
+                "aau", // pseudo-v marker
+                "abu", // pseudo-v marker
+                "acu", // pseudo-v marker
+                "auu", // pseudo-v marker
+                "uub", // pseudo-v marker
+                "uuc", // pseudo-v marker
+            ];
+
+
+            for (let ii = 0; ii < 70; ii++) {
+                let nX = Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h);
+                lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.strand.strandR, { codes: JSON.parse(JSON.stringify(vCodes2)) }));
+            }
+
+            vCodes3.forEach((cd) => {
+                for (let ii = 0; ii < 600; ii++) {
+                    let nX = Math.floor(Math.random() * lf.w);
+                    let nY = Math.floor(Math.random() * lf.h);
+                    lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.snip.snipGo, { codes: [cd] }));
+                }
+            });
+
+            for (let ii = 0; ii < 800; ii++) {
+                let nX = Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h);
+                lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.snip.snipGo, { codes: ["uuu"] }));
+            }
+
+        },
+        run: function() {
+            if (document.querySelectorAll(".proto").length < 2) {
+
+                let codes = [];
+                codes.push(...lf.behaviors.presets["move1"]);
+                codes.push(...lf.behaviors.presets["chem1"]);
+                let nPro = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 5, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes }, { init: true, complex: 1});
+                lf.addItem(nPro);
+
+                let codes3 = [];
+                codes3.push(...lf.behaviors.presets["move1"]);
+                codes3.push(...lf.behaviors.presets["breathe2"]);
+                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes3 }, { init: true, complex: 1});
+                lf.addItem(nPro3);
+
+                let codes4= [];
+                codes4.push(...lf.behaviors.presets["move4"]);
+                codes4.push(...lf.behaviors.presets["seek"]);
+                codes4.push(...lf.behaviors.presets["eat1"]);
+                codes4.push(...lf.behaviors.presets["prey1"]);
+                let nPro4 = new LFItem(new LFVector((lf.w / 2) - 20, (lf.h / 2), 0, 0), lfcore.proto.protoC, { codes: codes4 }, { init: true, complex: 2});
+                nPro4.obj.classList.add("test-t");
+                lf.addItem(nPro4);
+
+                let nPro4b = new LFItem(new LFVector((lf.w / 2) + 20, (lf.h / 2), 180, 0), lfcore.proto.protoC, { codes: codes4 }, { init: true, complex: 2});
+                nPro4b.obj.classList.add("test-t");
+                lf.addItem(nPro4b)
+            }
+
+            if (Math.random() > 0.8) {
+                let sX = Math.floor(Math.random() * lf.w);
+                let sY = Math.floor(Math.random() * lf.h);
+                let strenghts = [ 75, 200, 275 ];
+                let strength = strenghts[Math.floor(Math.random() * strenghts.length)];
+
+                lf.events.push({run: function(params) {
+                    lfcore.xtra.splash(params.x, params.y, params.strength);
+                }, params: { x: sX, y: sY, strength: strength }});
+            }
+
+        }
+    },
     hazetest: {
         init: function() {
             let jj = 0;
@@ -214,30 +311,34 @@ const LFEngine = {
                 let codes3 = [];
                 codes3.push(...lf.behaviors.presets["move1"]);
                 codes3.push(...lf.behaviors.presets["breathe2"]);
-                //let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes3 }, { init: true, complex: 1});
-                //lf.addItem(nPro3);
+                let nPro3 = new LFItem(new LFVector((lf.w / 2) + 5, lf.h / 2 - 20, Math.floor(Math.random() * 360), 0), lfcore.proto.protoS, { codes: codes3 }, { init: true, complex: 1});
+                lf.addItem(nPro3);
 
                 let codes2 = [];
                 codes2.push(...lf.behaviors.presets["move4"]);
                 codes2.push(...lf.behaviors.presets["seek"]);
                 codes2.push(...lf.behaviors.presets["eat1"]);
-                //let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto.protoC, { codes: codes2 }, { init: true, complex: 2});
-                //lf.addItem(nPro2);
+                let nPro2 = new LFItem(new LFVector((lf.w / 2), lf.h / 2, Math.floor(Math.random() * 360), 0), lfcore.proto.protoC, { codes: codes2 }, { init: true, complex: 2});
+                lf.addItem(nPro2);
 
                 let codes4= [];
                 codes4.push(...lf.behaviors.presets["move4"]);
                 codes4.push(...lf.behaviors.presets["seek"]);
                 codes4.push(...lf.behaviors.presets["eat1"]);
                 codes4.push(...lf.behaviors.presets["prey1"]);
-                let nPro4 = new LFItem(new LFVector((lf.w / 2) - 20, (lf.h / 2), Math.floor(Math.random() * 360), 0), lfcore.proto.protoC, { codes: codes4 }, { init: true, complex: 2});
-                nPro4.obj.classList.add("test-t");
-                lf.addItem(nPro4);
-            }
+                let nPro4 = new LFItem(new LFVector((lf.w / 2) - 20, (lf.h / 2), 0, 0), lfcore.proto.protoC, { codes: codes4 }, { init: true, complex: 2});
+                //nPro4.obj.classList.add("test-t");
+                //lf.addItem(nPro4);
 
-            let tt = document.querySelectorAll(".test-t");
-            if (tt.length > 0) {
-                lf.dbhr.style.left = tt[0].style.left;
-                lf.dbhr.style.top = tt[0].style.top;
+                let nPro4b = new LFItem(new LFVector((lf.w / 2) + 20, (lf.h / 2), 180, 0), lfcore.proto.protoC, { codes: codes4 }, { init: true, complex: 2});
+                //nPro4b.obj.classList.add("test-t");
+                //lf.addItem(nPro4b)
+
+
+                //lf.marker.track = nPro4.id;
+                //lf.dbhr.track = nPro4.id;
+                //lf.marker.obj.style.display = "block";
+                //lf.dbhr.obj.style.display = "block";
             }
         }
     }
@@ -255,11 +356,15 @@ function LF() {
     me.w = window.innerWidth;
     me.h = window.innerHeight;
     me.idc = 0;
+    me.cache = {};
     me.marker = {
         obj: document.getElementById("marker"),
         track: null
     };
-    me.dbhr = document.getElementById("dbhr");
+    me.dbhr = {
+        obj: document.getElementById("dbhr"),
+        track: null
+    };
     me.chaosOps = {
         dripRate: 0.4,
         puffRate: 0.5,
@@ -274,7 +379,7 @@ function LF() {
     me.behaviors = new LFCodedBehaviors();
     me.hash = new LFHash(me.w,me.h,50);
     me.haze = new LFHaze(me.w, me.h, 100);
-    me.runmode = "codetest";
+    me.runmode = "chaos";
     me.engine = LFEngine;
     me.logging = {
         log: [],
