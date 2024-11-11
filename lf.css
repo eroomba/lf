@@ -26,11 +26,27 @@ body {
 
 #marker {
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 1px;
+    height: 1px;
     margin-left: -3px;
     margin-top: -3px;
+    border: 2px solid red;
     background-color: red;
+    left: -2000px;
+    top: -2000px;
+    display: none;
+    z-index: 999999;
+}
+
+#dbhr {
+    width: 20px;
+    border: 1px solid purple;
+    color: purple;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 9999999;
+    transform-origin: left center;
     left: -2000px;
     top: -2000px;
     display: none;
@@ -116,7 +132,7 @@ body {
 
 .ort {
     font-size: 0.6rem;
-    opacity: 0.25;
+    opacity: 0.3;
     font-weight: bold;
 }
 
@@ -196,16 +212,17 @@ body {
     font-size: 1rem;
 }
 
-.snip.snip-uua,
-.snip.snip-uub,
-.snip.snip-uuc,
-.snip.snip-uud,
-.snip.snip-uau,
-.snip.snip-ubu,
-.snip.snip-ucu,
-.snip.snip-udu {
+.snip.snip-u {
+    opacity: 0.2;
+    font-size: 0.9rem;
+}
+
+.snip.snip-uaa,
+.snip.snip-uab,
+.snip.snip-uac {
     color: #FFAA00;
     font-size: 0.9rem;
+    opacity: 0.5;
 }
 
 .snip i.loaded {
@@ -226,8 +243,48 @@ body {
 
 .strand.strand-r {
     color: #FF9900;
-    font-size: 0.55rem;
+    font-size: 1.3rem;
     opacity: 0.5;
+}
+
+.strand.strand-v {
+    color: #f00;
+    font-size: 0.5rem;
+    opacity: 0.5;
+}
+
+.proto.infected-v .mid .main {
+    border-color: #c99 !important;
+}
+
+.strand.strand-v2 {
+    color: #90f;
+    font-size: 0.5rem;
+    opacity: 0.5;
+}
+
+.proto.infected-v2 .mid .main {
+    border-color: #96c !important;
+}
+
+.strand.strand-v3 {
+    color: #f0f;
+    font-size: 0.5rem;
+    opacity: 0.5;
+}
+
+.proto.infected-v3 .mid .main {
+    border-color: #c9c !important;
+}
+
+.strand.strand-v4 {
+    color: #09f;
+    font-size: 0.5rem;
+    opacity: 0.5;
+}
+
+.proto.infected-v4 .mid .main {
+    border-color: #69c !important;
 }
 
 .strand.strand-d,

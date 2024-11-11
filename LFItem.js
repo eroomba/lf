@@ -1,11 +1,37 @@
+function LFItemCore(init = {}) {
+    const setup = {
+            type = "none", 
+            subtype = "none",
+            iclass = "",
+            weight = 0,
+            data = null,
+            content = "",
+            formula = () => { return null; },
+            range = 0,
+            decay = null,
+            dformula = [] } = init;
+    let me = this;
+    me.type = type;
+    me.subtype = subtype;
+    me.iclass = iclass;
+    me.weight = weight;
+    me.data = data; 
+    me.content = content;
+    me.formula = formula
+    me.range = range; 
+    me.decay = decay; 
+    me.dformula = dformula; 
+}
+
 function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
     let me = this;
-    me.id = lf.generateID();
+    me.id = lf.generateID() + "-" + core.type;
     me.gen = lf.step;
     me.active = true;
     me.obj = null;
     me.pos = pos;
     me.life = 0;
+    me.maxlife = 0;
     me.hash = "";
     me.core = core;
     me.dynamic = new LFDynamic(dynamicInit);
@@ -15,8 +41,6 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
     me.parent = dynamicInit != null && "parent" in dynamicInit ? dynamicInit["parent"] : null;
     if ("complex" in initOps) me.complex = initOps["complex"];
     me.transformFill = "translateX(-50%) translateY(-50%) rotate(***deg)";
-
-    if (me.core != undefined) me.id += "-" + me.core.type;
 
     me.update = () => {
         me.age++;
@@ -28,13 +52,23 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
         me.obj.setAttribute("y", me.pos.y);
         me.obj.setAttribute("dir", me.pos.dir);
         me.obj.setAttribute("vel", me.pos.vel);
+
+        if (lf.marker.track != null && lf.marker.track == me.id) {
+            lf.marker.obj.style.left = me.obj.style.left;
+            lf.marker.obj.style.top = me.obj.style.top;
+        }
+        if (lf.dbhr.track != null && lf.dbhr.track == me.id) {
+            lf.dbhr.obj.style.left = me.obj.style.left;
+            lf.dbhr.obj.style.top = me.obj.style.top;
+        }
     };
     me.deactivate = () => {
         me.active = false;
     };
     me.init = () => {
         if (me.core != undefined && me.core != null) {
-            me.life = me.core.decay;
+            me.maxlife = me.core.decay;
+            me.life = me.maxlife;
         }
 
         if (me.pos == null || me.core == undefined || me.core == null) {
@@ -47,28 +81,35 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
             nObj.style.left = me.pos.x + "px";
             nObj.style.top = me.pos.y + "px";
             nObj.classList.add(me.core.type);
-            nObj.classList.add(me.core.class);
+            if (me.core.iclass.length > 0) nObj.classList.add(me.core.iclass);
             let nCont = "[]";
             switch (me.core.type) {
-                case 'spek':
-                    nCont = me.core.content;
-                    break;
-                case 'ort':
-                    nCont = me.core.content;
-                    break;
                 case 'snip':
                     nCont =  me.core.content;
                     let sCode = me.dynamic.codes[0];
                     nObj.setAttribute("scode", sCode);
                     nObj.classList.add("snip-" + sCode);
+                    if (sCode.indexOf("u") >= 0) nObj.classList.add("snip-u");
                     break;
                 case 'strand':
                     let cStrS = me.dynamic.codes.join(":");
                     nObj.setAttribute("code",cStrS);
                     nCont = me.core.content;
                     let cLen = me.dynamic.codes.length;
-                    if (cLen >= gVars.minStrandLen) {  nObj.classList.add("sz-full"); }
-                    else if (cLen >= Math.floor(gVars.minStrandLen / 2)) {nObj.classList.add("sz-mid"); }
+
+                    if (me.core.subtype == "strandD") {
+                        if (cLen >= gVars.minStrandLen) {  nObj.classList.add("sz-full"); }
+                        else if (cLen >= Math.floor(gVars.minStrandLen / 2)) {nObj.classList.add("sz-mid"); }
+                    }
+                    else if (me.core.subtype == "strandV") {
+                        let vTypes = lf.behaviors.getTypes(me.dynamic.codes);
+                        if (vTypes.includes("v2")) me.dynamic.mem["v-type"] = "v2";
+                        else if (vTypes.includes("v3")) me.dynamic.mem["v-type"] = "v3";
+                        else if (vTypes.includes("v4")) me.dynamic.mem["v-type"] = "v4";
+                        else me.dynamic.mem["v-type"] = "v";
+
+                        if (!nObj.classList.contains("strand-" + me.dynamic.mem["v-type"])) nObj.classList.add("strand-" + me.dynamic.mem["v-type"]);
+                    }
                     break;
                 case 'struck':
                     if (me.core.subtype == "struckHusk") {
@@ -95,7 +136,7 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
                         backCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>";
                     }
 
-                    if (pTypes.includes("chem")) {
+                    if (pTypes.includes("chem") && me.complex == 1) {
                         nObj.classList.add("chem");
                     }
 
@@ -120,6 +161,18 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
 
                     nCont = pHTML;
 
+                    switch (me.core.subtype) {
+                        case "protoC":
+                            me.life = Math.floor(me.maxlife * 0.6);
+                            break;
+                        default:
+                            me.life = Math.floor(me.maxlife * 0.5);
+                            break;
+                    }
+
+                    break;
+                default:
+                    nCont = me.core.content;
                     break;
             }
             nObj.innerHTML = nCont;
@@ -134,6 +187,9 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
 
             me.pos.pID = me.id;
             me.pos.pType = me.core.type;
+
+            if (me.obj.style.opacity != undefined && me.obj.style.opacity != null)
+                me.obj.setAttribute("oop", me.obj.style.opacity);
 
             if (me.active) {
                 me.obj.style.left = me.pos.x + "px";
