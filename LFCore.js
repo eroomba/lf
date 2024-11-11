@@ -965,7 +965,7 @@ const lfcore = {
             iclass: "strand-v",
             weight: 1,
             data: "strandV", 
-            content: "<div class=\"st-ct\">&trie;</div>", // double int
+            content: "<div class=\"st-ct\">&vDash;</div>", // double stem T
             formula: () => { 
                 return "strandV"; 
             }, 
@@ -1024,7 +1024,13 @@ const lfcore = {
                                             let nDir = strand.pos.dir;
                                             let nVel = strand.pos.vel;
                                             let nCodes = JSON.parse(JSON.stringify(strand.dynamic.codes));
-                                            let newV = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: strand.parent, codes: nCodes });
+                                            let nVCodeS = nCodes.join(":");
+                                            if (!("viruses" in lf.cache)) lf.cache["viruses"] = [];
+                                            let nVName = "v-" + lf.cache.viruses.length;
+                                            let nVID = nVName + "|" + nVCodeS;
+                                            if (!lf.cache.viruses.includes(nVID))  lf.cache.viruses.push(nVID);
+                                            console.log("new virus '" + nVName + "'");
+                                            let newV = new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: strand.parent + "", virusid: nVName, codes: nCodes });
                                             newV.debug += "to-v;";
                                             lf.queueItem(newV);
                                             itm.debug += "da-to-v;";
@@ -1250,7 +1256,6 @@ const lfcore = {
 
                 let g3Count = Math.floor(Math.random() * 5) + 5;
                 lf.haze.add(pos.x, pos.y, "spekG3", g3Count);
-                console.log("v decay");
             }
             else {
                 let oA = Math.floor(Math.random() * 360);
@@ -1549,7 +1554,7 @@ const lfcore = {
                 return "brane"; 
             }, 
             range: 25, 
-            decay: 2300,
+            decay: 1500,
             dformula: []
         }),
 
@@ -1581,7 +1586,7 @@ const lfcore = {
                 return "seed"; 
             }, 
             range: 20, 
-            decay: 800,
+            decay: 1000,
             dformula: []
         }),
 
