@@ -119,7 +119,7 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
                         backCont = "<div class=\"tail mv-tail mv-animation\">&sim;</div>";
                     }
 
-                    if (pTypes.includes("chem")) {
+                    if (pTypes.includes("chem") && me.complex == 1) {
                         nObj.classList.add("chem");
                     }
 

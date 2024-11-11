@@ -4,10 +4,11 @@ let mousePosY = 0;
 let helpOn = false;
 
 const gVars = {
-    braneCount: 2,
+    braneCount: 3,
     seedCount: 3,
     spekColl: false,
     minStrandLen: 24,
+    minStransLenS: 18,
     maxItems: 5000,
     huskDecay: 3000,
     vactCount: 9
@@ -131,6 +132,42 @@ const LFEngine = {
                 let mvPro = new LFItem(new LFVector(me.w / 2, me.h / 2, nDir, nVel), lfcore.proto.protoS, mvDynamic, { init: true, complex: 1 });
                 lf.queueItem(mvPro);
             }
+        }
+    },
+    spawntest: {
+        init: function() {
+            for (let ii = 0; ii < 200; ii++) {
+                let nX = Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h);
+                if (Math.random() > 0.5) {
+                    let nBrane = new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.struck.struckBrane, { mtype: "S" });
+                    nBrane.obj.classList.add("b2");
+                    lf.addItem(nBrane);
+                }
+                else {
+                    let nBrane = new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.struck.struckBrane, { mtype: "C" });
+                    lf.addItem(nBrane);
+                }
+            }
+
+            let cTest = ["a","b","c","d"];
+            for (let ii = 0; ii < 300; ii++) {
+                let cList = [];
+                let tCodes = Math.floor(Math.random() * 10) + 18;
+                for (let jj = 0; jj < tCodes; jj++) {
+                    let nCode = cTest[Math.floor(Math.random() * cTest.length)];
+                    nCode += cTest[Math.floor(Math.random() * cTest.length)];
+                    nCode += cTest[Math.floor(Math.random() * cTest.length)];
+                    cList.push(nCode);
+                }
+                let nX = Math.floor(Math.random() * lf.w);
+                let nY = Math.floor(Math.random() * lf.h);
+                let nStrand = new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 5), lfcore.strand.strandD, { codes: cList });
+                lf.addItem(nStrand);
+            }
+        },
+        run: function() {
+         
         }
     },
     vtest: {

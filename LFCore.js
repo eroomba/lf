@@ -955,7 +955,7 @@ const lfcore = {
                 return "strandD"; 
             }, 
             range: 17, 
-            decay: 5000,
+            decay: 2200,
             dformula: []
         },
 
@@ -970,7 +970,7 @@ const lfcore = {
                 return "strandR"; 
             }, 
             range: 17, 
-            decay: 3200,
+            decay: 2000,
             dformula: []
         },
 
@@ -1142,11 +1142,18 @@ const lfcore = {
                         else if (itm.core.type == "strand" && itm.core.subtype == "strandD") {
                             let nCodes = [];
             
-                            let codeLen = strand.dynamic.codes.length + itm.dynamic.codes.length;
+                            let codeList1 = strand.dynamic.codes;
+                            let codeList2 = itm.dynamic.codes;
+                            if (codeList2.length > codeList1.length) {
+                                codeList1 = itm.dynamic.codes;
+                                codeList2 = strand.dynamic.codes;
+                            }
                             let canComb = false;
-                            let sumB = groupObj(itm.dynamic.codes,[lfcore.snip.snipEx.data]);
-                            let sumE = sums[lfcore.snip.snipEx.data] + sumB[lfcore.snip.snipEx.data];
-                            if (sumE / codeLen <= 0.25 && codeLen <= 48) { 
+                            let match = 0;
+                            for (let m = 0; m < codeList2.length; m++) {
+                                if (codeList1.includes(codeList2[m])) match++;
+                            }
+                            if (match / codeList2.length < 0.5 && codeList1.length + codeList2.length <= 3 * gVars.minStrandLen) { 
                                 canComb = true;
                                 nCodes = JSON.parse(JSON.stringify(itm.dynamic.codes.sort()));
                             }
@@ -1185,32 +1192,34 @@ const lfcore = {
             
                     let cStrP = strand.dynamic.codes.join(":");
                     strand.obj.setAttribute("code",cStrP);
-                    if (strand.dynamic.codes.length >= gVars.minStrandLen && membrane != null) {
-                        let ptDyn = {
-                            codes: JSON.parse(JSON.stringify(strand.dynamic.codes))
-                        };
-            
-                        let iOps = { init: true, complex: 1 };
-                        let protoType = "protoS";
-                        if ("mtype" in membrane.dynamic.mem && membrane.dynamic.mem.mtype == "C") {
-                            protoType = "protoC";
-                            iOps.complex = 2;
-                        }
-            
-                        let nDir = Math.floor(Math.random() * 360);
-                        let nVel = Math.floor(Math.random() * 9);
-                        let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, iOps);
-                        lf.queueItem(nPro);
+                    if (membrane != null) {
+                        if (strand.dynamic.codes.length >= gVars.minStrandLen || ("mtype" in membrane.dynamic.mem && membrane.dynamic.mem.mtype == "S" && strand.dynamic.codes.length >= gVars.minStransLenS)) {
+                            let ptDyn = {
+                                codes: JSON.parse(JSON.stringify(strand.dynamic.codes))
+                            };
+                
+                            let iOps = { init: true, complex: 1 };
+                            let protoType = "protoS";
+                            if ("mtype" in membrane.dynamic.mem && membrane.dynamic.mem.mtype == "C") {
+                                protoType = "protoC";
+                                iOps.complex = 2;
+                            }
+                
+                            let nDir = Math.floor(Math.random() * 360);
+                            let nVel = Math.floor(Math.random() * 9);
+                            let nPro = new LFItem(new LFVector(strand.pos.x, strand.pos.y, nDir, nVel),lfcore.proto[protoType], ptDyn, iOps);
+                            lf.queueItem(nPro);
 
-                        lf.logAction(nPro.id,"created-str");
-            
-                        membrane.debug += "da-proto1";
-                        strand.debug += "da-proto2";
-                        membrane.deactivate();
-                        strand.deactivate();
-                        spawned = true;
-                        //console.log("s " + strand.id + " spawned");
-                    }
+                            lf.logAction(nPro.id,"created-str");
+                
+                            membrane.debug += "da-proto1";
+                            strand.debug += "da-proto2";
+                            membrane.deactivate();
+                            strand.deactivate();
+                            spawned = true;
+                            //console.log("s " + strand.id + " spawned");
+                        }
+                    }    
             
                     if (!spawned) {
                         lf.behaviors.run(strand, strand.dynamic.codes);
@@ -1433,9 +1442,11 @@ const lfcore = {
 
                     proto.obj.setAttribute("d-count",proto.dynamic.mem["divCounter"]);
 
+                    let divCount = 100;
+                    if (proto.complex < 2) divCount = 50;
                     // has been healthy long enough to divide
-                    if (proto.dynamic.mem["divCounter"] >= 100) {
-                        proto.dynamic.mem["divCounter"] = 100;
+                    if (proto.dynamic.mem["divCounter"] >= divCount) {
+                        proto.dynamic.mem["divCounter"] = divCount;
 
                         // has enough spekV to trigger division
                         if (proto.dynamic.mem["actCount"] > 8) {
@@ -1553,7 +1564,7 @@ const lfcore = {
                 return "brane"; 
             }, 
             range: 25, 
-            decay: 1000,
+            decay: 2300,
             dformula: []
         },
 
@@ -1601,7 +1612,7 @@ const lfcore = {
                 return "husk"; 
             }, 
             range: 0, 
-            decay: 3000,
+            decay: 1800,
             dformula: []
         },
 
@@ -1970,13 +1981,12 @@ const lfcore = {
             }
 
             if (lf.items.length < gVars.maxItems) {
-                if (Math.random() > 0.75) {
+                if (Math.random() > 0.5) {
                     let nDir = Math.floor(Math.random() * 360);
                     let nBlip = new LFItem(new LFVector(mX, mY, 0, nDir), lfcore.struck.struckBlip, null);
                     nBlip.obj.style.opacity = 0.4;
                     lf.queueItem(nBlip);
                 }
-        
             }
 
             let close = lf.query(drip);

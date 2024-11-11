@@ -26,100 +26,104 @@ const LFBehavior = {
         return newParams; 
     },
     breathe: (item, params) => {
-        if (item.complex >= 1) {
-            params.actions.push("breathe");
-            if (!("respirationCount" in item.dynamic.mem)) item.dynamic.mem["respirationCount"] = 0;
-            
-            let respIn = params.respiration[0];
-            let respOut = params.respiration[1]
+        if (!params.actions.includes("breathe")) {
+            if (item.complex >= 1) {
+                params.actions.push("breathe");
+                if (!("respirationCount" in item.dynamic.mem)) item.dynamic.mem["respirationCount"] = 0;
+                
+                let respIn = params.respiration[0];
+                let respOut = params.respiration[1]
 
-            let hasBreath = false;
+                let hasBreath = false;
 
-            let found = lf.haze.query(item,respIn);
-            let lifeAdd = lf.step % 3 == 0 ? 0 : 1;
-            if (found.length > 0 && lifeAdd > 0) {
-                shuffleArray(found);
-                lf.haze.transact(found[0].tableIndex,respIn,-1);
-                lf.haze.add(item.pos.x, item.pos.y, respOut, 1);
-                item.life = item.life + lifeAdd > item.maxlife ? item.maxlife : item.life + lifeAdd;
-                //console.log(item.id + " breathed!");
-                hasBreath = true;
-            }
-
-            let pip = item.obj.querySelector(".breath-pip");
-            if (item.dynamic.mem["respirationCount"] > 0) item.dynamic.mem["respirationCount"]--;
-            if (item.dynamic.mem["respirationCount"] == 0) {
-                if (hasBreath) {
-                    item.dynamic.mem["respirationCount"] = 10;
-                    if (!pip.classList.contains("breathing")) pip.classList.add("breathing"); 
-                    else pip.classList.remove("breathing");
+                let found = lf.haze.query(item,respIn);
+                let lifeAdd = lf.step % 3 == 0 ? 0 : 1;
+                if (found.length > 0 && lifeAdd > 0) {
+                    shuffleArray(found);
+                    lf.haze.transact(found[0].tableIndex,respIn,-1);
+                    lf.haze.add(item.pos.x, item.pos.y, respOut, 1);
+                    item.life = item.life + lifeAdd > item.maxlife ? item.maxlife : item.life + lifeAdd;
+                    //console.log(item.id + " breathed!");
+                    hasBreath = true;
                 }
-                else {
-                    item.dynamic.mem["respirationCount"] = 0;
-                    pip.classList.remove("breathing"); 
+
+                let pip = item.obj.querySelector(".breath-pip");
+                if (item.dynamic.mem["respirationCount"] > 0) item.dynamic.mem["respirationCount"]--;
+                if (item.dynamic.mem["respirationCount"] == 0) {
+                    if (hasBreath) {
+                        item.dynamic.mem["respirationCount"] = 10;
+                        if (!pip.classList.contains("breathing")) pip.classList.add("breathing"); 
+                        else pip.classList.remove("breathing");
+                    }
+                    else {
+                        item.dynamic.mem["respirationCount"] = 0;
+                        pip.classList.remove("breathing"); 
+                    }
                 }
+                
             }
-            
         }
 
         return params;
     },
     move: function(item, params) {
-        if (item.complex >= 1) {
-            params.actions.push("move");
+        if (!params.actions.includes("move")) {
+            if (item.complex >= 1) {
+                params.actions.push("move");
 
-            let iSpeed = params.speed == 0 ? 2 : params.speed;
-            if (item.complex == 1) iSpeed *= 0.5;
+                let iSpeed = params.speed == 0 ? 2 : params.speed;
+                if (item.complex == 1) iSpeed *= 0.5;
 
-            let mvSet = false;
-            let targetItem = null;
-            if (params.seektarget != null && params.seektarget in lf.iHash && lf.items[lf.iHash[params.seektarget]] != undefined)
-                targetItem = lf.items[lf.iHash[params.seektarget]];
-            if (targetItem != null) { 
-                let target = targetItem.pos;
-                let des = item.pos.subtract(target);
-                if (lf.dbhr.track != null && lf.dbhr.track == item.id) {
-                    lf.dbhr.obj.style.transform = "rotate(" + des.dir + "deg)";
-                    lf.dbhr.obj.style.width = des.magnitude() + "px";
-                }
-                let desDir = des.dir;
-                if (Math.abs(item.pos.dir - desDir) > 30) {
-                    let tDir = 1;
-                    if ("tdir" in item.dynamic.mem && item.dynamic.mem["tdir"] != 0) tdir = item.dynamic.mem["tdir"];
+                let mvSet = false;
+                let targetItem = null;
+                if (params.seektarget != null && params.seektarget in lf.iHash && lf.items[lf.iHash[params.seektarget]] != undefined)
+                    targetItem = lf.items[lf.iHash[params.seektarget]];
+                if (targetItem != null) { 
+                    let target = targetItem.pos;
+                    let des = item.pos.subtract(target);
+                    if (lf.dbhr.track != null && lf.dbhr.track == item.id) {
+                        lf.dbhr.obj.style.transform = "rotate(" + des.dir + "deg)";
+                        lf.dbhr.obj.style.width = des.magnitude() + "px";
+                    }
+                    let desDir = des.dir;
+                    if (Math.abs(item.pos.dir - desDir) > 30) {
+                        let tDir = 1;
+                        if ("tdir" in item.dynamic.mem && item.dynamic.mem["tdir"] != 0) tdir = item.dynamic.mem["tdir"];
+                        else {
+                            let ntDir = (Math.abs(desDir)/desDir);
+                            item.dynamic.mem["tdir"] = ntDir;
+                            tDir = ntDir;
+                        }
+                        let addVal = 30 * tDir;
+                        desDir = item.pos.dir + addVal;
+                    }
                     else {
-                        let ntDir = (Math.abs(desDir)/desDir);
-                        item.dynamic.mem["tdir"] = ntDir;
-                        tDir = ntDir;
+                        item.dynamic.mem["tdir"] = 0;
                     }
-                    let addVal = 30 * tDir;
-                    desDir = item.pos.dir + addVal;
+                    item.pos.dir = desDir;
+                    if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
+                        item.pos.vel = iSpeed;
+                        if (des.magnitude() < iSpeed || (target.vel > 0 && des.magnitude() < target.vel)) {
+                            item.pos.vel = 0; //des.magnitude();
+                        }
+                    }
+                    mvSet = true;
                 }
-                else {
+                
+                if (!mvSet) {
                     item.dynamic.mem["tdir"] = 0;
-                }
-                item.pos.dir = desDir;
-                if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
-                    item.pos.vel = iSpeed;
-                    if (des.magnitude() < iSpeed || (target.vel > 0 && des.magnitude() < target.vel)) {
-                        item.pos.vel = 0; //des.magnitude();
+                    if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
+                        item.pos.dir += 10 - Math.floor(Math.random() * 21);
+                        item.pos.vel = iSpeed; 
                     }
-                }
-                mvSet = true;
+                } 
+
+                item.obj.setAttribute("dir", item.pos.dir);
+                item.obj.setAttribute("speed", params.speed);
+
+                //item.pos.move(0);
+                //console.log(item.id + " moved!");
             }
-            
-            if (!mvSet) {
-                item.dynamic.mem["tdir"] = 0;
-                if (item.complex >= 2 || (item.complex >= 1 && item.pos.vel <= 0.9)) {
-                    item.pos.dir += 10 - Math.floor(Math.random() * 21);
-                    item.pos.vel = iSpeed; 
-                }
-            } 
-
-            item.obj.setAttribute("dir", item.pos.dir);
-            item.obj.setAttribute("speed", params.speed);
-
-            //item.pos.move(0);
-            //console.log(item.id + " moved!");
         }
 
         return params;
@@ -130,173 +134,175 @@ const LFBehavior = {
         return params;
     },
     eat: function(item, params) {
-        if (item.complex >= 2) {  
-            params.actions.push("eat");
-            if (!("digCount" in item.dynamic.mem)) { item.dynamic.mem["digCount"] = 0; }
-            if (!("gut" in item.dynamic.mem)) { item.dynamic.mem["gut"] = []; }
-            if (!("digEnergy" in item.dynamic.mem)) { item.dynamic.mem["digEnergy"] = 0; }
-            if (!("prey" in item.dynamic.mem)) { item.dynamic.mem["prey"] = null; }
-            if (!("preyCount" in item.dynamic.mem)) { item.dynamic.mem["preyCount"] = 0; }
-                 
+        if (!params.actions.includes("eat")) {
+            if (item.complex >= 2) {  
+                params.actions.push("eat");
+                if (!("digCount" in item.dynamic.mem)) { item.dynamic.mem["digCount"] = 0; }
+                if (!("gut" in item.dynamic.mem)) { item.dynamic.mem["gut"] = []; }
+                if (!("digEnergy" in item.dynamic.mem)) { item.dynamic.mem["digEnergy"] = 0; }
+                if (!("prey" in item.dynamic.mem)) { item.dynamic.mem["prey"] = null; }
+                if (!("preyCount" in item.dynamic.mem)) { item.dynamic.mem["preyCount"] = 0; }
+                    
 
-            if (item.dynamic.mem["prey"] != null) {
-                if (!item.dynamic.mem["prey"].active) item.dynamic.mem["prey"] = null;
-                else if (!(item.dynamic.mem["prey"].id in lf.iHash)) item.dynamic.mem["prey"] = null;
-            }
+                if (item.dynamic.mem["prey"] != null) {
+                    if (!item.dynamic.mem["prey"].active) item.dynamic.mem["prey"] = null;
+                    else if (!(item.dynamic.mem["prey"].id in lf.iHash)) item.dynamic.mem["prey"] = null;
+                }
 
-            let isDig = item.dynamic.mem["digCount"] > 0 ? true : false;
-            let dWeights = params.digestion;
-            if (item.dynamic.mem["prey"] != null) {
-                let prey = item.dynamic.mem["prey"];
-                let tVec = prey.pos.subtract(item.pos);
+                let isDig = item.dynamic.mem["digCount"] > 0 ? true : false;
+                let dWeights = params.digestion;
+                if (item.dynamic.mem["prey"] != null) {
+                    let prey = item.dynamic.mem["prey"];
+                    let tVec = prey.pos.subtract(item.pos);
 
-                if (tVec.magnitude() < prey.obj.clientWidth) {
-                    item.pos.dir = tVec.dir;
+                    if (tVec.magnitude() < prey.obj.clientWidth) {
+                        item.pos.dir = tVec.dir;
 
-                    item.dynamic.mem["preyCount"]--;
+                        item.dynamic.mem["preyCount"]--;
 
-                    if (item.dynamic.mem["preyCount"] <= 0) {
-                        item.dynamic.mem["preyCount"] = 2;
-                        if (item.obj.classList.contains("eating")) item.obj.classList.remove("eating");
-                        else item.obj.classList.add("eating");
-                    }
+                        if (item.dynamic.mem["preyCount"] <= 0) {
+                            item.dynamic.mem["preyCount"] = 2;
+                            if (item.obj.classList.contains("eating")) item.obj.classList.remove("eating");
+                            else item.obj.classList.add("eating");
+                        }
 
-                    let energy = item.dynamic.mem["prey"].life < 25 ? item.dynamic.mem["prey"].life : 20;
-                    item.dynamic.mem["prey"].life = item.dynamic.mem["prey"].life - energy < 0 ? 0 : item.dynamic.mem["prey"].life - energy;
-                    if (params.actions.includes("estore")) item.life += energy;
-                    else {
-                        item.life = item.life + energy > item.maxlife ? item.maxlife : item.life + energy; 
-                    }
+                        let energy = item.dynamic.mem["prey"].life < 25 ? item.dynamic.mem["prey"].life : 20;
+                        item.dynamic.mem["prey"].life = item.dynamic.mem["prey"].life - energy < 0 ? 0 : item.dynamic.mem["prey"].life - energy;
+                        if (params.actions.includes("estore")) item.life += energy;
+                        else {
+                            item.life = item.life + energy > item.maxlife ? item.maxlife : item.life + energy; 
+                        }
 
-                    if (item.dynamic.mem["prey"].life <= 0) {
-                        item.dynamic.mem["digCount"] = 10;
-                        item.dynamic.mem["digEnergy"] = Math.floor(energy * 0.25) + 1 < 5 ? 5 : Math.floor(energy * 0.5) + 1;
-                        let fCode = item.dynamic.mem["prey"].dynamic.codes;
-                        item.dynamic.mem["gut"].push({type:item.dynamic.mem["prey"].core.type, subtype: item.dynamic.mem["prey"].core.subtype, parentid: item.dynamic.mem["prey"].parent, code: fCode });
-                        item.dynamic.mem["prey"].deactivate();
-                        item.dynamic.mem["prey"] = null;
-                        item.dynamic.mem["preyCount"] = 0;
-                        params.seektarget = null;
-                        if (!item.obj.classList.contains("eating")) item.obj.classList.add("eating");
+                        if (item.dynamic.mem["prey"].life <= 0) {
+                            item.dynamic.mem["digCount"] = 10;
+                            item.dynamic.mem["digEnergy"] = Math.floor(energy * 0.25) + 1 < 5 ? 5 : Math.floor(energy * 0.5) + 1;
+                            let fCode = item.dynamic.mem["prey"].dynamic.codes;
+                            item.dynamic.mem["gut"].push({type:item.dynamic.mem["prey"].core.type, subtype: item.dynamic.mem["prey"].core.subtype, parentid: item.dynamic.mem["prey"].parent, code: fCode });
+                            item.dynamic.mem["prey"].deactivate();
+                            item.dynamic.mem["prey"] = null;
+                            item.dynamic.mem["preyCount"] = 0;
+                            params.seektarget = null;
+                            if (!item.obj.classList.contains("eating")) item.obj.classList.add("eating");
+                        }
+                        else {
+                            params.seektarget = item.dynamic.mem["prey"].id;
+                        }
                     }
                     else {
                         params.seektarget = item.dynamic.mem["prey"].id;
                     }
                 }
-                else {
-                    params.seektarget = item.dynamic.mem["prey"].id;
-                }
-            }
-            else if (item.dynamic.mem["digCount"] > 0) {
-                item.dynamic.mem["digCount"]--;
-                item.life += item.dynamic.mem["digEnergy"];
-            }
-            else {
-                if (item.dynamic.mem["gut"].length > 0) {
-                    switch (item.dynamic.mem["gut"][0].type) {
-                        case "snip":
-                            lfcore.snip.decay(item.dynamic.mem["gut"][0].subtype, item.dynamic.mem["gut"][0].code, item.pos);
-                            break;
-                        case "struck":
-                            lfcore.struck.decay(item.dynamic.mem["gut"][0].subtype, item.pos);
-                            break;
-                        case "proto":
-
-                            lf.haze.add(item.pos.x, item.pos.y, "spekG3", Math.floor(Math.random() * 10) + 5);
-
-                            let pCount = Math.floor(Math.random() * 3);
-                            let eCount = Math.floor(Math.random() * 3);
-                            let uCount = Math.floor(Math.random() * 3) + 2;
-
-                            let aDir = item.pos.dir - 120;
-                            let aAdd = 120 / (pCount + eCount + uCount);
-
-                            for (let pp = 0; pp < pCount; pp++) {
-                                let nX = item.pos.x;
-                                let nY = item.pos.y;
-                                let nDir = aDir;
-                                let nVel = 5;
-                                lf.queueItem(new LFItem(new LFVector(nX,nY,nDir,nVel), lfcore.ort.ortP, null));
-                                aDir += aAdd;
-                            }
-
-                            for (let ee = 0; ee < eCount; ee++) {
-                                let nX = item.pos.x;
-                                let nY = item.pos.y;
-                                let nDir = aDir;
-                                let nVel = 5;
-                                lf.queueItem(new LFItem(new LFVector(nX,nY,nDir,nVel), lfcore.ort.ortE, null));
-                                aDir += aAdd;
-                            }
-
-                            for (let uu = 0; uu < uCount; uu++) {
-                                let nX = item.pos.x;
-                                let nY = item.pos.y;
-                                let nDir = aDir;
-                                let nVel = 5;
-                                lf.queueItem(new LFItem(new LFVector(nX,nY,nDir,nVel), lfcore.ort.ortU, null));
-                                aDir += aAdd;
-                            }
-
-                            break;
-                    }
-                    let addV = dWeights[item.dynamic.mem["gut"][0].subtype];
-                    if (params.offing > 0 && item.dynamic.mem["gut"][0].parentid == item.id) addV = Math.floor(addV * params.offing);
-                    if (addV < 1) addV = 1;
-                    else if (addV > 30) addV = 30;
-                    item.life = item.life + addV > item.maxlife ? item.maxlife : item.life + addV;
-                    item.dynamic.mem["digCount"] = 0;
-                    item.dynamic.mem["gut"] = [];
-                    item.dynamic.mem["digEnergy"] = 0;
-                    item.obj.classList.remove("eating");
+                else if (item.dynamic.mem["digCount"] > 0) {
+                    item.dynamic.mem["digCount"]--;
+                    item.life += item.dynamic.mem["digEnergy"];
                 }
                 else {
-                    let qR = item.core.range / 2;
-                    let fd = lf.query(item, null, { range: qR });
+                    if (item.dynamic.mem["gut"].length > 0) {
+                        switch (item.dynamic.mem["gut"][0].type) {
+                            case "snip":
+                                lfcore.snip.decay(item.dynamic.mem["gut"][0].subtype, item.dynamic.mem["gut"][0].code, item.pos);
+                                break;
+                            case "struck":
+                                lfcore.struck.decay(item.dynamic.mem["gut"][0].subtype, item.pos);
+                                break;
+                            case "proto":
 
-                    fd.forEach((fItem) => {
-                        if (fItem.core.subtype in dWeights && dWeights[fItem.core.subtype] > 0 && item.dynamic.mem["digCount"] == 0 && (fItem.parent != item.id || params.offing > 0)) {
-                            let des = fItem.pos.subtract(item.pos);
+                                lf.haze.add(item.pos.x, item.pos.y, "spekG3", Math.floor(Math.random() * 10) + 5);
 
-                            if (Math.abs(des.dir) < 30 || des.magnitude() < item.core.range / 2) {
-                                if (fItem.core.type == "proto") {
-                                    let canDig = true;
+                                let pCount = Math.floor(Math.random() * 3);
+                                let eCount = Math.floor(Math.random() * 3);
+                                let uCount = Math.floor(Math.random() * 3) + 2;
 
-                                    let matchCount = 0;
-                                    for (let mc = 0; mc < fItem.dynamic.codes.length; mc++) {
-                                        if (item.dynamic.codes.includes(fItem.dynamic.codes[mc])) matchCount++;
-                                    }
-                                    let perc = matchCount / item.dynamic.codes.length;
-                                    if (perc > 0.8) {
-                                        canDig = false;
-                                    }
+                                let aDir = item.pos.dir - 120;
+                                let aAdd = 120 / (pCount + eCount + uCount);
 
-                                    if (item.dynamic.mem["prey"] == null && canDig) {
-                                        item.dynamic.mem["prey"] = fItem;
-                                        item.dynamic.mem["preyCount"] = 2;
-                                        if (!item.obj.classList.contains("eating")) item.obj.classList.add("eating");
-                                    }
+                                for (let pp = 0; pp < pCount; pp++) {
+                                    let nX = item.pos.x;
+                                    let nY = item.pos.y;
+                                    let nDir = aDir;
+                                    let nVel = 5;
+                                    lf.queueItem(new LFItem(new LFVector(nX,nY,nDir,nVel), lfcore.ort.ortP, null));
+                                    aDir += aAdd;
                                 }
-                                
-                                if (item.dynamic.mem["prey"] == null && fItem.core.type != "proto") {
-                                    let iWeight = dWeights[fItem.core.subtype];
-                                    item.dynamic.mem["digCount"] = iWeight;
-                                    item.dynamic.mem["digEnergy"] = 3; 
-                                    if (params.offing > 0 && fItem.parentid == item.id) {
-                                        item.dynamic.mem["digEnergy"] = 1;
-                                        item.dynamic.mem["digCount"] = Math.floor(iWeight / 2);
-                                    }
-                                    let fCode = "";
-                                    if (fItem.core.type == "snip") fCode = fItem.dynamic.codes[0];
-                                    item.dynamic.mem["gut"].push({type:fItem.core.type, subtype: fItem.core.subtype, parentid: fItem.parent, code: fCode });
-                                    item.life += 2;
-                                    fItem.debug += "da-eat;";
-                                    fItem.deactivate();
-                                    item.obj.classList.add("eating");
+
+                                for (let ee = 0; ee < eCount; ee++) {
+                                    let nX = item.pos.x;
+                                    let nY = item.pos.y;
+                                    let nDir = aDir;
+                                    let nVel = 5;
+                                    lf.queueItem(new LFItem(new LFVector(nX,nY,nDir,nVel), lfcore.ort.ortE, null));
+                                    aDir += aAdd;
                                 }
-                            }
+
+                                for (let uu = 0; uu < uCount; uu++) {
+                                    let nX = item.pos.x;
+                                    let nY = item.pos.y;
+                                    let nDir = aDir;
+                                    let nVel = 5;
+                                    lf.queueItem(new LFItem(new LFVector(nX,nY,nDir,nVel), lfcore.ort.ortU, null));
+                                    aDir += aAdd;
+                                }
+
+                                break;
                         }
-                    });
+                        let addV = dWeights[item.dynamic.mem["gut"][0].subtype];
+                        if (params.offing > 0 && item.dynamic.mem["gut"][0].parentid == item.id) addV = Math.floor(addV * params.offing);
+                        if (addV < 1) addV = 1;
+                        else if (addV > 30) addV = 30;
+                        item.life = item.life + addV > item.maxlife ? item.maxlife : item.life + addV;
+                        item.dynamic.mem["digCount"] = 0;
+                        item.dynamic.mem["gut"] = [];
+                        item.dynamic.mem["digEnergy"] = 0;
+                        item.obj.classList.remove("eating");
+                    }
+                    else {
+                        let qR = item.core.range / 2;
+                        let fd = lf.query(item, null, { range: qR });
+
+                        fd.forEach((fItem) => {
+                            if (fItem.core.subtype in dWeights && dWeights[fItem.core.subtype] > 0 && item.dynamic.mem["digCount"] == 0 && (fItem.parent != item.id || params.offing > 0)) {
+                                let des = fItem.pos.subtract(item.pos);
+
+                                if (Math.abs(des.dir) < 30 || des.magnitude() < item.core.range / 2) {
+                                    if (fItem.core.type == "proto") {
+                                        let canDig = true;
+
+                                        let matchCount = 0;
+                                        for (let mc = 0; mc < fItem.dynamic.codes.length; mc++) {
+                                            if (item.dynamic.codes.includes(fItem.dynamic.codes[mc])) matchCount++;
+                                        }
+                                        let perc = matchCount / item.dynamic.codes.length;
+                                        if (perc > 0.8) {
+                                            canDig = false;
+                                        }
+
+                                        if (item.dynamic.mem["prey"] == null && canDig) {
+                                            item.dynamic.mem["prey"] = fItem;
+                                            item.dynamic.mem["preyCount"] = 2;
+                                            if (!item.obj.classList.contains("eating")) item.obj.classList.add("eating");
+                                        }
+                                    }
+                                    
+                                    if (item.dynamic.mem["prey"] == null && fItem.core.type != "proto") {
+                                        let iWeight = dWeights[fItem.core.subtype];
+                                        item.dynamic.mem["digCount"] = iWeight;
+                                        item.dynamic.mem["digEnergy"] = 3; 
+                                        if (params.offing > 0 && fItem.parentid == item.id) {
+                                            item.dynamic.mem["digEnergy"] = 1;
+                                            item.dynamic.mem["digCount"] = Math.floor(iWeight / 2);
+                                        }
+                                        let fCode = "";
+                                        if (fItem.core.type == "snip") fCode = fItem.dynamic.codes[0];
+                                        item.dynamic.mem["gut"].push({type:fItem.core.type, subtype: fItem.core.subtype, parentid: fItem.parent, code: fCode });
+                                        item.life += 2;
+                                        fItem.debug += "da-eat;";
+                                        fItem.deactivate();
+                                        item.obj.classList.add("eating");
+                                    }
+                                }
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -304,170 +310,176 @@ const LFBehavior = {
         return params;
     },
     chem: function(item, params) {
-        if (item.complex >= 1 && params.chem != null) {
-            params.actions.push("chem");
+        if (!params.actions.includes("chem")) {
+            if (item.complex == 1 && params.chem != null) {
+                params.actions.push("chem");
 
-            if (!("chemCap" in item.dynamic.mem)) item.dynamic.mem["chemCap"] = 0;
-            if (!("chemStep" in item.dynamic.mem)) item.dynamic.mem["chemStep"] = 0;
-            if (!("chemEmit" in item.dynamic.mem)) item.dynamic.mem["chemEmit"] = 0;
-            if (!("chemCounter" in item.dynamic.mem)) item.dynamic.mem["chemCounter"] = 0;
+                if (!("chemCap" in item.dynamic.mem)) item.dynamic.mem["chemCap"] = 0;
+                if (!("chemStep" in item.dynamic.mem)) item.dynamic.mem["chemStep"] = 0;
+                if (!("chemEmit" in item.dynamic.mem)) item.dynamic.mem["chemEmit"] = 0;
+                if (!("chemCounter" in item.dynamic.mem)) item.dynamic.mem["chemCounter"] = 0;
 
-            let hasChem = false;
-            let chemType = params.chem.type
-            let chemTime = params.chem.time;
-            let chemEnergy = params.chem.energy;
-            let chemAmount = params.chem.amount;
-            
-            let found = lf.haze.query(item,chemType);
-            if (found.length > 0) {
-                shuffleArray(found);
-                found.forEach((tb) => {
-                    if (tb.count > 0 && item.dynamic.mem["chemCap"] < chemAmount) {
-                        item.dynamic.mem["chemCap"]++;
-                        lf.haze.transact(tb.tableIndex,chemType,-1);
-                    }
-                });
-
-                if (item.dynamic.mem["chemCap"] >= chemAmount) {
-                    hasChem = true;
-                    if (item.dynamic.mem["chemStep"] >= chemTime) {
-                        item.dynamic.mem["chemCounter"] = 0;
-                        item.dynamic.mem["chemCap"] -= chemAmount;
-                        item.dynamic.mem["chemStep"] = 0;
-                        item.dynamic.mem["chemEmit"]++;
-                        item.life = item.life + chemEnergy > item.maxlife ? item.maxlife : item.life + chemEnergy;
-                        lf.haze.add(item.x, item.y, "spekX", 1);
-                        if (item.dynamic.mem["chemEmit"] >= params.chem.emit) {
-                            let nDir = (item.pos.dir + 180) % 360;
-                            let nVel = 2;
-                            let nEx = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip.snipEx, { parent: item.id, code: lfcore.snip["snipEx"].data });
-                            lf.queueItem(nEx);
-                            item.dynamic.mem["chemEmit"] = 0;
+                let hasChem = false;
+                let chemType = params.chem.type
+                let chemTime = params.chem.time;
+                let chemEnergy = params.chem.energy;
+                let chemAmount = params.chem.amount;
+                
+                let found = lf.haze.query(item,chemType);
+                if (found.length > 0) {
+                    shuffleArray(found);
+                    found.forEach((tb) => {
+                        if (tb.count > 0 && item.dynamic.mem["chemCap"] < chemAmount) {
+                            item.dynamic.mem["chemCap"]++;
+                            lf.haze.transact(tb.tableIndex,chemType,-1);
                         }
-                        //console.log("chemed!!");
+                    });
+
+                    if (item.dynamic.mem["chemCap"] >= chemAmount) {
+                        hasChem = true;
+                        if (item.dynamic.mem["chemStep"] >= chemTime) {
+                            item.dynamic.mem["chemCounter"] = 0;
+                            item.dynamic.mem["chemCap"] -= chemAmount;
+                            item.dynamic.mem["chemStep"] = 0;
+                            item.dynamic.mem["chemEmit"]++;
+                            item.life = item.life + chemEnergy > item.maxlife ? item.maxlife : item.life + chemEnergy;
+                            lf.haze.add(item.x, item.y, "spekX", 1);
+                            if (item.dynamic.mem["chemEmit"] >= params.chem.emit) {
+                                let nDir = (item.pos.dir + 180) % 360;
+                                let nVel = 2;
+                                let nEx = new LFItem(new LFVector(item.pos.x, item.pos.y, nDir, nVel), lfcore.snip.snipEx, { parent: item.id, code: lfcore.snip["snipEx"].data });
+                                lf.queueItem(nEx);
+                                item.dynamic.mem["chemEmit"] = 0;
+                            }
+                            //console.log("chemed!!");
+                        }
+                        else {
+                            item.dynamic.mem["chemStep"]++;
+                            item.life = item.life + 2 > item.maxlife ? item.maxlife : item.life + 2;
+                        }
+                    }
+                }
+
+                let pip = item.obj.querySelector(".chem-pip");
+                if (item.dynamic.mem["chemCounter"] > 0) item.dynamic.mem["chemCounter"]--;
+                if (item.dynamic.mem["chemCounter"] == 0) {
+                    if (hasChem) {
+                        item.dynamic.mem["chemCounter"] = 10;
+                        if (!pip.classList.contains("cheming")) pip.classList.add("cheming"); 
+                        else pip.classList.remove("cheming");
                     }
                     else {
-                        item.dynamic.mem["chemStep"]++;
-                        item.life = item.life + 2 > item.maxlife ? item.maxlife : item.life + 2;
+                        item.dynamic.mem["chemCounter"] = 0;
+                        pip.classList.remove("cheming"); 
                     }
                 }
-            }
-
-            let pip = item.obj.querySelector(".chem-pip");
-            if (item.dynamic.mem["chemCounter"] > 0) item.dynamic.mem["chemCounter"]--;
-            if (item.dynamic.mem["chemCounter"] == 0) {
-                if (hasChem) {
-                    item.dynamic.mem["chemCounter"] = 10;
-                    if (!pip.classList.contains("cheming")) pip.classList.add("cheming"); 
-                    else pip.classList.remove("cheming");
-                }
-                else {
-                    item.dynamic.mem["chemCounter"] = 0;
+                else if (!hasChem) {
                     pip.classList.remove("cheming"); 
-                }
+                    item.dynamic.mem["chemCounter"] = 10;
+                }   
             }
-            else if (!hasChem) {
-                pip.classList.remove("cheming"); 
-                item.dynamic.mem["chemCounter"] = 10;
-            }   
         }
 
         return params;
     },
     perceive: function(item, params) {
-        if (item.complex >= 1) {
-            params.actions.push("perceive");
-            
-            let pRange = params.prange == 0 ? item.core.range * 2 : params.prange;
+        if (!params.actions.includes("perceive")) {
+            if (item.complex >= 1) {
+                params.actions.push("perceive");
+                
+                let pRange = params.prange == 0 ? item.core.range * 2 : params.prange;
 
-            params.found = lf.query(item, null, { range: pRange });
+                params.found = lf.query(item, null, { range: pRange });
+            }
         }
 
         return params;
     },
     seek: function(item, params) {
-        if (item.complex >= 1 && params.found.length > 0) {
-            params.actions.push("seek");
+        if (!params.actions.includes("seek")) {
+            if (item.complex >= 1 && params.found.length > 0) {
+                params.actions.push("seek");
 
-            if (params.seektarget == null) {
-                let target = null;
+                if (params.seektarget == null) {
+                    let target = null;
 
-                if (params.actions.includes("breathe") && params.respiration != null && params.respiration.length == 2 && params.respiration[0] != null) {
-                    let rsp = lf.haze.query(item, params.respiration[0]);
-                    let minD = null;
-                    rsp.forEach((tb) => {
-                        let tbC = lf.haze.getCellPos(tb.tableIndex);
-                        if (tbC != null) {
-                            let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
-                            if (params.seektarget == null) { 
-                                minD = dD;
-                                target = new LFVector(tbC.x,tbC.y,0,0);
+                    if (params.actions.includes("breathe") && params.respiration != null && params.respiration.length == 2 && params.respiration[0] != null) {
+                        let rsp = lf.haze.query(item, params.respiration[0]);
+                        let minD = null;
+                        rsp.forEach((tb) => {
+                            let tbC = lf.haze.getCellPos(tb.tableIndex);
+                            if (tbC != null) {
+                                let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                                if (params.seektarget == null) { 
+                                    minD = dD;
+                                    target = new LFVector(tbC.x,tbC.y,0,0);
+                                }
+                                else if (dD < minD) { 
+                                    minD = dD;
+                                    target = new LFVector(tbC.x,tbC.y,0,0);
+                                }
                             }
-                            else if (dD < minD) { 
-                                minD = dD;
-                                target = new LFVector(tbC.x,tbC.y,0,0);
+                        });
+                    }
+                    if (params.actions.includes("chem")) {
+                        if (item.dynamic.mem["chemCap"] < 3) {
+                            let fG3 = lf.haze.query(item, "spekG3");
+                            if (fG3.length > 0) {
+                                let minD = null;
+                                fG3.forEach((tb) => {
+                                    let tbC = lf.haze.getCellPos(tb.tableIndex);
+                                    if (tbC != null) {
+                                        let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                                        if (params.seektarget == null) { 
+                                            minD = dD; 
+                                            target = new LFVector(tbC.x,tbC.y,0,0);
+                                        }
+                                        else if (minD == null || dD < minD) { 
+                                            minD = dD; 
+                                            target = new LFVector(tbC.x,tbC.y,0,0); 
+                                        }
+                                    }
+                                });
                             }
                         }
-                    });
-                }
-                if (params.actions.includes("chem")) {
-                    if (item.dynamic.mem["chemCap"] < 3) {
-                        let fG3 = lf.haze.query(item, "spekG3");
-                        if (fG3.length > 0) {
-                            let minD = null;
-                            fG3.forEach((tb) => {
-                                let tbC = lf.haze.getCellPos(tb.tableIndex);
-                                if (tbC != null) {
-                                    let dD = Math.hypot(item.pos.x - tbC.x, item.pos.y - tbC.y);
+                    }
+                    if (params.actions.includes("eat") && item.dynamic.mem["gut"].length == 0 && item.dynamic.mem["prey"] == null) {
+                        let minD = null;
+                        for (let ski = params.found.length -1; ski >= 0; ski--) {
+                            if (params.found[ski].core.type == "proto" && item.dynamic.codes.length > 0) {
+                                let matchCount = 0;
+                                for (let mc = 0; mc < params.found[ski].dynamic.codes.length; mc++) {
+                                    if (item.dynamic.codes.includes(params.found[ski].dynamic.codes[mc])) matchCount++;
+                                }
+                                let perc = matchCount / item.dynamic.codes.length;
+                                if (perc > 0.8) {
+                                    params.found.splice(ski,1);
+                                }
+                            }
+                        }
+                        params.found.forEach((sk) => {
+                            if (sk.core.subtype in params.digestion) {
+                                let isDig = true;
+
+                                if (isDig) {
+                                    let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
+                                    let tWidth = sk.obj.clientWidth / 2;
                                     if (params.seektarget == null) { 
                                         minD = dD; 
-                                        target = new LFVector(tbC.x,tbC.y,0,0);
+                                        target = sk.id; 
                                     }
                                     else if (minD == null || dD < minD) { 
                                         minD = dD; 
-                                        target = new LFVector(tbC.x,tbC.y,0,0); 
+                                        target = sk.id;
                                     }
                                 }
-                            });
-                        }
+                            }
+                        });
+                        if (target != null) params.found = [];
                     }
+                    
+                    params.seektarget = target;
                 }
-                if (params.actions.includes("eat") && item.dynamic.mem["gut"].length == 0 && item.dynamic.mem["prey"] == null) {
-                    let minD = null;
-                    for (let ski = params.found.length -1; ski >= 0; ski--) {
-                        if (params.found[ski].core.type == "proto" && item.dynamic.codes.length > 0) {
-                            let matchCount = 0;
-                            for (let mc = 0; mc < params.found[ski].dynamic.codes.length; mc++) {
-                                if (item.dynamic.codes.includes(params.found[ski].dynamic.codes[mc])) matchCount++;
-                            }
-                            let perc = matchCount / item.dynamic.codes.length;
-                            if (perc > 0.8) {
-                                params.found.splice(ski,1);
-                            }
-                        }
-                    }
-                    params.found.forEach((sk) => {
-                        if (sk.core.subtype in params.digestion) {
-                            let isDig = true;
-
-                            if (isDig) {
-                                let dD = Math.hypot(item.pos.x - sk.pos.x, item.pos.y - sk.pos.y);
-                                let tWidth = sk.obj.clientWidth / 2;
-                                if (params.seektarget == null) { 
-                                    minD = dD; 
-                                    target = sk.id; 
-                                }
-                                else if (minD == null || dD < minD) { 
-                                    minD = dD; 
-                                    target = sk.id;
-                                }
-                            }
-                        }
-                    });
-                    if (target != null) params.found = [];
-                }
-                
-                params.seektarget = target;
             }
         }
 
@@ -486,115 +498,117 @@ const LFBehavior = {
         return params;
     },
     infect: function(item, params) {
-        params.actions.push("infect");
+        if (!params.actions.includes("infect")) {
+            params.actions.push("infect");
 
-        if (params.viral.markers >= gVars.vactCount) {
-            params.actions.push("infect-active");
-            if (!("infcount" in item.dynamic.mem)) item.dynamic.mem["infcount"] = 0;
-            if (!("inftotal" in item.dynamic.mem)) item.dynamic.mem["inftotal"] = 0;
-            if (!("infhost" in item.dynamic.mem)) item.dynamic.mem["infhost"] = null;
+            if (params.viral.markers >= gVars.vactCount) {
+                params.actions.push("infect-active");
+                if (!("infcount" in item.dynamic.mem)) item.dynamic.mem["infcount"] = 0;
+                if (!("inftotal" in item.dynamic.mem)) item.dynamic.mem["inftotal"] = 0;
+                if (!("infhost" in item.dynamic.mem)) item.dynamic.mem["infhost"] = null;
 
-            let hasHost = false;
+                let hasHost = false;
 
-            if (item.dynamic.mem["infhost"] != null) {
-                let hostID = item.dynamic.mem["infhost"];
-                let host = null;
-                if (hostID in lf.iHash) {
-                    if (lf.items[lf.iHash[hostID]].active) {
-                        host = lf.items[lf.iHash[hostID]];
-                        hasHost = true;
-                    }
-                }
-
-                if (host != null) {
-                    item.obj.display = "none";
-                    item.pos.vel = 0;
-                    item.pos.x = host.pos.x;
-                    item.pos.y = host.pos.y;
-                    item.pos.dir = host.pos.dir;
-                    item.pos.vel = host.pos.vel;
-                    item.life = item.maxlife;
-                    if (item.dynamic.mem["infcount"] >= params.viral.incubate) {
-                        item.dynamic.mem["inftotal"]++;
-                        item.dynamic.mem["infcount"] = 0;
-                        if (item.dynamic.mem["inftotal"] >= params.viral.max) {
-                            item.dynamic.mem["inftotal"] = 0;
-                            // expel
-                            let expCount = params.viral.exp;
-                            item.dynamic.mem["inftotal"] -= expCount;
-                            let aDir = host.pos.dir - 20;
-                            let aAdd = 20;
-                            for (let ee = 0; ee < expCount; ee++) {
-                                let nX = item.pos.x;
-                                let nY = item.pos.y;
-                                let nDir = aDir;
-                                let nVel = host.pos.vel * 2.5;
-                                if (nVel < 5) nVel = 5;
-                                lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id, codes: JSON.parse(JSON.stringify(item.dynamic.codes)) }));
-                                aDir += aAdd;
-                                aDir %= 360;
-                            }
+                if (item.dynamic.mem["infhost"] != null) {
+                    let hostID = item.dynamic.mem["infhost"];
+                    let host = null;
+                    if (hostID in lf.iHash) {
+                        if (lf.items[lf.iHash[hostID]].active) {
+                            host = lf.items[lf.iHash[hostID]];
+                            hasHost = true;
                         }
                     }
-                    else {
-                        host.life = host.life - params.viral.pull >= 0 ? host.life - params.viral.pull : 0;
-                        if (host.life > 0) {
-                            item.dynamic.mem["infcount"]++;
+
+                    if (host != null) {
+                        item.obj.display = "none";
+                        item.pos.vel = 0;
+                        item.pos.x = host.pos.x;
+                        item.pos.y = host.pos.y;
+                        item.pos.dir = host.pos.dir;
+                        item.pos.vel = host.pos.vel;
+                        item.life = item.maxlife;
+                        if (item.dynamic.mem["infcount"] >= params.viral.incubate) {
+                            item.dynamic.mem["inftotal"]++;
+                            item.dynamic.mem["infcount"] = 0;
+                            if (item.dynamic.mem["inftotal"] >= params.viral.max) {
+                                item.dynamic.mem["inftotal"] = 0;
+                                // expel
+                                let expCount = params.viral.exp;
+                                item.dynamic.mem["inftotal"] -= expCount;
+                                let aDir = host.pos.dir - 20;
+                                let aAdd = 20;
+                                for (let ee = 0; ee < expCount; ee++) {
+                                    let nX = item.pos.x;
+                                    let nY = item.pos.y;
+                                    let nDir = aDir;
+                                    let nVel = host.pos.vel * 2.5;
+                                    if (nVel < 5) nVel = 5;
+                                    lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id, codes: JSON.parse(JSON.stringify(item.dynamic.codes)) }));
+                                    aDir += aAdd;
+                                    aDir %= 360;
+                                }
+                            }
                         }
                         else {
-                            host = null;
+                            host.life = host.life - params.viral.pull >= 0 ? host.life - params.viral.pull : 0;
+                            if (host.life > 0) {
+                                item.dynamic.mem["infcount"]++;
+                            }
+                            else {
+                                host = null;
+                            }
                         }
                     }
-                }
 
-                if (host == null) {
-                    let expCount = item.dynamic.mem["inftotal"];
-                    item.dynamic.mem["infhost"] = null;
-                    item.dynamic.mem["infcount"] = 0;
-                    item.dynamic.mem["inftotal"] = 0;
+                    if (host == null) {
+                        let expCount = item.dynamic.mem["inftotal"];
+                        item.dynamic.mem["infhost"] = null;
+                        item.dynamic.mem["infcount"] = 0;
+                        item.dynamic.mem["inftotal"] = 0;
 
-                    let aDir = item.pos.dir;
-                    let aAdd = Math.floor(360 / (expCount + 1));
-                    aDir += aAdd;
-
-                    for (let ee = 0; ee < expCount; ee++) {
-                        let nX = item.pos.x;
-                        let nY = item.pos.y;
-                        let nVel = item.pos.vel;
-                        let nDir = aDir;
-                        lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id, codes: JSON.parse(JSON.stringify(item.dynamic.codes)) }));
+                        let aDir = item.pos.dir;
+                        let aAdd = Math.floor(360 / (expCount + 1));
                         aDir += aAdd;
-                        aDir %= 360;
-                    }
 
-                    item.obj.style.display = "block";
+                        for (let ee = 0; ee < expCount; ee++) {
+                            let nX = item.pos.x;
+                            let nY = item.pos.y;
+                            let nVel = item.pos.vel;
+                            let nDir = aDir;
+                            lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id, codes: JSON.parse(JSON.stringify(item.dynamic.codes)) }));
+                            aDir += aAdd;
+                            aDir %= 360;
+                        }
+
+                        item.obj.style.display = "block";
+                    }
                 }
-            }
-            
-            if (!hasHost) {
-                let hosts = lf.query(item,"proto");
-                let minDist = null;
-                let newHost = null;
-                if (hosts.length > 0) {
-                    for (let h = 0; h < hosts.length; h++) {
-                        if (!("infected" in hosts[h].dynamic.mem)) {
-                            let dist = Math.hypot(item.pos.x - hosts[h].pos.x, item.pos.y - hosts[h].pos.y);
-                            if (minDist == null) {
-                                newHost = hosts[h];
-                                minDist = dist;
-                            }
-                            else if (dist < minDist) {
-                                newHost = hosts[h];
-                                minDist = dist;
+                
+                if (!hasHost) {
+                    let hosts = lf.query(item,"proto");
+                    let minDist = null;
+                    let newHost = null;
+                    if (hosts.length > 0) {
+                        for (let h = 0; h < hosts.length; h++) {
+                            if (!("infected" in hosts[h].dynamic.mem)) {
+                                let dist = Math.hypot(item.pos.x - hosts[h].pos.x, item.pos.y - hosts[h].pos.y);
+                                if (minDist == null) {
+                                    newHost = hosts[h];
+                                    minDist = dist;
+                                }
+                                else if (dist < minDist) {
+                                    newHost = hosts[h];
+                                    minDist = dist;
+                                }
                             }
                         }
-                    }
-                    if (newHost != null) {
-                        item.dynamic.mem["infhost"] = newHost.id;
-                        let addClass = "infected-" + item.dynamic.mem["v-type"];
-                        newHost.obj.classList.add(addClass);
-                        newHost.dynamic.mem["infected"] = item.id;
-                        item.obj.display = "none";
+                        if (newHost != null) {
+                            item.dynamic.mem["infhost"] = newHost.id;
+                            let addClass = "infected-" + item.dynamic.mem["v-type"];
+                            newHost.obj.classList.add(addClass);
+                            newHost.dynamic.mem["infected"] = item.id;
+                            item.obj.display = "none";
+                        }
                     }
                 }
             }
