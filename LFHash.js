@@ -6,6 +6,7 @@ function LFHash(w,h,sub) {
     me.sW = Math.ceil(me.w / me.sub);
     me.sH = Math.ceil(me.h / me.sub);
     me.table = new Array(me.sW * me.sH).fill("");
+    // type tables
     me.typeTables = {
         ort: new Array(me.sW * me.sH).fill(""),
         snip: new Array(me.sW * me.sH).fill(""),
