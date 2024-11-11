@@ -38,6 +38,17 @@ body {
     z-index: 999999;
 }
 
+#rmarker {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    border: 1px solid red;
+    left: -2000px;
+    top: -2000px;
+    display: none;
+    z-index: 999999;
+}
+
 #dbhr {
     width: 20px;
     border: 1px solid purple;
@@ -249,42 +260,44 @@ body {
 
 .strand.strand-v {
     color: #f00;
-    font-size: 0.5rem;
+    filter: hue-rotate(0deg);
+    font-size: 0.6rem;
     opacity: 0.5;
 }
 
 .proto.infected-v .mid .main {
-    border-color: #c99 !important;
+    /* border-color: #f99 !important; */
+    filter: grayscale(80%) hue-rotate(180deg);
 }
 
 .strand.strand-v2 {
-    color: #90f;
-    font-size: 0.5rem;
-    opacity: 0.5;
+    /* color: #f0f; */
+    filter: hue-rotate(-40deg);
 }
 
 .proto.infected-v2 .mid .main {
-    border-color: #96c !important;
+    /* border-color: #f9e !important; */
+    filter: grayscale(80%) hue-rotate(70deg);
 }
 
 .strand.strand-v3 {
-    color: #f0f;
-    font-size: 0.5rem;
-    opacity: 0.5;
+    /* color: #f06; */
+    filter: hue-rotate(-150deg);
 }
 
 .proto.infected-v3 .mid .main {
-    border-color: #c9c !important;
+    /* border-color: #d9c !important; */
+    filter: grayscale(20%) hue-rotate(-130deg);
 }
 
 .strand.strand-v4 {
-    color: #09f;
-    font-size: 0.5rem;
-    opacity: 0.5;
+    /* color: #f0f; */
+    filter: hue-rotate(160deg);
 }
 
 .proto.infected-v4 .mid .main {
-    border-color: #69c !important;
+    /* border-color: #f9f !important; */
+    filter: hue-rotate(-30deg);
 }
 
 .strand.strand-d,

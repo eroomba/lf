@@ -115,6 +115,36 @@ const LFEngine = {
             }
         }
     },
+    csstest: {
+        init: function() {
+            lf.addItem(new LFItem(new LFVector(300,300,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 1}));
+            lf.addItem(new LFItem(new LFVector(600,300,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 2}));
+            lf.addItem(new LFItem(new LFVector(300,500,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 1}));
+            lf.addItem(new LFItem(new LFVector(600,500,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 2}));
+
+            let v1 = ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uuu"];
+            let v2 = ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uuc", "uuu"];
+            let v3 = ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uub", "uuu"];
+            let v4 = ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uub", "uuc", "uuu"];
+
+            lf.addItem(new LFItem(new LFVector(400,300,0,0), lfcore.strand.strandV,{codes: v1,vid: "v-0"}, {init: true }));
+            lf.addItem(new LFItem(new LFVector(700,300,0,0), lfcore.strand.strandV,{codes: v2,vid: "v-1"}, {init: true }));
+            lf.addItem(new LFItem(new LFVector(400,500,0,0), lfcore.strand.strandV,{codes: v3,vid: "v-2"}, {init: true }));
+            lf.addItem(new LFItem(new LFVector(700,500,0,0), lfcore.strand.strandV,{codes: v4,vid: "v-3"}, {init: true }));
+
+            lf.addItem(new LFItem(new LFVector(500,300,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 1}));
+            lf.addItem(new LFItem(new LFVector(800,300,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 2}));
+            lf.addItem(new LFItem(new LFVector(500,500,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 1}));
+            lf.addItem(new LFItem(new LFVector(800,500,0,0), lfcore.proto.protoS,{codes: []}, {init: true, complex: 2}));
+
+            lf.addItem(new LFItem(new LFVector(500,300,0,0), lfcore.strand.strandV,{codes: v1,vid: "v-4"}, {init: true }));
+            lf.addItem(new LFItem(new LFVector(800,300,0,0), lfcore.strand.strandV,{codes: v2,vid: "v-5"}, {init: true }));
+            lf.addItem(new LFItem(new LFVector(500,500,0,0), lfcore.strand.strandV,{codes: v3,vid: "v-6"}, {init: true }));
+            lf.addItem(new LFItem(new LFVector(800,500,0,0), lfcore.strand.strandV,{codes: v4,vid: "v-7"}, {init: true }));
+        },
+        run: function() {
+        }
+    },
     single: {
         init: function() {
 
@@ -202,27 +232,38 @@ const LFEngine = {
                 "uuc", // pseudo-v marker
             ];
 
+            let vOps = [    ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uuu"],
+                            ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uuc", "uuu"],
+                            ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uub", "uuu"],
+                            ["aau", "abu",  "acu", "auu", "uca", "ucb", "ucc", "ucu", "uua", "uub", "uuc", "uuu"]
+                        ];
 
-            for (let ii = 0; ii < 70; ii++) {
+
+            //for (let ii = 0; ii < 70; ii++) {
+                //let nX = Math.floor(Math.random() * lf.w);
+                //let nY = Math.floor(Math.random() * lf.h);
+                //lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.strand.strandR, { codes: JSON.parse(JSON.stringify(vCodes2)) }));
+            //}
+
+            //vCodes3.forEach((cd) => {
+                //for (let ii = 0; ii < 600; ii++) {
+                    //let nX = Math.floor(Math.random() * lf.w);
+                    //let nY = Math.floor(Math.random() * lf.h);
+                    //lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.snip.snipGo, { codes: [cd] }));
+                //}
+            //});
+
+            //for (let ii = 0; ii < 800; ii++) {
+                //let nX = Math.floor(Math.random() * lf.w);
+                //let nY = Math.floor(Math.random() * lf.h);
+                //lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.snip.snipGo, { codes: ["uuu"] }));
+            //}
+
+            for (let ii = 0; ii < 300; ii++) {
                 let nX = Math.floor(Math.random() * lf.w);
                 let nY = Math.floor(Math.random() * lf.h);
-                lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.strand.strandR, { codes: JSON.parse(JSON.stringify(vCodes2)) }));
+                lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.strand.strandV, { virusid: "v-" + ii, codes: JSON.parse(JSON.stringify(vOps[Math.floor(Math.random() * vOps.length)])) }));
             }
-
-            vCodes3.forEach((cd) => {
-                for (let ii = 0; ii < 600; ii++) {
-                    let nX = Math.floor(Math.random() * lf.w);
-                    let nY = Math.floor(Math.random() * lf.h);
-                    lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.snip.snipGo, { codes: [cd] }));
-                }
-            });
-
-            for (let ii = 0; ii < 800; ii++) {
-                let nX = Math.floor(Math.random() * lf.w);
-                let nY = Math.floor(Math.random() * lf.h);
-                lf.addItem(new LFItem(new LFVector(nX,nY,Math.floor(Math.random() * 360), 1), lfcore.snip.snipGo, { codes: ["uuu"] }));
-            }
-
         },
         run: function() {
             if (document.querySelectorAll(".proto").length < 2) {
@@ -253,10 +294,10 @@ const LFEngine = {
                 lf.addItem(nPro4b)
             }
 
-            if (Math.random() > 0.8) {
+            if (Math.random() > 0.95) {
                 let sX = Math.floor(Math.random() * lf.w);
                 let sY = Math.floor(Math.random() * lf.h);
-                let strenghts = [ 75, 200, 275 ];
+                let strenghts = [ 75, 120 ];
                 let strength = strenghts[Math.floor(Math.random() * strenghts.length)];
 
                 lf.events.push({run: function(params) {
@@ -398,6 +439,10 @@ function LF() {
         obj: document.getElementById("marker"),
         track: null
     };
+    me.rmarker = {
+        obj: document.getElementById("rmarker"),
+        track: null
+    };
     me.dbhr = {
         obj: document.getElementById("dbhr"),
         track: null
@@ -416,8 +461,10 @@ function LF() {
     me.behaviors = new LFCodedBehaviors();
     me.hash = new LFHash(me.w,me.h,50);
     me.haze = new LFHaze(me.w, me.h, 100);
+    //me.rbrush = new RBush();
     me.runmode = "chaos";
     me.engine = LFEngine;
+    me.spacial = "hash";
     me.logging = {
         log: [],
         protos: {
@@ -432,23 +479,56 @@ function LF() {
     };
     me.remEncode = (itemID) => {
         if (itemID in me.items) {
-            me.hash.remove(itemID, me.items[itemID].pos.x, me.items[itemID].pos.y);
-            me.items[itemID].pos.hash = "";
+            if (me.spacial == "rbrush") {
+                me.rbrush.remove({item: { id: itemID }}, (a, b) => {
+                    return a.item.id === b.item.id;
+                });
+            }
+            else {
+                me.hash.remove(itemID, me.items[itemID].pos.x, me.items[itemID].pos.y);
+                me.items[itemID].pos.hash = "";
+            }
         }
     };
     me.query = (item, type, qops = {}) => {
-        if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
+        if (me.spacial == "rbrush") {
+            let qRange = item.core.range;
             let qX = item.pos.x;
             let qY = item.pos.y;
-            let qR = null;
-            if (item.core != undefined) qR = item.core.range;
-            if (qops != undefined && qops != null) {
-                if ("x" in qops) qX = qops["x"];
-                if ("y" in qops) qX = qops["y"];
-                if ("range" in qops) qR = qops["range"];
-            }
+            if ("range" in qops) qRange = qops["range"];
+            if ("x" in qops) qX = qops["x"];
+            if ("y" in qops) qY = qops["y"];
 
-            if (qR != null) return me.hash.query(item,type,{ range: qR });
+            let qmnX = qX - qRange;
+            let qmnY = qY - qRange;
+            let qmxX = qX + qRange;
+            let qmxY = qY + qRange;
+            let found = me.rbrush.search({
+                minX: qmnX,
+                minY: qmnY,
+                maxX: qmxX,
+                maxY: qmxY
+            });
+            let rRes = [];
+            found.forEach((fnd) => { 
+                if (fnd.item.id != item.id && (type == null || type == fnd.item.core.type)) rRes.push(fnd.item); 
+            });
+            return rRes;
+        }
+        else {
+            if (item != undefined && item != null && item.pos != undefined && item.pos != null) {
+                let qX = item.pos.x;
+                let qY = item.pos.y;
+                let qR = null;
+                if (item.core != undefined) qR = item.core.range;
+                if (qops != undefined && qops != null) {
+                    if ("x" in qops) qX = qops["x"];
+                    if ("y" in qops) qX = qops["y"];
+                    if ("range" in qops) qR = qops["range"];
+                }
+
+                if (qR != null) return me.hash.query(item,type,{ range: qR });
+            }
         }
         return [];
     };
@@ -460,7 +540,25 @@ function LF() {
         console.log("stopped at step " + me.step);
     };
     me.roll = () => {
-        me.hash.roll(me.items);
+        if (me.spacial == "rbrush") {
+            me.rbrush.clear();
+            for (let i = 0; i < me.items.length; i++) {
+                let imnX = me.items[i].pos.x - me.items[i].core.range;
+                let imnY = me.items[i].pos.y - me.items[i].core.range;
+                let imxX = me.items[i].pos.x + me.items[i].core.range;
+                let imxY = me.items[i].pos.y + me.items[i].core.range;
+                me.rbrush.insert({
+                    minX: imnX,
+                    minY: imnY,
+                    maxX: imxX,
+                    maxY: imxY,
+                    item: me.items[i]
+                });
+            }
+        }
+        else {
+            me.hash.roll(me.items);
+        }
     };
     me.refresh = () => {
         for (let ih = me.items.length - 1; ih >= 0; ih--) {
@@ -478,7 +576,12 @@ function LF() {
         if (item.active && !(item.id in me.iHash)) {
             item.gen = me.step;
             me.items.push(item);
-            me.iHash[item.id] = me.items.length - 1;
+            if (me.spacial == "rbrush") {
+
+            }
+            else {
+                me.iHash[item.id] = me.items.length - 1;
+            }
             me.obj.append(item.obj);
             return true;
         }

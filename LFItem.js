@@ -103,9 +103,18 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
                     }
                     else if (me.core.subtype == "strandV") {
                         let vTypes = lf.behaviors.getTypes(me.dynamic.codes);
-                        if (vTypes.includes("v2")) me.dynamic.mem["v-type"] = "v2";
-                        else if (vTypes.includes("v3")) me.dynamic.mem["v-type"] = "v3";
-                        else if (vTypes.includes("v4")) me.dynamic.mem["v-type"] = "v4";
+                        if (vTypes.includes("v2")) {
+                            me.dynamic.mem["v-type"] = "v2";
+                            nCont = "&Vdash;";
+                        }
+                        else if (vTypes.includes("v3")) {
+                            me.dynamic.mem["v-type"] = "v3";
+                            nCont = "&Vvdash;";
+                        }
+                        else if (vTypes.includes("v4")) {
+                            me.dynamic.mem["v-type"] = "v4";
+                            nCont = "&VDash;";
+                        }
                         else me.dynamic.mem["v-type"] = "v";
 
                         if (!nObj.classList.contains("strand-" + me.dynamic.mem["v-type"])) nObj.classList.add("strand-" + me.dynamic.mem["v-type"]);

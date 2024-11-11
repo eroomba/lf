@@ -37,7 +37,7 @@ const LFBehavior = {
                 let hasBreath = false;
 
                 let found = lf.haze.query(item,respIn);
-                let lifeAdd = item.age % 5 == 0 ? 0 : 1;
+                let lifeAdd = item.age % 20 == 0 ? 0 : 1;
                 if (found.length > 0 && lifeAdd > 0) {
                     shuffleArray(found);
                     lf.haze.transact(found[0].tableIndex,respIn,-1);
@@ -490,15 +490,24 @@ const LFBehavior = {
             params.actions.push("antibody");
             
             if (!("antiv" in item.dynamic.mem)) item.dynamic.mem["antiv"] = [];
+            if (!("antivCount" in item.dynamic.mem)) item.dynamic.mem["antivCount"] = 0;
 
             if ("infected" in item.dynamic.mem) {
                 let vid = item.dynamic.mem["infected"];
                 let vItm = null
                 if (vid in lf.iHash && lf.items[lf.iHash[vid]].active) vItm = lf.items[lf.iHash[vid]];
                 if (vItm != undefined && vItm != null) {
-                    item.dynamic.mem["antiv"].push(vItm.dynamic.codes.join(":"));
-                    item.dynamic.mem["infected"] = "";
-                    vItm.deactivate();
+                    let abCount = vItm.dynamic.codes.length;
+                    if (item.dynamic.mem["antivCount"] >= abCount) {
+                        item.dynamic.mem["antiv"].push(vItm.dynamic.codes.join(":"));
+                        item.dynamic.mem["infected"] = "";
+                        console.log("antibody developed for " + vItm.dynamic.mem.vid);
+                        vItm.deactivate();
+                        item.dynamic.mem["antivCount"] = 0;
+                    }
+                    else {
+                        item.dynamic.mem["antivCount"]++;
+                    }
                 } 
             }
         }
@@ -563,7 +572,34 @@ const LFBehavior = {
                                     let nDir = aDir;
                                     let nVel = host.pos.vel * 2.5;
                                     if (nVel < 5) nVel = 5;
-                                    lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id, codes: JSON.parse(JSON.stringify(item.dynamic.codes)) }));
+                                    let nVCode = JSON.parse(JSON.stringify(item.dynamic.codes));
+
+                                    // mutate virus
+                                    let mutateOps = "abc";
+                                    let nCodes = JSON.parse(JSON.stringify(host.dynamic.codes));
+                                    for (let m = 0; m < nCodes.length; m++) {
+                                        if (!lf.behaviors.vsafecodes.includes(nCodes[m])) {
+                                            let mutate = Math.random() > 0.98 ? true : false;
+                                            if (mutate) {
+                                                let rIdx = Math.floor(Math.random() * nCodes[m].length);
+                                                let rIdx2 = Math.floor(Math.random() * mutateOps.length);
+                                                nCodes[m][rIdx] = mutateOps[rIdx2];
+                                            }
+                                        }
+                                    }
+
+                                    let nVCodeS = nCodes.join(":");
+                                    if (!("viruses" in lf.cache)) lf.cache["viruses"] = [];
+                                    let nVName = "v-" + lf.cache.viruses.length;
+                                    let nVID = nVName + "|" + nVCodeS;
+                                    let nVID2 = item.dynamic.mem.virusid + "";
+                                    if (!lf.cache.viruses.includes(nVID))  {
+                                        lf.cache.viruses.push(nVID);
+                                        nVID2 = nVName;
+                                        console.log("new virus '" + nVName + "'");
+                                    }
+
+                                    lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id + "", virusid: nVID2, codes: nVCode }));
                                     aDir += aAdd;
                                     aDir %= 360;
                                 }
@@ -595,7 +631,7 @@ const LFBehavior = {
                             let nY = item.pos.y;
                             let nVel = item.pos.vel;
                             let nDir = aDir;
-                            lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id, codes: JSON.parse(JSON.stringify(item.dynamic.codes)) }));
+                            lf.queueItem(new LFItem(new LFVector(nX, nY, nDir, nVel), lfcore.strand.strandV, { parent: item.id + "", virusid: item.dynamic.mem.virusid + "", codes: JSON.parse(JSON.stringify(item.dynamic.codes)) }));
                             aDir += aAdd;
                             aDir %= 360;
                         }
@@ -614,6 +650,7 @@ const LFBehavior = {
                             if (!("infected" in hosts[h].dynamic.mem)) {
                                 let canInfect = true;
                                 if ("antiv" in hosts[h].dynamic.mem) {
+                                    console.log("cannot infect because of antibody " + item.dynamic.mem.vid);
                                     if (hosts[h].dynamic.mem["antiv"].includes(mCode)) canInfect = false;
                                 }
                                 if (canInfect) {
@@ -844,7 +881,11 @@ function LFCodedBehaviors() {
             // eat
             return LFBehavior.eat(item,params);
         },
-        "bda": function(item,params) {},
+        "bda": function(item,params) {
+            // enable brane digestion
+            params.digestion["struckBrane"] += 10;
+            return params;
+        },
         "bdb": function(item,params) {},
         "bdc": function(item,params) {},
         "bdd": function(item,params) {},
@@ -963,6 +1004,20 @@ function LFCodedBehaviors() {
         "uaa",
         "uab",
         "uac"
+    ];
+    me.vsafecodes = [
+        "aau", // pseudo-v marker
+        "abu", // pseudo-v marker
+        "acu", // pseudo-v marker
+        "auu", // pseudo-v marker
+        "uca", // pseudo-v marker
+        "ucb", // pseudo-v marker
+        "ucc", // pseudo-v marker
+        "ucu", // pseudo-v marker
+        "uua", // pseudo-v marker
+        "uub", // pseudo-v marker
+        "uuc", // pseudo-v marker
+        "uuu" // psudo-v activator
     ];
     me.runOrder = [
         "reset", // reset
