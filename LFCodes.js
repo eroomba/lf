@@ -37,7 +37,7 @@ const LFBehavior = {
                 let hasBreath = false;
 
                 let found = lf.haze.query(item,respIn);
-                let lifeAdd = lf.step % 3 == 0 ? 0 : 1;
+                let lifeAdd = item.age % 5 == 0 ? 0 : 1;
                 if (found.length > 0 && lifeAdd > 0) {
                     shuffleArray(found);
                     lf.haze.transact(found[0].tableIndex,respIn,-1);
@@ -485,6 +485,26 @@ const LFBehavior = {
 
         return params;
     },
+    antibody: function(item,params) {
+        if (!params.actions.includes("anibody")) {
+            params.actions.push("antibody");
+            
+            if (!("antiv" in item.dynamic.mem)) item.dynamic.mem["antiv"] = [];
+
+            if ("infected" in item.dynamic.mem) {
+                let vid = item.dynamic.mem["infected"];
+                let vItm = null
+                if (vid in lf.iHash && lf.items[lf.iHash[vid]].active) vItm = lf.items[lf.iHash[vid]];
+                if (vItm != undefined && vItm != null) {
+                    item.dynamic.mem["antiv"].push(vItm.dynamic.codes.join(":"));
+                    item.dynamic.mem["infected"] = "";
+                    vItm.deactivate();
+                } 
+            }
+        }
+
+        return params;
+    },
     activate: function(item,params,vops=null) {
         if (!params.actions.includes("v-activate")) {
             params.actions.push("v-activate");
@@ -588,17 +608,24 @@ const LFBehavior = {
                     let hosts = lf.query(item,"proto");
                     let minDist = null;
                     let newHost = null;
+                    let mCode = item.dynamic.codes.join(":");
                     if (hosts.length > 0) {
                         for (let h = 0; h < hosts.length; h++) {
                             if (!("infected" in hosts[h].dynamic.mem)) {
-                                let dist = Math.hypot(item.pos.x - hosts[h].pos.x, item.pos.y - hosts[h].pos.y);
-                                if (minDist == null) {
-                                    newHost = hosts[h];
-                                    minDist = dist;
+                                let canInfect = true;
+                                if ("antiv" in hosts[h].dynamic.mem) {
+                                    if (hosts[h].dynamic.mem["antiv"].includes(mCode)) canInfect = false;
                                 }
-                                else if (dist < minDist) {
-                                    newHost = hosts[h];
-                                    minDist = dist;
+                                if (canInfect) {
+                                    let dist = Math.hypot(item.pos.x - hosts[h].pos.x, item.pos.y - hosts[h].pos.y);
+                                    if (minDist == null) {
+                                        newHost = hosts[h];
+                                        minDist = dist;
+                                    }
+                                    else if (dist < minDist) {
+                                        newHost = hosts[h];
+                                        minDist = dist;
+                                    }
                                 }
                             }
                         }
@@ -822,8 +849,15 @@ function LFCodedBehaviors() {
         "bdc": function(item,params) {},
         "bdd": function(item,params) {},
         
-        "caa": function(item,params) {},
-        "cab": function(item,params) {},
+        "caa": function(item,params) {
+            // antibodies
+            return LFBehavior.antibody(item,params);
+        },
+        "cab": function(item,params) {
+            // antibodies
+            return LFBehavior.antibody(item,params);
+        },
+
         "cac": function(item,params) {},
         "cad": function(item,params) {},
         "cba": function(item,params) {},
@@ -982,6 +1016,9 @@ function LFCodedBehaviors() {
         // ----------------
         //     actions
         // ----------------
+
+        "caa", // activate antibodies
+        "cab", // activate antibodies
 
         "acb", // respirate
 

@@ -498,28 +498,6 @@ function LF() {
             delete me.iHash[itemID];
         }
     };
-    me.pip = (x,y,id,content,pClass=null) => {
-        let pipid = "pip-" + id;
-        let p = document.getElementById(pipid);
-        if (p == undefined || p == null) {
-            p = document.createElement("div");
-            p.id = pipid;
-            p.classList.add("pip");
-            me.obj.appendChild(p);
-        }
-        if (pClass != null && !p.classList.contains(pClass)) p.classList.add(pClass);
-        p.style.left = x + "px";
-        p.style.top = y + "px";
-        p.style.transform = "translateX(-50%) translateY(-50%) rotate(" + Math.floor(Math.random() * 360) + "deg)";
-        p.innerHTML = content;
-        p.classList.remove("fade-out-1");
-        void p.offsetWidth;
-        p.classList.add("fade-out-1");
-    };
-    me.rempip = (id) => {
-        let pip = document.getElementById("pip-" + id);
-        if (pip != undefined && pip != null) pip.remove();
-    }
     me.writelog = () => {
         console.log(me.logging);
     };
@@ -715,7 +693,7 @@ function fillDocs() {
             if (k > 0 && k < ortKeys.length - 2) ortList += ", ";
             else if (k == ortKeys.length - 2) ortList += ", and ";
             ortList += lfcore.ort[ortKeys[k]].subtype.replace("ort","");
-            ortList += " [<span class=\"doc-item-display ort-disp " + lfcore.ort[ortKeys[k]].class + "\" style=\"opacity:1;\">" + lfcore.ort[ortKeys[k]].content + "</span>]"
+            ortList += " [<span class=\"doc-item-display ort-disp " + lfcore.ort[ortKeys[k]].iclass + "\" style=\"opacity:1;\">" + lfcore.ort[ortKeys[k]].content + "</span>]"
             ortCount++;
         }
     }
@@ -729,7 +707,7 @@ function fillDocs() {
         if (snipKeys[k].indexOf("snip") == 0) {
             if (k > 0 && k < snipKeys.length - 2) snipList += ", ";
             else if (k == snipKeys.length - 2) snipList += ", and ";
-            snipList += "<span class=\"doc-item-display snip-disp " + lfcore.snip[snipKeys[k]].class + "\" style=\"opacity:1;\">" + lfcore.snip[snipKeys[k]].content + "</span>"
+            snipList += "<span class=\"doc-item-display snip-disp " + lfcore.snip[snipKeys[k]].iclass + "\" style=\"opacity:1;\">" + lfcore.snip[snipKeys[k]].content + "</span>"
             snipCount++;
         }
     }
@@ -740,8 +718,8 @@ function fillDocs() {
     document.getElementById("doc-strand-list").innerHTML = strandDisp;
 
     let struckList = "";
-    struckList += "<span class=\"doc-item-display struck-disp " + lfcore.struck.struckBrane.class + "\" style=\"opacity:1;\">" + lfcore.struck.struckBrane.content + "</span>";
+    struckList += "<span class=\"doc-item-display struck-disp " + lfcore.struck.struckBrane.iclass + "\" style=\"opacity:1;\">" + lfcore.struck.struckBrane.content + "</span>";
     struckList +=", ";
-    struckList += "<span class=\"doc-item-display struck-disp " + lfcore.struck.struckSeed.class + "\" style=\"opacity:1;\">" + lfcore.struck.struckSeed.content + "</span>";
+    struckList += "<span class=\"doc-item-display struck-disp " + lfcore.struck.struckSeed.iclass + "\" style=\"opacity:1;\">" + lfcore.struck.struckSeed.content + "</span>";
     document.getElementById("doc-struck-list").innerHTML = struckList;
 }
