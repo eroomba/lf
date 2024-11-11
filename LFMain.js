@@ -7,10 +7,10 @@ const gVars = {
     braneCount: 2,
     seedCount: 3,
     spekColl: false,
-    minStrandLen: 21,
+    minStrandLen: 24,
     maxItems: 5000,
     huskDecay: 3000,
-    vactCount: 8
+    vactCount: 9
 }
 
 function PNoise()  {
