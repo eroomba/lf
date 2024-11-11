@@ -1,6 +1,31 @@
+function LFItemCore(init = {}) {
+    const setup = {
+            type = "none", 
+            subtype = "none",
+            iclass = "",
+            weight = 0,
+            data = null,
+            content = "",
+            formula = () => { return null; },
+            range = 0,
+            decay = null,
+            dformula = [] } = init;
+    let me = this;
+    me.type = type;
+    me.subtype = subtype;
+    me.iclass = iclass;
+    me.weight = weight;
+    me.data = data; 
+    me.content = content;
+    me.formula = formula
+    me.range = range; 
+    me.decay = decay; 
+    me.dformula = dformula; 
+}
+
 function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
     let me = this;
-    me.id = lf.generateID();
+    me.id = lf.generateID() + "-" + core.type;
     me.gen = lf.step;
     me.active = true;
     me.obj = null;
@@ -16,8 +41,6 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
     me.parent = dynamicInit != null && "parent" in dynamicInit ? dynamicInit["parent"] : null;
     if ("complex" in initOps) me.complex = initOps["complex"];
     me.transformFill = "translateX(-50%) translateY(-50%) rotate(***deg)";
-
-    if (me.core != undefined) me.id += "-" + me.core.type;
 
     me.update = () => {
         me.age++;
@@ -58,15 +81,9 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
             nObj.style.left = me.pos.x + "px";
             nObj.style.top = me.pos.y + "px";
             nObj.classList.add(me.core.type);
-            nObj.classList.add(me.core.class);
+            if (me.core.iclass.length > 0) nObj.classList.add(me.core.iclass);
             let nCont = "[]";
             switch (me.core.type) {
-                case 'spek':
-                    nCont = me.core.content;
-                    break;
-                case 'ort':
-                    nCont = me.core.content;
-                    break;
                 case 'snip':
                     nCont =  me.core.content;
                     let sCode = me.dynamic.codes[0];
@@ -153,6 +170,9 @@ function LFItem(pos, core, dynamicInit=null, initOps = {init: true}) {
                             break;
                     }
 
+                    break;
+                default:
+                    nCont = me.core.content;
                     break;
             }
             nObj.innerHTML = nCont;

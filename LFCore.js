@@ -17,31 +17,16 @@ function LFDynamic(initParams) {
 const lfcore = {
     curr: this,
     cache: {},
-    default: {
-        // default
-        default: {
-            class: "",
-            weight: 1.003,
-            data: null, 
-            content: "",
-            formula: (val) => { 
-                return null;
-            }, 
-            range: 0, 
-            decay: null, 
-            dformula: [] 
-        },
-    },
 
     // speks
 
     spek: {
         // spekA1
-        spekA1: {
+        spekA1: new LFItemCore({
             // a1 combines w/a2 to form a
             type: "spek",
             subtype: "spekA1",
-            class: "spek-a1",
+            iclass: "spek-a1",
             weight: 1.003,
             data: 101, 
             content: "&ominus;", // circle with -
@@ -51,14 +36,14 @@ const lfcore = {
             range: 5, 
             decay: null, 
             dformula: [] 
-        },
+        }),
 
         // spekA2
-        spekA2: { 
+        spekA2: new LFItemCore({ 
             // a1 combines w/a2 to form a
             type: "spek",
             subtype: "spekA2",
-            class: "spek-a2",
+            iclass: "spek-a2",
             weight: 1.003, 
             data: 11,
             content: "&oast;", // circle with asterisk
@@ -68,14 +53,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekB1
-        spekB1: { 
+        spekB1: new LFItemCore({ 
             // b1 combines w/b2 to form b
             type: "spek",
             subtype: "spekB1",
-            class: "spek-b1",
+            iclass: "spek-b1",
             weight: 1.003, 
             data: 201,
             content: "&minusb;", // square with dash
@@ -85,14 +70,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekB2
-        spekB2: { 
+        spekB2: new LFItemCore({ 
             // b1 combines w/b2 to form b
             type: "spek",
             subtype: "spekB2",
-            class: "spek-b2",
+            iclass: "spek-b2",
             weight: 1.003, 
             data: 202,
             content: "&sdotb;", // square with dot
@@ -102,14 +87,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekC1
-        spekC1: { 
+        spekC1: new LFItemCore({ 
             // c1 combines w/c2 to form c
             type: "spek",
             subtype: "spekC1",
-            class: "spek-c1",
+            iclass: "spek-c1",
             weight: 1.003, 
             data: 301,
             content: "&odot;", // circle with dot
@@ -119,14 +104,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekC2
-        spekC2: { 
+        spekC2: new LFItemCore({ 
             // c1 combines w/c2 to form c
             type: "spek",
             subtype: "spekC2",
-            class: "spek-c2",
+            iclass: "spek-c2",
             weight: 1.004, 
             data: 302,
             content: "&ocir;", // circle with ring
@@ -136,14 +121,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekD1
-        spekD1: { 
+        spekD1: new LFItemCore({ 
             // d1 can combine w/d2 to form d OR w/x to form p
             type: "spek",
             subtype: "spekD1",
-            class: "spek-d1",
+            iclass: "spek-d1",
             weight: 1.004, 
             data: 401,
             content: "&timesb;", // square with x
@@ -153,14 +138,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekD2
-        spekD2: { 
+        spekD2: new LFItemCore({ 
             // d2 can combine w/d1 to form d OR w/x to form e
             type: "spek",
             subtype: "spekD2",
-            class: "spek-d2",
+            iclass: "spek-d2",
             weight: 1.003, 
             data: 402,
             content: "&plusb;", // square with +
@@ -170,14 +155,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekU1
-        spekU1: { 
+        spekU1: new LFItemCore({ 
             // d1 can combine w/d2 to form d OR w/x to form p
             type: "spek",
             subtype: "spekU1",
-            class: "spek-u1",
+            iclass: "spek-u1",
             weight: 1.004, 
             data: 501,
             content: "&timesb;", // square with x
@@ -187,14 +172,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekU2
-        spekU2: { 
+        spekU2: new LFItemCore({ 
             // d2 can combine w/d1 to form d OR w/x to form e
             type: "spek",
             subtype: "spekU2",
-            class: "spek-u2",
+            iclass: "spek-u2",
             weight: 1.003, 
             data: 502,
             content: "&plusb;", // square with +
@@ -204,14 +189,14 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekX
-        spekX: { 
+        spekX: new LFItemCore({ 
             // x is very ractive: x + d1 = p, x + d2 = e
             type: "spek",
             subtype: "spekX",
-            class: "spek-x",
+            iclass: "spek-x",
             weight: 1.006, 
             data: 600,
             content: "&otimes;", // circle with X
@@ -221,13 +206,13 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: []
-        },
+        }),
 
         // spekG1
-        spekG1: { 
+        spekG1: new LFItemCore({ 
             type: "spek",
             subtype: "spekG1",
-            class: "spek-g1",
+            iclass: "spek-g1",
             weight: 1.001, 
             data: 701,
             content: "&trie;", // equal with triangle
@@ -237,13 +222,13 @@ const lfcore = {
             range: 5,
             decay: null,
             dformula: []
-        },
+        }),
 
         // spekG2
-        spekG2: { 
+        spekG2: new LFItemCore({ 
             type: "spek",
             subtype: "spekG2",
-            class: "spek-g2",
+            iclass: "spek-g2",
             weight: 1.002, 
             data: 702,
             content: "&eDot;", // equal with dots 
@@ -253,13 +238,13 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekG3
-        spekG3: { 
+        spekG3: new LFItemCore({ 
             type: "spek",
             subtype: "spekG3",
-            class: "spek-g3",
+            iclass: "spek-g3",
             weight: 1.1,  
             data: 703,
             content: "&epar;", // equal with 2 crosses (hash) 
@@ -269,13 +254,13 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // spekV
-        spekV: { 
+        spekV: new LFItemCore({ 
             type: "spek",
             subtype: "spekV",
-            class: "spek-v",
+            iclass: "spek-v",
             weight: 1.001,  
             data: 800,
             content: "&veebar;", // k 
@@ -285,7 +270,7 @@ const lfcore = {
             range: 5, 
             decay: null,
             dformula: [] 
-        },
+        }),
 
         // functions
 
@@ -304,10 +289,10 @@ const lfcore = {
     // orts
     ort: {
         // ortA
-        ortA: { 
+        ortA: new LFItemCore({ 
             type: "ort",
             subtype: "ortA",
-            class: "ort-a",
+            iclass: "ort-a",
             weight: 1.1,
             data: "a",
             content: "&forall;", // upside down A
@@ -320,13 +305,13 @@ const lfcore = {
                 {name: "spk-b1", type: "spek"},
                 {name: "spk-c2", type: "spek"}
             ] 
-        },
+        }),
 
         // ortB
-        ortB:  { 
+        ortB:  new LFItemCore({ 
             type: "ort",
             subtype: "ortB",
-            class: "ort-b",
+            iclass: "ort-b",
             weight: 1.1,
             data: "b", 
             content: "&bowtie;", // bowtie
@@ -339,13 +324,13 @@ const lfcore = {
                 {name: "spekC1", type: "spek"},
                 {name: "spekD2", type: "spek"},
             ]  
-        },
+        }),
 
         // ortC
-        ortC: { 
+        ortC: new LFItemCore({ 
             type: "ort",
             subtype: "ortC",
-            class: "ort-c",
+            iclass: "ort-c",
             weight: 1.1,
             data: "c", 
             content: "&comp;", // long C
@@ -358,13 +343,13 @@ const lfcore = {
                 {name: "spekD1", type: "spek"},
                 {name: "spekA2", type: "spek"},
             ] 
-        },
+        }),
 
         // ortD
-        ortD: { 
+        ortD: new LFItemCore({ 
             type: "ort",
             subtype: "ortD",
-            class: "ort-d",
+            iclass: "ort-d",
             weight: 1.15,
             data: "d", 
             content: "&part;", // loopy d
@@ -377,13 +362,13 @@ const lfcore = {
                 {name: "spekA1", type: "spek"},
                 {name: "spekB2", type: "spek"}
             ] 
-        },
+        }),
 
         // ortP
-        ortP: { 
+        ortP: new LFItemCore({ 
             type: "ort",
             subtype: "ortP",
-            class: "ort-p",
+            iclass: "ort-p",
             weight: 1.1,
             data: "p", 
             content: "&empty;", // circle with cross line
@@ -396,13 +381,13 @@ const lfcore = {
                 {name: "spekU1", type: "spek"},
                 {name: "spekG1", type: "spek"}
             ] 
-        },
+        }),
 
         // ortE
-        ortE: { 
+        ortE: new LFItemCore({ 
             type: "ort",
             subtype: "ortE",
-            class: "ort-e",
+            iclass: "ort-e",
             weight: 1.2,
             data: "e", 
             content: "&sum;", // summation
@@ -415,13 +400,13 @@ const lfcore = {
                 {name: "spekU2", type: "spek"},
                 {name: "spekG2", type: "spek"}
             ] 
-        },
+        }),
 
         // ortU
-        ortU: { 
+        ortU: new LFItemCore({ 
             type: "ort",
             subtype: "ortU",
-            class: "ort-u",
+            iclass: "ort-u",
             weight: 1.15,
             data: "u", 
             content: "&cup;", // cup
@@ -434,13 +419,13 @@ const lfcore = {
                 {name: "spekX", type: "spek"},
                 {name: "spekG3", type: "spek"}
             ] 
-        },
+        }),
 
         // ortI
-        ortI: { 
+        ortI: new LFItemCore({ 
             type: "ort",
             subtype: "ortI",
-            class: "ort-i",
+            iclass: "ort-i",
             weight: 1.2,
             data: "i", 
             content: "&ecolon;", // equal colon
@@ -453,7 +438,7 @@ const lfcore = {
                 {name: "spekX", type: "spek"},
                 {name: "spekG3", type: "spek"}
             ] 
-        },
+        }),
 
 
         // ort functions
@@ -592,10 +577,10 @@ const lfcore = {
     // snips
     snip: {
         // snipPre
-        snipPre: { 
+        snipPre: new LFItemCore({ 
             type: "snip",
             subtype: "snipPre",
-            class: "snip-pre",
+            iclass: "snip-pre",
             weight: 1.18,
             data: "snip",
             content: "&percnt;", 
@@ -611,13 +596,13 @@ const lfcore = {
             range: 12, 
             decay: 110,
             dformula: [] 
-        },
+        }),
 
         // snipGo
-        snipGo: {
+        snipGo: new LFItemCore({
             type: "snip",
             subtype: "snipGo",
-            class: "snip-go",
+            iclass: "snip-go",
             weight: 1.2, 
             data: "snip",
             content: "&int;", 
@@ -633,13 +618,13 @@ const lfcore = {
             range: 10, 
             decay: 1000,
             dformula: [] 
-        },
+        }),
 
         // snipBlk
-        snipBlk: {
+        snipBlk: new LFItemCore({
             type: "snip",
             subtype: "snipBlk",
-            class: "snip-blk",
+            iclass: "snip-blk",
             weight: 1.3, 
             data: "ppp",
             content: "&origof;", 
@@ -650,13 +635,13 @@ const lfcore = {
             range: 10, 
             decay: 1400,
             dformula: [] 
-        },
+        }),
 
         // snipEx
-        snipEx: {
+        snipEx: new LFItemCore({
             type: "snip",
             subtype: "snipEx",
-            class: "snip-ex",
+            iclass: "snip-ex",
             weight: 1.2, 
             data: "e--",
             content: "&sim;", 
@@ -667,7 +652,7 @@ const lfcore = {
             range: 8, 
             decay: 1200,
             dformula: [] 
-        },
+        }),
 
         // snip functions
 
@@ -944,10 +929,10 @@ const lfcore = {
 
     // strands
     strand: {
-        strandD: { 
+        strandD: new LFItemCore({ 
             type: "strand",
             subtype: "strandD",
-            class: "strand-d",
+            iclass: "strand-d",
             weight: 1.35,
             data: "strandD", 
             content: "<div class=\"st-cn\">&nbsp;</div><div class=\"st-ct\">&infin;</div><div class=\"st-cn\"><!--nm--></div>",
@@ -957,12 +942,12 @@ const lfcore = {
             range: 17, 
             decay: 2200,
             dformula: []
-        },
+        }),
 
-        strandR: { 
+        strandR: new LFItemCore({ 
             type: "strand",
             subtype: "strandR",
-            class: "strand-r",
+            iclass: "strand-r",
             weight: 1.3,
             data: "strandR", 
             content: "<div class=\"st-ct\">&infin;</div>", // inf
@@ -972,12 +957,12 @@ const lfcore = {
             range: 17, 
             decay: 2000,
             dformula: []
-        },
+        }),
 
-        strandV: { 
+        strandV: new LFItemCore({ 
             type: "strand",
             subtype: "strandV",
-            class: "strand-v",
+            iclass: "strand-v",
             weight: 1,
             data: "strandV", 
             content: "<div class=\"st-ct\">&trie;</div>", // double int
@@ -987,7 +972,7 @@ const lfcore = {
             range: 5, 
             decay: 100,
             dformula: []
-        },
+        }),
 
         // strand functions
 
@@ -1351,10 +1336,10 @@ const lfcore = {
     // protos
     proto: {
         // protoC
-        protoC: {
+        protoC: new LFItemCore({
             type: "proto",
             subtype: "protoC",
-            class: "proto-1a",
+            iclass: "proto-1a",
             weight: 2, 
             data: "proto",
             content: "<html>", 
@@ -1364,13 +1349,13 @@ const lfcore = {
             range: 20, 
             decay: 100,
             dformula: []
-        },
+        }),
 
         // protoS
-        protoS: {
+        protoS: new LFItemCore({
             type: "proto",
             subtype: "protoS",
-            class: "proto-1b",
+            iclass: "proto-1b",
             weight: 1.75,
             data: "proto",
             content: "<html>", 
@@ -1380,7 +1365,7 @@ const lfcore = {
             range: 20, 
             decay: 100,
             dformula: []
-        },
+        }),
 
 
         // proto functions
@@ -1553,10 +1538,10 @@ const lfcore = {
     // strucks
     struck: {
         // struckBrane
-        struckBrane: {
+        struckBrane: new LFItemCore({
             type: "struck",
             subtype: "struckBrane",
-            class: "brane", 
+            iclass: "brane", 
             weight: 1.6,
             data: "brane", 
             content: "&compfn;",
@@ -1566,13 +1551,13 @@ const lfcore = {
             range: 25, 
             decay: 2300,
             dformula: []
-        },
+        }),
 
         // struckBlip
-        struckBlip: {
+        struckBlip: new LFItemCore({
             type: "struck",
             subtype: "struckBlip",
-            class: "blip", 
+            iclass: "blip", 
             weight: 1.4,
             data: "blip", 
             content: "&compfn;",
@@ -1582,13 +1567,13 @@ const lfcore = {
             range: 20, 
             decay: 300,
             dformula: []
-        },
+        }),
 
         // struckSeed
-        struckSeed: {
+        struckSeed: new LFItemCore({
             type: "struck",
             subtype: "struckSeed",
-            class: "seed", 
+            iclass: "seed", 
             weight: 1.5,
             data: "seed", 
             content: "&sect;",
@@ -1598,13 +1583,13 @@ const lfcore = {
             range: 20, 
             decay: 800,
             dformula: []
-        },
+        }),
 
         // struckHusk
-        struckHusk: {
+        struckHusk: new LFItemCore({
             type: "struck",
             subtype: "struckHusk",
-            class: "husk", 
+            iclass: "husk", 
             weight: 1.1,
             data: "husk", 
             content: "<html>",
@@ -1614,7 +1599,7 @@ const lfcore = {
             range: 0, 
             decay: 1800,
             dformula: []
-        },
+        }),
 
         // functions
 
